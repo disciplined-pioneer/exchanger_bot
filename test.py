@@ -1,21 +1,55 @@
 import asyncio
+from datetime import datetime
+from db.models.models import ExchangeHistory
 from db.crud.base import init_postgres
-from db.models.models import ExchangeRate
+
+async def fill_exchange_history():
+    """
+    Заполняем таблицу ExchangeHistory примерными данными.
+    """
+    await ExchangeHistory.create(
+        tg_id=802587774,
+        date=datetime(2025, 4, 1, 10, 0),  # Примерная дата
+        cny_amount=100.0,
+        currency_name='USD',
+        currency_amount=12.0
+    )
+    await ExchangeHistory.create(
+        tg_id=802587774,
+        date=datetime(2025, 4, 10, 15, 30),  # Примерная дата
+        cny_amount=150.0,
+        currency_name='USD',
+        currency_amount=18.0
+    )
+    await ExchangeHistory.create(
+        tg_id=802587774,
+        date=datetime(2025, 4, 15, 9, 0),  # Примерная дата
+        cny_amount=200.0,
+        currency_name='RUB',
+        currency_amount=1600.0
+    )
+    await ExchangeHistory.create(
+        tg_id=802587774,
+        date=datetime(2025, 4, 20, 13, 45),  # Примерная дата
+        cny_amount=120.0,
+        currency_name='RUB',
+        currency_amount=960.0
+    )
 
 async def main():
-
+    # Инициализация PostgreSQL
     await init_postgres()
 
-    await ExchangeRate.create(usd_alipay=0.0,
-                              usd_wechat=0.0,
-                              rub_alipay=0.0,
-                              rub_wechat=0.0)
+    # Заполняем таблицу ExchangeHistory
+    await fill_exchange_history()
 
-    result = await ExchangeRate.get(id=1)
-    print(result.usd_alipay, result.usd_wechat, result.rub_alipay, result.rub_wechat)
+    # Получаем сумму для USD за текущий месяц
+    usd_amount = await ExchangeHistory.get_currency_amount_for_month('USD')
+    print(f"Сумма USD за текущий месяц: {usd_amount}")
 
-    
-    
+    # Получаем сумму для RUB за текущий месяц
+    rub_amount = await ExchangeHistory.get_currency_amount_for_month('RUB')
+    print(f"Сумма RUB за текущий месяц: {rub_amount}")
 
 if __name__ == "__main__":
     asyncio.run(main())

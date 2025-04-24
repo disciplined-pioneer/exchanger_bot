@@ -1,5 +1,4 @@
 from aiogram import Router, F, types
-from aiogram.fsm.context import FSMContext
 from bot.keyboards.user.start import back_admin_keyb, start_admin_keyb
 from bot.templates.user.start import starting_admin_message
 from bot.templates.admin.statistics import get_monthly_exchange_report
