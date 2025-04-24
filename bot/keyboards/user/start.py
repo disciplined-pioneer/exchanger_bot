@@ -12,3 +12,9 @@ back_admin_keyb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="◀️ Назад", callback_data="start_menu_admin")]
     ]
 )
+
+update_rate_keyb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="🔄 Обновить курс", callback_data="update_rate_partner")]
+    ]
+)

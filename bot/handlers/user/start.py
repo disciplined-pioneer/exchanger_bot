@@ -31,7 +31,7 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
 
     elif tg_id in settings.bot.PARTNERS: # Парнёр
-        await message.answer(text=await get_exchange_rate(), reply_markup=None)
+        await message.answer(text=await get_exchange_rate(), reply_markup=update_rate_keyb)
 
     else: # Пользователь
         await message.answer(text=starting_user_message, reply_markup=None)
