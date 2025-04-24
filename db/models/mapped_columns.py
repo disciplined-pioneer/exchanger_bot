@@ -1,8 +1,12 @@
-from sqlalchemy import Integer, BigInteger, DateTime, String, text
+from typing import Annotated
+from sqlalchemy import BigInteger, DateTime, String, text
 from sqlalchemy.orm import mapped_column
 
 # Определение столбцов без использования Annotated
-intpk = mapped_column(Integer, primary_key=True)
+intpk = Annotated[
+    int,
+    mapped_column(primary_key=True)
+]
 unique_big_int = mapped_column(BigInteger, unique=True)
 created_at = mapped_column(DateTime(timezone=True), server_default=text("TIMEZONE('Europe/Moscow', NOW())"))
 

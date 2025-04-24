@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TypeVar, Generic, Sequence
 
 from sqlalchemy.exc import NoResultFound
@@ -136,31 +137,26 @@ class ModelAdmin(Generic[T]):
             return result.scalars().all()
 
 
-class UserTopics(Base, ModelAdmin):
-    __tablename__ = 'user_topics'
-
-    id = mapped_column(Integer, primary_key=True)  
-    tg_id = mapped_column(BigInteger, unique=True, index=True)
-    topic_id = mapped_column(BigInteger, nullable=True)
-    created_at = mapped_column(DateTime(timezone=True), server_default=text("TIMEZONE('Europe/Moscow', NOW())"))
-
-    def __str__(self):
-        return f"UserTopics(tg_id={self.tg_id}, topic_id={self.topic_id}, created_at={self.created_at})"
+# Хранение курса валют
+class ExchangeRate(Base, ModelAdmin):
     
-    @classmethod
-    async def get_by_tg_id(cls, tg_id: int):
-        """
-        # Возвращает данные по tg_id, если они существуют. Если нет, возвращает False.
-        :param tg_id: tg_id пользователя.
-        :return: Объект UserTopics или False, если не найдено.
-        """
-        result = await cls.get(tg_id=tg_id)
-        return result if result else False
+    __tablename__ = 'exchange_rate'
+
+    id: Mapped[intpk]
+    usd_alipay: Mapped[float]
+    usd_wechat: Mapped[float]
+
+    rub_alipay: Mapped[float]
+    rub_wechat: Mapped[float]
+
+
+# Хранение истории обменов
+class ExchangeHistory(Base, ModelAdmin):
     
-    @classmethod
-    async def get_topic_id_by_tg_id(cls, topic_id: int) -> int | None:
-        """
-        Возвращает tg_id по topic_id, если найден. Если не найден — возвращает None.
-        """
-        result = await cls.get(topic_id=topic_id)
-        return result.tg_id if result else None
+    __tablename__ = 'exchange_history'
+
+    id: Mapped[intpk]
+    date: Mapped[datetime]
+    cny_amount: Mapped[float]  # Количество CNY
+    currency_name: Mapped[str] # Название другой валюты
+    currency_amount: Mapped[float]  # Количество другой валюты
