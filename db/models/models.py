@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import TypeVar, Generic, Sequence
 
+from sqlalchemy import func
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from sqlalchemy.orm import Mapped, selectinload, load_only
 from sqlalchemy.sql import select, update as sqlalchemy_update
 
@@ -152,11 +155,36 @@ class ExchangeRate(Base, ModelAdmin):
 
 # Хранение истории обменов
 class ExchangeHistory(Base, ModelAdmin):
-    
     __tablename__ = 'exchange_history'
 
     id: Mapped[intpk]
     date: Mapped[datetime]
     cny_amount: Mapped[float]  # Количество CNY
-    currency_name: Mapped[str] # Название другой валюты
+    currency_name: Mapped[str]  # Название другой валюты
     currency_amount: Mapped[float]  # Количество другой валюты
+
+
+    @classmethod
+    async def get_currency_amount_for_month(cls, currency_name: str) -> float:
+        """
+        # Получает сумму currency_amount для заданной валюты за текущий месяц.
+        :param currency_name: Название валюты (например, 'USD', 'RUB').
+        :return: Сумма всех currency_amount за текущий месяц для указанной валюты.
+        """
+        # Получаем текущую дату
+        now = datetime.now()
+
+        # Начало месяца (1-е число текущего месяца)
+        start_of_month = datetime(now.year, now.month, 1)
+
+        # Выполняем запрос, чтобы получить сумму currency_amount за текущий месяц
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.sum(cls.currency_amount)).where(
+                    cls.currency_name == currency_name,
+                    cls.date >= start_of_month
+                )
+            )
+
+            total_amount = result.scalar()  # Извлекаем сумму из результата запроса
+            return total_amount if total_amount else 0.0
