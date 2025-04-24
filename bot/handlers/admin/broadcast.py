@@ -87,7 +87,7 @@ async def ask_buttons(callback: types.CallbackQuery, state: FSMContext):
 # Выводим сообщение рассылки админа
 @router.message(BroadcastStates.waiting_for_buttons)
 async def handle_buttons(message: Message, state: FSMContext):
-    
+
     await message.delete()
     data = await state.get_data()
     content = data["broadcast"]
@@ -143,5 +143,5 @@ async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
 # Отмена рассылки
 @router.callback_query(F.data == "cancel")
 async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text("Действие отменено")
+    await callback.message.edit_text("❌ Рассылка была отменена")
     await state.clear()
