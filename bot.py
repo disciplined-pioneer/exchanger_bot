@@ -1,6 +1,7 @@
 import logging
 import asyncio
 from aiogram import Dispatcher
+from db.models.models import ExchangeRate
 from aiogram.types import BotCommandScopeDefault
 
 from core.bot import bot
@@ -18,6 +19,12 @@ dp.include_routers(*routers)
 
 async def main():
     await init_postgres()
+    # Заполняем таблицу нулями
+    await ExchangeRate.create(usd_alipay=0.0,
+                              usd_wechat=0.0,
+                              rub_alipay=0.0,
+                              rub_wechat=0.0)
+    
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,
         scope=BotCommandScopeDefault()
