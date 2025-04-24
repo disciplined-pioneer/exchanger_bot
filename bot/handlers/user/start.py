@@ -4,6 +4,7 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
+from settings import settings
 from bot.keyboards.user.start import *
 from bot.templates.user.start import *
 
@@ -24,5 +25,14 @@ async def cmd_start(message: Message, state: FSMContext):
     except Exception:
         pass
 
-    await message.answer(text=starting_message, reply_markup=start_keyboard)
+    tg_id = message.from_user.id
+    
+    if tg_id in settings.bot.ADMINS: # Админ
+        await message.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
+
+    elif tg_id in settings.bot.PARTNERS: # Парнёр
+        await message.answer(text=await get_exchange_rate(), reply_markup=None)
+
+    else: # Пользователь
+        await message.answer(text=starting_user_message, reply_markup=None)
         

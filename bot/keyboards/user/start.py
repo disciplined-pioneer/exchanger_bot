@@ -1,7 +1,14 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-start_keyboard = InlineKeyboardMarkup(
+start_admin_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="Начало", callback_data="start")]
+        [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
+        [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")]
+    ]
+)
+
+back_admin_keyb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="start_menu_admin")]
     ]
 )
