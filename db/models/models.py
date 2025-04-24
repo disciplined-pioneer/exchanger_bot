@@ -165,6 +165,27 @@ class ExchangeHistory(Base, ModelAdmin):
 
 
     @classmethod
+    async def get_cny_amount_current_month(cls) -> float:
+        """
+        # Возвращает сумму CNY за текущий месяц.
+        """
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+        if now.month == 12:
+            next_month = datetime(now.year + 1, 1, 1)
+        else:
+            next_month = datetime(now.year, now.month + 1, 1)
+
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.sum(cls.cny_amount))
+                .where(cls.date >= start_of_month, cls.date < next_month)
+            )
+            total = result.scalar()
+            return total or 0.0
+
+
+    @classmethod
     async def get_currency_amount_for_month(cls, currency_name: str) -> float:
         """
         # Получает сумму currency_amount для заданной валюты за текущий месяц.
