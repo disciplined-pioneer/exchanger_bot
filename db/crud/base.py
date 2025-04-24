@@ -22,3 +22,4 @@ async def init_postgres() -> bool:
         except Exception as e:
             logging.exception(e)
             return False
+        
