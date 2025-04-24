@@ -1,0 +1,4 @@
+starting_message = (
+    "Привет!"
+)
+
