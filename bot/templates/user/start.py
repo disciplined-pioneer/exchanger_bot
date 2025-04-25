@@ -17,9 +17,9 @@ async def get_exchange_rate() -> str:
     return (
         "<b>💱 Курс валюты</b>\n\n"
         "Текущий курс:\n\n"
-        f"• <b>{result.usd_alipay}</b> USDT = 1 Alipay\n"
-        f"• <b>{result.usd_wechat}</b> USDT = 1 WeChat\n"
         f"• <b>{result.rub_alipay}</b> ₽ = 1 Alipay\n"
-        f"• <b>{result.rub_wechat}</b> ₽ = 1 WeChat"
+        f"• <b>{result.rub_wechat}</b> ₽ = 1 WeChat\n"
+        f"• <b>{result.usd_alipay}</b> USDT = 1 Alipay\n"
+        f"• <b>{result.usd_wechat}</b> USDT = 1 WeChat"
     )
 

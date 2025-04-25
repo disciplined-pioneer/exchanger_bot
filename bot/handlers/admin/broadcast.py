@@ -95,9 +95,12 @@ async def handle_buttons(message: Message, state: FSMContext):
     buttons = []
     for row in message.text.split("\n"):
         row_buttons = []
-        for pair in row.split("|"):
-            text, url = map(str.strip, pair.split("-", 1))
-            row_buttons.append(InlineKeyboardButton(text=text, url=url))
+        try:
+            for pair in row.split("|"):
+                text, url = map(str.strip, pair.split("-", 1))
+                row_buttons.append(InlineKeyboardButton(text=text, url=url))
+        except:
+            pass
         buttons.append(row_buttons)
 
     content["keyboard"] = buttons
@@ -136,7 +139,7 @@ async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
         except Exception as e:
             print(f"Ошибка при отправке пользователю {user_id}: {e}")
 
-    await callback.message.edit_text("Рассылка успешно завершена ✅")
+    await callback.message.edit_text("✅ Рассылка успешно завершена")
     await state.clear()
 
 
