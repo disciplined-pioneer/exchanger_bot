@@ -146,11 +146,34 @@ class ExchangeRate(Base, ModelAdmin):
     __tablename__ = 'exchange_rate'
 
     id: Mapped[intpk]
-    usd_alipay: Mapped[float]
-    usd_wechat: Mapped[float]
+    usdt_alipay: Mapped[float]
+    usdt_wechat: Mapped[float]
 
     rub_alipay: Mapped[float]
     rub_wechat: Mapped[float]
+
+    @classmethod
+    async def get_exchange_rate(cls, column_name: str) -> float:
+        """
+        Получаем курс по указанной колонке (например, 'usd_talipay', 'rub_wechat' и т.д.)
+        
+        :param column_name: Название колонки (например, 'usdt_alipay', 'usdt_wechat', 'rub_alipay', 'rub_wechat')
+        :return: Курс валюты
+        """
+        # Проверка на наличие подходящей колонки
+        if column_name not in ['usdt_alipay', 'usdt_wechat', 'rub_alipay', 'rub_wechat']:
+            raise ValueError(f"Invalid column name: {column_name}")
+
+        # Выполнение запроса, чтобы получить курс из нужной колонки
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(getattr(cls, column_name))
+                .limit(1)
+            )
+            rate = result.scalar()
+            if rate is None:
+                raise ValueError(f"No value found for column {column_name}")
+            return rate
 
 
 # Хранение истории обменов

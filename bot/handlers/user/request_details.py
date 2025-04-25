@@ -45,6 +45,80 @@ async def make_exchange(callback: types.CallbackQuery, state: FSMContext):
                                      reply_markup=exchange_methods_keyboard)
 
 
+# Обработка кнопки "Совершить обмен"
+@router.callback_query(F.data.startswith("exchange_"))
+async def exchange(callback: types.CallbackQuery, state: FSMContext):
+
+    # Запрашиваем у пользователя сумму
+    currency = callback.data.split("_")[1].upper()  # Получаем валюту
+    state_message = await callback.message.edit_text(text=f"Введите сумму в {currency}:")
+
+    # Сохраняем данные в состоянии
+    await state.set_data({
+        "exchange_type": callback.data.replace("exchange_", ''),
+        "last_id_message": state_message.message_id
+    })
+    
+    # Переходим в состояние сохранения суммы
+    await state.set_state(ExchangeStates.summ)
+
+
+# Сохраняем сумму
+@router.message(ExchangeStates.summ)
+async def process_input(message: types.Message, state: FSMContext):
+
+    try:
+
+        await message.delete()
+        text = message.text.replace(",", ".").strip()
+
+        # Получаем данные из состояния
+        data = await state.get_data()
+        last_bot_message_id = data.get("last_id_message")  # Используем правильный ключ
+
+        try:
+            amount = float(text)
+            if amount <= 0:
+                # Если сумма отрицательная или 0, выводим сообщение
+                await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text="❗ Сумма должна быть положительной. Введите число: "
+                )
+                return
+        except ValueError:
+            # Если введено не число
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=last_bot_message_id,
+                text="❗ Пожалуйста, введите корректную сумму числом. Введите число: "
+            )
+            return
+
+        # Извлекаем тип обмена и платформу
+        exchange_type = data.get('exchange_type', '')
+        currency = exchange_type.split('_')[0]
+        platform = exchange_type.split('_')[1]  # alipay или wechat
+
+        # Формируем текст для сообщения
+        exchange_message = await format_exchange_message(
+            sum=float(text),
+            currency=currency,
+            platform=platform
+        )
+
+        # Изменяем сообщение с суммой и данными обмена
+        await bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=last_bot_message_id,
+            text=exchange_message
+        )
+    
+    except Exception as e:
+        print(e)
+
+
+
 # Вернуться в меню "Назад"
 @router.callback_query(F.data == "back_menu")
 async def back_menu(callback: types.CallbackQuery, state: FSMContext):

@@ -12,7 +12,7 @@ async def generate_partner_buttons() -> InlineKeyboardMarkup:
         inline_keyboard=[
             # Генерация кнопок партнёров
             [InlineKeyboardButton(
-                text=f"Партнёр {idx} | CNY ~ {min(result.usd_alipay, result.usd_alipay)}$ ~ {min(result.rub_alipay, result.rub_wechat)}Р", 
+                text=f"Партнёр {idx} | CNY ~ {min(result.usdt_alipay, result.usdt_alipay)}$ ~ {min(result.rub_alipay, result.rub_wechat)}Р", 
                 callback_data=f"partner_{idx}"
             )]
             for idx in range(1, len(settings.bot.PARTNERS) + 1)
@@ -39,10 +39,10 @@ exchange_keyboard = InlineKeyboardMarkup(
 
 exchange_methods_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="RUB → Alipay", callback_data="rub_alipay")],
-        [InlineKeyboardButton(text="RUB → WeChat", callback_data="rub_wechat")],
-        [InlineKeyboardButton(text="USDT → Alipay", callback_data="usdt_alipay")],
-        [InlineKeyboardButton(text="USDT → WeChat", callback_data="usdt_wechat")],
+        [InlineKeyboardButton(text="RUB → Alipay", callback_data="exchange_rub_alipay")],
+        [InlineKeyboardButton(text="RUB → WeChat", callback_data="exchange_rub_wechat")],
+        [InlineKeyboardButton(text="USDT → Alipay", callback_data="exchange_usdt_alipay")],
+        [InlineKeyboardButton(text="USDT → WeChat", callback_data="exchange_usdt_wechat")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_partner")]
     ]
 )
