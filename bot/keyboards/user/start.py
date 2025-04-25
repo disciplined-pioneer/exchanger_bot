@@ -18,3 +18,11 @@ update_rate_keyb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="🔄 Обновить курс", callback_data="update_rate_partner")]
     ]
 )
+
+
+start_user_keyb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Поддержка", url="https://www.google.com/")],
+        [InlineKeyboardButton(text="Выбрать партнёра", callback_data="select_partner")]
+    ]
+)

@@ -159,6 +159,7 @@ class ExchangeHistory(Base, ModelAdmin):
 
     id: Mapped[intpk]
     tg_id: Mapped[int]
+    partner_id: Mapped[int]
     date: Mapped[datetime]
     cny_amount: Mapped[float]  # Количество CNY
     currency_name: Mapped[str]  # Название другой валюты
