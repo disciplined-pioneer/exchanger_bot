@@ -19,4 +19,4 @@ router = Router()
 async def select_partner(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text("Выберите партнёра",
-                                     reply_markup=generate_partner_buttons())
+                                     reply_markup=await generate_partner_buttons())
