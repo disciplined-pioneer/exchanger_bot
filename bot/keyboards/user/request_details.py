@@ -36,3 +36,13 @@ exchange_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_partner")]
     ]
 )
+
+exchange_methods_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="RUB → Alipay", callback_data="rub_alipay")],
+        [InlineKeyboardButton(text="RUB → WeChat", callback_data="rub_wechat")],
+        [InlineKeyboardButton(text="USDT → Alipay", callback_data="usdt_alipay")],
+        [InlineKeyboardButton(text="USDT → WeChat", callback_data="usdt_wechat")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_partner")]
+    ]
+)

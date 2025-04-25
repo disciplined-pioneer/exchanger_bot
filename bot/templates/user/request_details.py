@@ -14,3 +14,11 @@ async def get_partner_summary_text(partner_id: str) -> str:
         f"• <b>{result.usd_wechat}</b> USDT = 1 WeChat"
     )
     return result
+
+
+types_exchange_text = (
+    "💱 <b>Поддерживается обмен:</b>\n\n"
+    "• RUB → CNY\n"
+    "• USDT → CNY\n\n"
+    "🔽 Выберите направление обмена:"
+)

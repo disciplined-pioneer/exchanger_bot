@@ -34,6 +34,15 @@ async def handle_partner(callback: types.CallbackQuery, state: FSMContext):
     partner_id = callback.data.split("_")[1]
     await callback.message.edit_text(text=await get_partner_summary_text(partner_id),
                                      reply_markup=exchange_keyboard)
+    
+    await state.set_data({"partner_id": partner_id}) # Сохраняем id в стостояние
+    
+
+# Обработка кнопки "Совершить обмен"
+@router.callback_query(F.data == "make_exchange")
+async def make_exchange(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.edit_text(text=types_exchange_text,
+                                     reply_markup=exchange_methods_keyboard)
 
 
 # Вернуться в меню "Назад"
