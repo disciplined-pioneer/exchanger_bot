@@ -9,7 +9,7 @@ start_admin_keyb = InlineKeyboardMarkup(
 
 back_admin_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="start_menu_admin")]
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="start_menu_admin")]
     ]
 )
 

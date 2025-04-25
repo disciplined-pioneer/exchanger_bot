@@ -30,3 +30,9 @@ async def generate_partner_buttons() -> InlineKeyboardMarkup:
     return keyboard
 
 
+exchange_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="💱 Совершить обмен", callback_data="make_exchange")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_partner")]
+    ]
+)

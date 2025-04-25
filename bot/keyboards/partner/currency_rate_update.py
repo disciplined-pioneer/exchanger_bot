@@ -6,3 +6,4 @@ def back_keyboard():
             [InlineKeyboardButton(text="🔙 Назад", callback_data="go_back")]
         ]
     )
+

@@ -5,18 +5,21 @@ from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
 from settings import settings
-from bot.keyboards.user.start import *
-from bot.templates.user.start import *
-from bot.templates.partner.request_details import *
 
+from bot.templates.user.start import *
+from bot.templates.user.request_details import *
+
+from bot.keyboards.user.start import *
+from bot.keyboards.user.request_details import *
 from bot.keyboards.user.request_details import generate_partner_buttons
 
 
 router = Router()
 
 
-# Обработка "Выбрать партнёра"
+# Обработка "Выбрать партнёра" + "Нзад"
 @router.callback_query(F.data == "select_partner")
+@router.callback_query(F.data == "back_partner")
 async def select_partner(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text("Выберите партнёра",
@@ -29,10 +32,12 @@ async def handle_partner(callback: types.CallbackQuery, state: FSMContext):
 
     # Сюда попадут все partner_1, partner_2 и т.д.
     partner_id = callback.data.split("_")[1]
-    await callback.message.edit_text(text=await get_partner_summary_text(partner_id))
+    await callback.message.edit_text(text=await get_partner_summary_text(partner_id),
+                                     reply_markup=exchange_keyboard)
 
 
-# Вернуться в меню
+# Вернуться в меню "Назад"
 @router.callback_query(F.data == "back_menu")
 async def back_menu(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_text(text=starting_user_message, reply_markup=start_user_keyb)
+
