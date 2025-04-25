@@ -211,3 +211,16 @@ class ExchangeHistory(Base, ModelAdmin):
 
             total_amount = result.scalar()  # Извлекаем сумму из результата запроса
             return total_amount if total_amount else 0.0
+        
+        
+    @classmethod
+    async def get_deal_count_by_partner(cls, partner_id: int) -> int:
+        """
+        Возвращает количество сделок (записей) по заданному partner_id.
+        """
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.count()).where(cls.partner_id == partner_id)
+            )
+            count = result.scalar()
+            return count or 0
