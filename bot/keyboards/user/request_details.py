@@ -1,7 +1,7 @@
 from settings import settings
 from db.models.models import ExchangeRate
-
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 
 # Генерация кнопок "Партнёры"
 async def generate_partner_buttons() -> InlineKeyboardMarkup:
@@ -44,5 +44,12 @@ exchange_methods_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="USDT → Alipay", callback_data="exchange_usdt_alipay")],
         [InlineKeyboardButton(text="USDT → WeChat", callback_data="exchange_usdt_wechat")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_partner")]
+    ]
+)
+
+confirm_exchange_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Верно, начать обмен", callback_data="start_exchange")],
+        [InlineKeyboardButton(text="❌ Отменить обмен", callback_data="back_partner")]
     ]
 )

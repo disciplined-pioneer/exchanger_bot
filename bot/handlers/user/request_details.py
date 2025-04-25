@@ -4,7 +4,6 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
-from settings import settings
 
 from bot.templates.user.start import *
 from bot.templates.user.request_details import *
@@ -83,7 +82,7 @@ async def process_input(message: types.Message, state: FSMContext):
                 await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text="❗ Сумма должна быть положительной. Введите число: "
+                    text=incorrect_data[0]
                 )
                 return
         except ValueError:
@@ -91,7 +90,7 @@ async def process_input(message: types.Message, state: FSMContext):
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text="❗ Пожалуйста, введите корректную сумму числом. Введите число: "
+                text=incorrect_data[1]
             )
             return
 
@@ -111,11 +110,36 @@ async def process_input(message: types.Message, state: FSMContext):
         await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=last_bot_message_id,
-            text=exchange_message
+            text=exchange_message,
+            reply_markup=confirm_exchange_keyboard
         )
     
-    except Exception as e:
-        print(e)
+    except:
+        pass
+
+
+# Подтверждение обмена
+@router.callback_query(F.data == "start_exchange")
+async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
+    # Сохраняем данные в состоянии
+    state_message = await callback.message.edit_text(text=waiting_details)
+
+    # Получаем текущие данные состояния
+    data = await state.get_data()
+    print("До обновления:", data)
+
+    # Обновляем данные, добавляя новые поля
+    data.update({
+        "tg_id": callback.message.from_user.id,
+        "last_id_message": state_message.message_id
+    })
+
+    # Сохраняем обновленные данные
+    await state.set_data(data)
+
+    # Проверяем, что данные обновлены
+    data = await state.get_data()
+    print("После обновления:", data)
 
 
 

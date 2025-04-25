@@ -38,3 +38,11 @@ async def format_exchange_message(sum: float, currency: str, platform: str) -> s
     )
 
     return result
+
+
+incorrect_data = ['❗ Сумма должна быть положительной. Введите число:', '❗ Пожалуйста, введите корректную сумму числом. Введите число:']
+
+waiting_details = (
+    "Ожидайте реквизиты для оплаты\n"
+    "(здесь будут написаны условия пополнения)"
+)
