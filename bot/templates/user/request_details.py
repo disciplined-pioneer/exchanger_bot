@@ -53,3 +53,4 @@ async def format_exchange_request(amount: float, currency: str) -> str:
         f"Сумма: {amount}\n"
         f"Валюта: {currency.upper()}"
     )
+

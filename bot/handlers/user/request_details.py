@@ -1,6 +1,4 @@
 from aiogram import Router, F, types
-from aiogram.filters import Command
-from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
@@ -11,6 +9,8 @@ from bot.templates.user.request_details import *
 from bot.keyboards.user.start import *
 from bot.keyboards.user.request_details import *
 from bot.keyboards.user.request_details import generate_partner_buttons
+
+from bot.keyboards.partner.currency_rate_update import send_details_keyboard
 
 
 router = Router()
@@ -141,7 +141,9 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     partner_number = int(data.get('partner_number'))
     partner_id = settings.bot.PARTNERS[partner_number-1]
-    await bot.send_message(partner_id, await format_exchange_request(amount=sum_amount, currency=currency))
+    await bot.send_message(partner_id,
+                           await format_exchange_request(amount=sum_amount, currency=currency),
+                           reply_markup=send_details_keyboard)
 
 # Вернуться в меню "Назад"
 @router.callback_query(F.data == "back_menu")
