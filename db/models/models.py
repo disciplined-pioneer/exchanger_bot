@@ -146,11 +146,11 @@ class ExchangeRate(Base, ModelAdmin):
     __tablename__ = 'exchange_rate'
 
     id: Mapped[intpk]
-    usdt_alipay: Mapped[float]
-    usdt_wechat: Mapped[float]
+    usdt_alipay = mapped_column(Float)
+    usdt_wechat = mapped_column(Float)
 
-    rub_alipay: Mapped[float]
-    rub_wechat: Mapped[float]
+    rub_alipay = mapped_column(Float)
+    rub_wechat = mapped_column(Float)
 
     @classmethod
     async def get_exchange_rate(cls, column_name: str) -> float:

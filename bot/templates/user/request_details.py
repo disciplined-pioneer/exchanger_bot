@@ -31,10 +31,10 @@ types_exchange_text = (
 
 async def format_exchange_message(sum: float, currency: str, platform: str) -> str:
 
-    cny_sum = await ExchangeRate.get_exchange_rate(f"{currency}_{platform}")
+    cny_sum = sum/await ExchangeRate.get_exchange_rate(f"{currency}_{platform}")
     result = (
         f"\nВы отдаёте {sum} {currency.upper()}\n"
-        f"для получения {cny_sum} CNY на {platform.capitalize()}\n"
+        f"для получения {round(cny_sum, 3)} CNY на {platform.capitalize()}\n"
     )
 
     return result
