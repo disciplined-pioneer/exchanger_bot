@@ -9,6 +9,6 @@ class UpdateRates(StatesGroup):
 LIST_CURRENCIES = {
     "rub_alipay": "Введите актуальный курс для пары CNY = RUB (Alipay)",
     "rub_wechat": "Введите актуальный курс для пары CNY = RUB (WeChat)",
-    "usd_alipay": "Введите актуальный курс для пары CNY = USDT (Alipay)",
-    "usd_wechat": "Введите актуальный курс для пары CNY = USDT (WeChat)"
+    "usdt_alipay": "Введите актуальный курс для пары CNY = USDT (Alipay)",
+    "usdt_wechat": "Введите актуальный курс для пары CNY = USDT (WeChat)"
 }

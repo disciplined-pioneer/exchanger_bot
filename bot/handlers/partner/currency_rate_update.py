@@ -39,15 +39,33 @@ async def process_input(message: types.Message, state: FSMContext):
 
     try:
         value = float(message.text.replace(",", "."))
+        if value <= 0:
+            try:
+                await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text="❌ Число должно быть положительным!",
+                    reply_markup=back_keyboard()
+                )
+            except:
+                pass
+            return
+
     except ValueError:
         # Если значение не корректное — редактируем старое сообщение с ошибкой
         if last_bot_message_id:
-            await bot.edit_message_text(
-                chat_id=message.chat.id,
-                message_id=last_bot_message_id,
-                text="❌ Введите число!"
-            )
+            try:
+                await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text="❌ Введите число!",
+                    reply_markup=back_keyboard()
+                )
+            except:
+                pass
         return
+    except:
+        pass
 
     keys = list(LIST_CURRENCIES.keys())
     current_key = keys[data["index"]]
@@ -82,8 +100,8 @@ async def ask_next(message: types.Message, state: FSMContext):
         # Изменяем курс
         values = data.get('values', {})
         exchange_rate = await ExchangeRate.get(id=1)
-        await exchange_rate.update(usd_alipay=values.get('usd_alipay', 0.0),
-                                  usd_wechat=values.get('usd_wechat', 0.0),
+        await exchange_rate.update(usdt_alipay=values.get('usdt_alipay', 0.0),
+                                  usdt_wechat=values.get('usdt_wechat', 0.0),
                                   rub_alipay=values.get('rub_alipay', 0.0),
                                   rub_wechat=values.get('rub_wechat', 0.0))
         await state.clear()

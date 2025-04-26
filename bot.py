@@ -18,12 +18,16 @@ dp.include_routers(*routers)
 
 
 async def main():
+
     await init_postgres()
+
     # Заполняем таблицу нулями
-    await ExchangeRate.create(usdt_alipay=0.0,
-                              usdt_wechat=0.0,
-                              rub_alipay=0.0,
-                              rub_wechat=0.0)
+    exchange_rate = await ExchangeRate.get(id=1)
+    if exchange_rate is None: # Если нет курса валют
+       await ExchangeRate.create(usdt_alipay=0.0,
+                                usdt_wechat=0.0,
+                                rub_alipay=0.0,
+                                rub_wechat=0.0)
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,
