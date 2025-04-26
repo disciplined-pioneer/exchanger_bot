@@ -4,11 +4,13 @@ from bot.handlers.admin.statistics import router as statistics
 from bot.handlers.partner.currency_rate_update import router as currency_rate_update
 
 from bot.handlers.user.request_details import router as request_details
+from bot.handlers.partner.receiving_application import router as receiving_application
 
 routers = [
     start,
     broadcast,
     statistics,
     currency_rate_update,
-    request_details
+    request_details,
+    receiving_application
 ]

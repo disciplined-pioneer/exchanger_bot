@@ -10,7 +10,7 @@ from bot.keyboards.user.start import *
 from bot.keyboards.user.request_details import *
 from bot.keyboards.user.request_details import generate_partner_buttons
 
-from bot.keyboards.partner.currency_rate_update import send_details_keyboard
+from bot.keyboards.partner.receiving_application import send_details_keyboard
 
 
 router = Router()
@@ -144,6 +144,7 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
     await bot.send_message(partner_id,
                            await format_exchange_request(amount=sum_amount, currency=currency),
                            reply_markup=send_details_keyboard)
+
 
 # Вернуться в меню "Назад"
 @router.callback_query(F.data == "back_menu")

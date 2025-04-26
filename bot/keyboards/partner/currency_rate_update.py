@@ -7,8 +7,4 @@ def back_keyboard():
         ]
     )
 
-send_details_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="📨 Отправить реквизиты", callback_data="send_details")]
-    ]
-)
+

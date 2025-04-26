@@ -4,6 +4,7 @@ from db.models.models import ExchangeRate, ExchangeHistory
 
 class ExchangeStates(StatesGroup):
     summ = State()
+    details = State()
 
 
 # Выбор партнёра + курс
