@@ -46,3 +46,10 @@ waiting_details = (
     "Ожидайте реквизиты для оплаты\n"
     "(здесь будут написаны условия пополнения)"
 )
+
+async def format_exchange_request(amount: float, currency: str) -> str:
+    return (
+        "Получение заявки на обмен:\n\n"
+        f"Сумма: {amount}\n"
+        f"Валюта: {currency.upper()}"
+    )

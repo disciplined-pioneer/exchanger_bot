@@ -30,11 +30,11 @@ async def select_partner(callback: types.CallbackQuery, state: FSMContext):
 async def handle_partner(callback: types.CallbackQuery, state: FSMContext):
 
     # Сюда попадут все partner_1, partner_2 и т.д.
-    partner_id = callback.data.split("_")[1]
-    await callback.message.edit_text(text=await get_partner_summary_text(partner_id),
+    partner_number = callback.data.split("_")[1]
+    await callback.message.edit_text(text=await get_partner_summary_text(partner_number),
                                      reply_markup=exchange_keyboard)
     
-    await state.set_data({"partner_id": partner_id}) # Сохраняем id в стостояние
+    await state.update_data({"partner_number": partner_number}) # Сохраняем id в стостояние
     
 
 # Обработка кнопки "Совершить обмен"
@@ -53,7 +53,7 @@ async def exchange(callback: types.CallbackQuery, state: FSMContext):
     state_message = await callback.message.edit_text(text=f"Введите сумму в {currency}:")
 
     # Сохраняем данные в состоянии
-    await state.set_data({
+    await state.update_data({
         "exchange_type": callback.data.replace("exchange_", ''),
         "last_id_message": state_message.message_id
     })
@@ -105,6 +105,7 @@ async def process_input(message: types.Message, state: FSMContext):
             currency=currency,
             platform=platform
         )
+        await state.update_data({"sum_amout": float(text)})
 
         # Изменяем сообщение с суммой и данными обмена
         await bot.edit_message_text(
@@ -121,27 +122,26 @@ async def process_input(message: types.Message, state: FSMContext):
 # Подтверждение обмена
 @router.callback_query(F.data == "start_exchange")
 async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
+
     # Сохраняем данные в состоянии
     state_message = await callback.message.edit_text(text=waiting_details)
 
     # Получаем текущие данные состояния
     data = await state.get_data()
-    print("До обновления:", data)
-
-    # Обновляем данные, добавляя новые поля
     data.update({
         "tg_id": callback.message.from_user.id,
         "last_id_message": state_message.message_id
     })
+    await state.update_data(data)
 
-    # Сохраняем обновленные данные
-    await state.set_data(data)
-
-    # Проверяем, что данные обновлены
+    # Отправляем сообщение нужному партнёру
     data = await state.get_data()
-    print("После обновления:", data)
+    sum_amount = data.get('sum_amout', 0)
+    currency = data.get('exchange_type', '').split('_')[0].upper()
 
-
+    partner_number = int(data.get('partner_number'))
+    partner_id = settings.bot.PARTNERS[partner_number-1]
+    await bot.send_message(partner_id, await format_exchange_request(amount=sum_amount, currency=currency))
 
 # Вернуться в меню "Назад"
 @router.callback_query(F.data == "back_menu")
