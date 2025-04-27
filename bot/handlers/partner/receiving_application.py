@@ -15,7 +15,7 @@ router = Router()
 async def send_details(callback: types.CallbackQuery, state: FSMContext):
 
     tg_id = callback.data.split("_")[2]
-    state_message = await callback.message.edit_text("Введите свои реквизиты:")
+    state_message = await callback.message.edit_text(input_requisites_message)
     await state.set_state(ExchangeStates.details)
     await state.update_data({"last_id_message": state_message.message_id,
                              "tg_id": tg_id})
@@ -35,7 +35,7 @@ async def save_details(message: types.Message, state: FSMContext):
     await bot.edit_message_text(
         chat_id=message.chat.id,
         message_id=last_bot_message_id,
-        text=f"Подтвердите реквизиты:\n\n{details_text}",
+        text=get_confirm_requisites_message(details_text),
         reply_markup=confirm_details_keyboard
     )
 
@@ -52,7 +52,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         storage=state.storage,
         key=state.key.__class__(bot_id=state.key.bot_id, chat_id=tg_id, user_id=tg_id)
     )
-    
+
     user_data = await user_state.get_data()
     print(f'\nСостояние партнёра: {partner_data}')
     print(f'\nСостояние пользователя: {user_data}\n')
@@ -69,7 +69,8 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         reply_markup=payment_keyboard
     )
 
-    await callback.message.edit_text(text='✅ Реквизиты были отправлены')
+    await callback.message.edit_text(text=requisites_sent_message)
+
 
 # Отмена реквизитов
 @router.callback_query(F.data == "edit_details")
@@ -81,7 +82,7 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
     state_message = await bot.edit_message_text(
         chat_id=callback.message.chat.id,
         message_id=last_bot_message_id,
-        text="Введите свои реквизиты:"
+        text=input_requisites_message
     )
 
     await state.set_state(ExchangeStates.details)
