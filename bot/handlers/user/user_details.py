@@ -4,6 +4,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 from core.bot import bot
 from settings import settings
+from bot.keyboards.user.user_details import *
 
 router = Router()
 
@@ -76,6 +77,12 @@ async def user_details(message: types.Message, state: FSMContext):
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
 
-    print("\nОбрабатываем реквизиты пользователя\n")
+    state_message = await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text=f'Подтвердите реквизиты: {message.text}',
+                    reply_markup=user_confirm_keyb
+                )
+    await state.update_data({"last_id_message": state_message.message_id})
 
     
