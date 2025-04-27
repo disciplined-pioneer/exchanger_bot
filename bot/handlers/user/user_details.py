@@ -23,14 +23,10 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 # Обработчик для получения фото или файла
 @router.message(PaymentState.waiting_for_receipt)  # Только для этого состояния
 async def handle_receipt(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    print(f"\nТекущее состояние до изменения: {current_state}")
 
     await message.delete()
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
-
-    print("Обрабатываем файл или фото в состоянии ожидания чека")
 
     try:
         partner_number = int(data.get('partner_number', '')) - 1
@@ -40,12 +36,12 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             sent_file = message.photo[-1]  # Выбираем максимальный размер фото
             file_id = sent_file.file_id
             await state.update_data({"file_check": file_id})
-            #await bot.send_photo(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
+            await bot.send_photo(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
 
         elif message.document:
             file_id = message.document.file_id
             await state.update_data({"file_check": file_id})
-            #await bot.send_document(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
+            await bot.send_document(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
 
         else:
             state_message = await bot.edit_message_text(
@@ -75,13 +71,6 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 # Обработчик для получения реквизитов пользователя
 @router.message(PaymentState.user_details)  # Только для этого состояния
 async def user_details(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    print(f"\nТекущее состояние до изменения: {current_state}")
-
-    # Проверка на правильное состояние перед обработкой
-    if current_state != PaymentState.user_details.state:
-        print(f"Ошибка: текущее состояние {current_state} не соответствует ожидаемому {PaymentState.user_details.state}")
-        return
 
     await message.delete()
     data = await state.get_data()
