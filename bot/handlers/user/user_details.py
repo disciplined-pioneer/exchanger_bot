@@ -61,8 +61,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
         await state.set_state(PaymentState.user_details)
         
 
-    except Exception as e:
-        print(f"Ошибка при обработке: {e}")
+    except:
         pass
 
 
@@ -73,6 +72,17 @@ async def user_details(message: types.Message, state: FSMContext):
     await message.delete()
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
+
+    # Проверка
+    if not (message.photo or message.document or message.text):
+        state_message = await bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=last_bot_message_id,
+            text="❗️ Пожалуйста, отправьте фото, документ или же текст",
+            reply_markup=None
+        )
+        await state.update_data({"last_id_message": state_message.message_id})
+        return
 
     state_message = await bot.edit_message_text(
                     chat_id=message.chat.id,
