@@ -3,8 +3,11 @@ from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
 from settings import settings
-from bot.keyboards.user.user_details import *
 from utils.user.user_details import *
+
+from bot.templates.user.user_details import *
+from bot.keyboards.user.user_details import *
+
 
 
 router = Router()
@@ -13,7 +16,7 @@ router = Router()
 # Обработчик кнопки "Я оплатил"
 @router.callback_query(F.data == "payment_confirmed")
 async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
-    state_message = await callback.message.edit_text("Пожалуйста, отправьте фото или файл с чеком в этот чат")
+    state_message = await callback.message.edit_text(photo_or_receipt_message)
     await state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
     await state.update_data({"last_id_message": state_message.message_id})
 
@@ -34,18 +37,18 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             sent_file = message.photo[-1]
             file_id = sent_file.file_id
             await state.update_data({"file_check": file_id})
-            await bot.send_photo(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
+            await bot.send_photo(partner_id, file_id, caption=payment_confirmation_message)
 
         elif message.document:
             file_id = message.document.file_id
             await state.update_data({"file_check": file_id})
-            await bot.send_document(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
+            await bot.send_document(partner_id, file_id, caption=payment_confirmation_message)
 
         else:
             state_message = await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text="❗️ Пожалуйста, отправьте фото или документ"
+                text=photo_or_document_request_message
             )
             await state.update_data({"last_id_message": state_message.message_id})
             return
@@ -55,7 +58,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
         state_message = await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text=f"Введите свои реквизиты:\n{exchange_type}. Или загрузите QR-код для оплаты"
+                    text=generate_requisites_message(exchange_type)
                 )
         await state.update_data({"last_id_message": state_message.message_id})
         await state.set_state(PaymentState.user_details)
@@ -77,7 +80,7 @@ async def user_details(message: types.Message, state: FSMContext):
         state_message = await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=last_bot_message_id,
-            text="❗️ Пожалуйста, отправьте фото, документ или текст",
+            text=photo_document_or_text_request_message,
             reply_markup=None
         )
         await state.update_data({"last_id_message": state_message.message_id})
@@ -102,13 +105,12 @@ async def user_details(message: types.Message, state: FSMContext):
     await state.update_data({"last_id_message": sent_message.message_id})
 
 
-
 # Обработчик кнопки "Надо исправить"
 @router.callback_query(F.data == "user_edit_details")
 async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     exchange_type = data.get('exchange_type', '').split('_')[1].capitalize()
-    state_message = await callback.message.edit_text(f"Введите свои реквизиты:\n{exchange_type}. Или загрузите QR-код для оплаты")
+    state_message = await callback.message.edit_text(generate_requisites_message(exchange_type))
 
     await state.set_state(PaymentState.user_details)
     await state.update_data({"last_id_message": state_message.message_id})
