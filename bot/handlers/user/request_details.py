@@ -123,7 +123,7 @@ async def process_input(message: types.Message, state: FSMContext):
 async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     # Сохраняем данные в состоянии
-    tg_id = callback.message.from_user.id
+    tg_id = callback.from_user.id
     state_message = await callback.message.edit_text(text=waiting_details)
 
     # Получаем текущие данные состояния

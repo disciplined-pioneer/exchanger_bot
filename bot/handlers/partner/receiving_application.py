@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
 from bot.keyboards.partner.receiving_application import *
+from bot.templates.partner.receiving_application import *
 from bot.templates.user.request_details import ExchangeStates
 
 
@@ -38,12 +39,37 @@ async def save_details(message: types.Message, state: FSMContext):
         reply_markup=confirm_details_keyboard
     )
 
-    print(data)
-
 
 # обработка кнопкии "Подтверждаю"
+@router.callback_query(F.data == "confirm_details")
+async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
+    partner_data = await state.get_data()
+    tg_id = int(partner_data.get('tg_id', ''))
 
+    # Считываем состояние пользователя
+    user_state = FSMContext(
+        storage=state.storage,
+        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=tg_id, user_id=tg_id)
+    )
+    
+    user_data = await user_state.get_data()
+    print(f'\nСостояние партнёра: {partner_data}')
+    print(f'\nСостояние пользователя: {user_data}\n')
+
+    # Отправляем реквизиты
+    details = partner_data.get('details', '')
+    sum = user_data.get('sum_amout', '')
+    currency = user_data.get('exchange_type', '').split('_')[0].upper()
+    await bot.send_message(
+        chat_id=tg_id,
+        text=await create_payment_message(details=details,
+                                          sum=sum,
+                                          currency=currency),
+        reply_markup=payment_keyboard
+    )
+
+    await callback.message.edit_text(text='✅ Реквизиты были отправлены')
 
 # Отмена реквизитов
 @router.callback_query(F.data == "edit_details")

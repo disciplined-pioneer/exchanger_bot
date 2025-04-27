@@ -15,3 +15,9 @@ confirm_details_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="❌ Надо исправить", callback_data="edit_details")]
     ]
 )
+
+payment_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Я оплатил", callback_data='payment_confirmed')]
+    ]
+)
