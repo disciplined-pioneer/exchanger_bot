@@ -1,8 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-send_details_keyboard = InlineKeyboardMarkup(
+
+async def send_details(tg_id):
+    return InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="📨 Отправить реквизиты", callback_data="send_details")]
+        [InlineKeyboardButton(text="📨 Отправить реквизиты", callback_data=f"send_details_{tg_id}")]
     ]
 )
 

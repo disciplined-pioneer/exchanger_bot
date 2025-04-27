@@ -2,7 +2,6 @@ from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
-
 from bot.templates.user.start import *
 from bot.templates.user.request_details import *
 
@@ -10,7 +9,7 @@ from bot.keyboards.user.start import *
 from bot.keyboards.user.request_details import *
 from bot.keyboards.user.request_details import generate_partner_buttons
 
-from bot.keyboards.partner.receiving_application import send_details_keyboard
+from bot.keyboards.partner.receiving_application import send_details
 
 
 router = Router()
@@ -124,12 +123,13 @@ async def process_input(message: types.Message, state: FSMContext):
 async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     # Сохраняем данные в состоянии
+    tg_id = callback.message.from_user.id
     state_message = await callback.message.edit_text(text=waiting_details)
 
     # Получаем текущие данные состояния
     data = await state.get_data()
     data.update({
-        "tg_id": callback.message.from_user.id,
+        "tg_id": tg_id,
         "last_id_message": state_message.message_id
     })
     await state.update_data(data)
@@ -141,9 +141,9 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     partner_number = int(data.get('partner_number'))
     partner_id = settings.bot.PARTNERS[partner_number-1]
-    await bot.send_message(partner_id,
-                           await format_exchange_request(amount=sum_amount, currency=currency),
-                           reply_markup=send_details_keyboard)
+    await bot.send_message(chat_id=partner_id,
+                           text=await format_exchange_request(amount=sum_amount, currency=currency),
+                           reply_markup=await send_details(tg_id))
 
 
 # Вернуться в меню "Назад"
