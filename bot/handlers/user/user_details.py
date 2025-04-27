@@ -1,7 +1,6 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
-
 from core.bot import bot
 from settings import settings
 from bot.keyboards.user.user_details import *
@@ -83,4 +82,13 @@ async def user_details(message: types.Message, state: FSMContext):
                 )
     await state.update_data({"last_id_message": state_message.message_id})
 
-    
+
+# Обработчик кнопки "Надо исправить"
+@router.callback_query(F.data == "user_edit_details")
+async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    exchange_type = data.get('exchange_type', '').split('_')[1].capitalize()
+    state_message = await callback.message.edit_text(f"Введите свои реквизиты:\n{exchange_type}. Или загрузите QR-код для оплаты")
+
+    await state.set_state(PaymentState.user_details)
+    await state.update_data({"last_id_message": state_message.message_id})

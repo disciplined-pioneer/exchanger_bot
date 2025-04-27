@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from core.bot import bot
 from bot.keyboards.partner.receiving_application import *
 from bot.templates.partner.receiving_application import *
-from bot.templates.user.request_details import ExchangeStates
+from utils.user.request_details import ExchangeStates
 
 
 router = Router()
