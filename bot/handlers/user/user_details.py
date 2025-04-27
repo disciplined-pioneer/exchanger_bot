@@ -1,17 +1,15 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
+
 
 from core.bot import bot
 from settings import settings
 from bot.keyboards.user.user_details import *
+from utils.user.user_details import *
+
 
 router = Router()
 
-# Создаём класс состояния
-class PaymentState(StatesGroup):
-    waiting_for_receipt = State()  # Ожидаем фото/файл с чеком
-    user_details = State()  # Реквизиты пользователя
 
 # Обработчик кнопки "Я оплатил"
 @router.callback_query(F.data == "payment_confirmed")

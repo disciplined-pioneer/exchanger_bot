@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from core.bot import bot
 from bot.templates.user.start import *
 from bot.templates.user.request_details import *
+from utils.user.request_details import *
 
 from bot.keyboards.user.start import *
 from bot.keyboards.user.request_details import *
