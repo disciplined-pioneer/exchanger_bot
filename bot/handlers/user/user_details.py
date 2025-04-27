@@ -20,7 +20,7 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Обработчик для получения фото или файла
-@router.message(PaymentState.waiting_for_receipt)  # Только для этого состояния
+@router.message(PaymentState.waiting_for_receipt)
 async def handle_receipt(message: types.Message, state: FSMContext):
 
     await message.delete()
@@ -32,7 +32,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
         partner_id = settings.bot.PARTNERS[partner_number]
 
         if message.photo:
-            sent_file = message.photo[-1]  # Выбираем максимальный размер фото
+            sent_file = message.photo[-1]
             file_id = sent_file.file_id
             await state.update_data({"file_check": file_id})
             await bot.send_photo(partner_id, file_id, caption="Клиент подтвердил оплату и отправил чек:")
@@ -68,7 +68,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 
 
 # Обработчик для получения реквизитов пользователя
-@router.message(PaymentState.user_details)  # Только для этого состояния
+@router.message(PaymentState.user_details)
 async def user_details(message: types.Message, state: FSMContext):
 
     await message.delete()
