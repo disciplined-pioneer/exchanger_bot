@@ -68,29 +68,39 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 # Обработчик для получения реквизитов пользователя
 @router.message(PaymentState.user_details)
 async def user_details(message: types.Message, state: FSMContext):
-
     await message.delete()
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
 
-    # Проверка
+    # Проверка на пустоту
     if not (message.photo or message.document or message.text):
         state_message = await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=last_bot_message_id,
-            text="❗️ Пожалуйста, отправьте фото, документ или же текст",
+            text="❗️ Пожалуйста, отправьте фото, документ или текст",
             reply_markup=None
         )
         await state.update_data({"last_id_message": state_message.message_id})
         return
 
-    state_message = await bot.edit_message_text(
-                    chat_id=message.chat.id,
-                    message_id=last_bot_message_id,
-                    text=f'Подтвердите реквизиты: {message.text}',
-                    reply_markup=user_confirm_keyb
-                )
-    await state.update_data({"last_id_message": state_message.message_id})
+    # Логика по типу сообщения
+    if message.photo:
+        caption="Подтвердите отправку реквизитов (фото):"
+    elif message.document:
+        caption=f"Подтвердите отправку реквизитов (документ)"
+    elif message.text:
+        caption=f"Подтвердите реквизиты: {message.text}"
+
+    sent_message = await bot.edit_message_text(
+        chat_id=message.chat.id,
+        message_id=last_bot_message_id,
+        text=caption,
+        reply_markup=user_confirm_keyb
+    )
+
+    # Сохраняем новое сообщение для трекинга
+    await state.update_data({"last_id_message": sent_message.message_id})
+
 
 
 # Обработчик кнопки "Надо исправить"
