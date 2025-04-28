@@ -152,7 +152,7 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
     # Добавляем историю обмена
     now = datetime.now()
     current_datetime = datetime(now.year, now.month, now.day, now.hour, now.minute)
-    cny_sum = sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}")
+    cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
     
     new_exchange = await ExchangeHistory.create(
         tg_id=tg_id,

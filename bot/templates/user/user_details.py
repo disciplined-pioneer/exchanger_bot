@@ -13,3 +13,6 @@ photo_document_or_text_request_message = "❗️ Пожалуйста, отпр�
 def generate_payment_message(sum: float, data: str='') -> str:
 
     return f"Ожидайте зачисления:\nСумма: {sum}\nРеквизиты:\n{data}"
+
+def format_confirm_details(details: str='') -> str:
+    return f"Подтвердите отправку реквизитов: {details}"

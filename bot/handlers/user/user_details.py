@@ -8,7 +8,7 @@ from utils.user.user_details import *
 from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
-from db.models.models import ExchangeHistory
+from db.models.models import ExchangeHistory, ExchangeRate
 
 
 
@@ -94,14 +94,13 @@ async def user_details(message: types.Message, state: FSMContext):
     if message.photo:
         
         await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
-        details = message.photo[-1].file_id
-        caption = f"Подтвердите отправку реквизитов"
-
+        
         # Отправляем фотографию
+        details = message.photo[-1].file_id
         sent_message = await bot.send_photo(
             chat_id=message.chat.id,
             photo=details,
-            caption=caption,
+            caption=format_confirm_details(),
             reply_markup=user_confirm_keyb
         )
         await state.update_data({"message_type": 'photo'})
@@ -109,27 +108,24 @@ async def user_details(message: types.Message, state: FSMContext):
     elif message.document:
 
         await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
-        details = message.document.file_id
-        caption = f"Подтвердите отправку реквизитов"
 
         # Отправляем документ
+        details = message.document.file_id
         sent_message = await bot.send_document(
             chat_id=message.chat.id,
             document=details,
-            caption=caption,
+            caption=format_confirm_details(),
             reply_markup=user_confirm_keyb
         )
         await state.update_data({"message_type": 'document'})
 
     elif message.text:
 
-        details = message.text
-        caption = f"Подтвердите реквизиты: {details}"
-
         # Отправляем текст
+        details = message.text
         sent_message = await bot.edit_message_text(
             chat_id=message.chat.id,
-            text=caption,
+            text=format_confirm_details(details),
             message_id=last_bot_message_id,
             reply_markup=user_confirm_keyb
         )
@@ -149,7 +145,10 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
     details_user = data.get('details_user', '')
-    sum_amout = data.get('sum_amout', '')
+    currency = data.get('exchange_type', '').split('_')[0].upper()
+    platform = data.get('exchange_type', '').split('_')[1].upper()
+    sum_amount = data.get('sum_amout', '')
+    cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
     message_type = data.get("message_type", '')
 
     # В зависимости от типа отправляем сообщение
@@ -158,7 +157,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         state_message = await bot.send_photo(
             chat_id=callback.message.chat.id,
             photo=details_user,
-            caption=generate_payment_message(sum_amout)
+            caption=generate_payment_message(cny_sum)
         )
 
     elif message_type in 'document':
@@ -166,11 +165,11 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         state_message = await bot.send_document(
             chat_id=callback.message.chat.id,
             document=details_user,
-            caption=generate_payment_message(sum_amout)
+            caption=generate_payment_message(cny_sum)
         )
 
     else:
-        state_message = await callback.message.edit_text(generate_payment_message(sum_amout, details_user))
+        state_message = await callback.message.edit_text(generate_payment_message(cny_sum, details_user))
     
     await state.update_data({"last_id_message": state_message.message_id})
 
