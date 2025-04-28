@@ -189,11 +189,13 @@ class ExchangeHistory(Base, ModelAdmin):
     currency_amount: Mapped[float]  # Количество другой валюты
     status: Mapped[str] # Статус обмена
 
+    status_completed = "exchange_completed"
+
 
     @classmethod
     async def get_cny_amount_current_month(cls) -> float:
         """
-        # Возвращает сумму CNY за текущий месяц.
+        Возвращает сумму CNY за текущий месяц для завершённых обменов.
         """
         now = datetime.now()
         start_of_month = datetime(now.year, now.month, 1)
@@ -205,7 +207,11 @@ class ExchangeHistory(Base, ModelAdmin):
         async with async_db_session() as session:
             result = await session.execute(
                 select(func.sum(cls.cny_amount))
-                .where(cls.date >= start_of_month, cls.date < next_month)
+                .where(
+                    cls.date >= start_of_month,
+                    cls.date < next_month,
+                    cls.status == cls.status_completed
+                )
             )
             total = result.scalar()
             return total or 0.0
@@ -214,31 +220,39 @@ class ExchangeHistory(Base, ModelAdmin):
     @classmethod
     async def get_currency_amount_for_month(cls, currency_name: str) -> float:
         """
-        # Получает сумму currency_amount для заданной валюты за текущий месяц.
-        :param currency_name: Название валюты (например, 'USD', 'RUB').
-        :return: Сумма всех currency_amount за текущий месяц для указанной валюты.
+        Получает сумму currency_amount для указанной валюты за текущий месяц для завершённых обменов.
         """
-        # Получаем текущую дату
         now = datetime.now()
-
-        # Начало месяца (1-е число текущего месяца)
         start_of_month = datetime(now.year, now.month, 1)
 
-        # Выполняем запрос, чтобы получить сумму currency_amount за текущий месяц
         async with async_db_session() as session:
             result = await session.execute(
-                select(func.sum(cls.currency_amount)).where(
+                select(func.sum(cls.currency_amount))
+                .where(
                     cls.currency_name == currency_name,
-                    cls.date >= start_of_month
+                    cls.date >= start_of_month,
+                    cls.status == cls.status_completed
                 )
             )
+            total_amount = result.scalar()
+            return total_amount or 0.0
 
-            total_amount = result.scalar()  # Извлекаем сумму из результата запроса
-            return total_amount if total_amount else 0.0
-        
-        
+
     @classmethod
     async def get_deal_count_by_partner(cls, partner_id: int) -> int:
+        """
+        Возвращает количество завершённых сделок с данным партнёром.
+        """
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.count())
+                .where(
+                    cls.partner_id == partner_id,
+                    cls.status == cls.status_completed
+                )
+            )
+            count = result.scalar()
+            return count or 0
         """
         Возвращает количество сделок (записей) по заданному partner_id.
         """

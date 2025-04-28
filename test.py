@@ -13,7 +13,8 @@ async def fill_exchange_history():
         date=datetime(2025, 4, 1, 10, 0),  # Примерная дата
         cny_amount=100.0,
         currency_name='USD',
-        currency_amount=12.0
+        currency_amount=12.0,
+        status="exchange_started"
     )
     await ExchangeHistory.create(
         tg_id=802587774,
@@ -21,7 +22,8 @@ async def fill_exchange_history():
         date=datetime(2025, 4, 10, 15, 30),  # Примерная дата
         cny_amount=150.0,
         currency_name='USD',
-        currency_amount=18.0
+        currency_amount=18.0,
+        status="exchange_completed"
     )
     await ExchangeHistory.create(
         tg_id=802587774,
@@ -29,7 +31,8 @@ async def fill_exchange_history():
         date=datetime(2025, 4, 15, 9, 0),  # Примерная дата
         cny_amount=200.0,
         currency_name='RUB',
-        currency_amount=1600.0
+        currency_amount=1600.0,
+        status="exchange_completed"
     )
     await ExchangeHistory.create(
         tg_id=802587774,
@@ -37,11 +40,12 @@ async def fill_exchange_history():
         date=datetime(2025, 4, 20, 13, 45),  # Примерная дата
         cny_amount=120.0,
         currency_name='RUB',
-        currency_amount=960.0
+        currency_amount=960.0,
+        status="payment_not_received"
     )
 
 async def main():
-    
+
     # Инициализация PostgreSQL
     await init_postgres()
 
