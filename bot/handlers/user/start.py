@@ -25,11 +25,11 @@ async def cmd_start(message: Message, state: FSMContext):
     except Exception:
         pass
 
-    tg_id = message.from_user.id
 
     await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
-    
-    """if tg_id in settings.bot.ADMINS: # Админ
+
+    """tg_id = message.from_user.id
+    if tg_id in settings.bot.ADMINS: # Админ
         await message.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
 
     elif tg_id in settings.bot.PARTNERS: # Парнёр
@@ -37,4 +37,6 @@ async def cmd_start(message: Message, state: FSMContext):
 
     else: # Пользователь
         await message.answer(text=starting_user_message, reply_markup=start_user_keyb)"""
+
+    await state.clear()
         
