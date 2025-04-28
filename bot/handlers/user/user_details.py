@@ -74,6 +74,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 # Обработчик для получения реквизитов пользователя
 @router.message(PaymentState.user_details)
 async def user_details(message: types.Message, state: FSMContext):
+
     await message.delete()
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
@@ -91,21 +92,49 @@ async def user_details(message: types.Message, state: FSMContext):
 
     # Логика по типу сообщения
     if message.photo:
-        details = '(ваша фотография)'
-        caption = f"Подтвердите отправку реквизитов {details}"
+        
+        await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
+        details = message.photo[-1].file_id
+        caption = f"Подтвердите отправку реквизитов"
+
+        # Отправляем фотографию
+        sent_message = await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=details,
+            caption=caption,
+            reply_markup=user_confirm_keyb
+        )
+        await state.update_data({"message_type": 'photo'})
+        
     elif message.document:
-        details = '(ваш документ)'
-        caption = f"Подтвердите отправку реквизитов {details}"
+
+        await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
+        details = message.document.file_id
+        caption = f"Подтвердите отправку реквизитов"
+
+        # Отправляем документ
+        sent_message = await bot.send_document(
+            chat_id=message.chat.id,
+            document=details,
+            caption=caption,
+            reply_markup=user_confirm_keyb
+        )
+        await state.update_data({"message_type": 'document'})
+
     elif message.text:
+
         details = message.text
         caption = f"Подтвердите реквизиты: {details}"
 
-    sent_message = await bot.edit_message_text(
-        chat_id=message.chat.id,
-        message_id=last_bot_message_id,
-        text=caption,
-        reply_markup=user_confirm_keyb
-    )
+        # Отправляем текст
+        sent_message = await bot.edit_message_text(
+            chat_id=message.chat.id,
+            text=caption,
+            message_id=last_bot_message_id,
+            reply_markup=user_confirm_keyb
+        )
+        await state.update_data({"message_type": 'text'})
+
 
     # Сохраняем новое сообщение для трекинга
     await state.update_data({"last_id_message": sent_message.message_id,
@@ -121,7 +150,9 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     id_exchange = data.get('id_exchange', '')
     details_user = data.get('details', '')
     sum_amout = data.get('sum_amout', '')
+    message_type = data.get("message_type")
 
+    
     state_message = await callback.message.edit_text(generate_payment_message(sum_amout, details_user))
     await state.update_data({"last_id_message": state_message.message_id})
 
@@ -136,9 +167,23 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 # Обработчик кнопки "Надо исправить"
 @router.callback_query(F.data == "user_edit_details")
 async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
+
     data = await state.get_data()
     exchange_type = data.get('exchange_type', '').split('_')[1].capitalize()
-    state_message = await callback.message.edit_text(generate_requisites_message(exchange_type))
+    message_type = data.get("message_type")
+    
+    # В зависимости от типа отправляем сообщение
+    if message_type in ['photo', 'document']:
+        await callback.message.delete()
+        state_message = await bot.send_message(
+            chat_id=callback.message.chat.id,
+            text=generate_requisites_message(exchange_type)
+        )
+        await state.update_data(message_type="text")
+    else:
+        state_message = await callback.message.edit_text(
+            text=generate_requisites_message(exchange_type)
+        )
 
     await state.set_state(PaymentState.user_details)
     await state.update_data({"last_id_message": state_message.message_id})
