@@ -9,6 +9,7 @@ async def fill_exchange_history():
     """
     await ExchangeHistory.create(
         tg_id=802587774,
+        partner_id=123,
         date=datetime(2025, 4, 1, 10, 0),  # Примерная дата
         cny_amount=100.0,
         currency_name='USD',
@@ -16,6 +17,7 @@ async def fill_exchange_history():
     )
     await ExchangeHistory.create(
         tg_id=802587774,
+        partner_id=123,
         date=datetime(2025, 4, 10, 15, 30),  # Примерная дата
         cny_amount=150.0,
         currency_name='USD',
@@ -23,6 +25,7 @@ async def fill_exchange_history():
     )
     await ExchangeHistory.create(
         tg_id=802587774,
+        partner_id=123,
         date=datetime(2025, 4, 15, 9, 0),  # Примерная дата
         cny_amount=200.0,
         currency_name='RUB',
@@ -30,6 +33,7 @@ async def fill_exchange_history():
     )
     await ExchangeHistory.create(
         tg_id=802587774,
+        partner_id=123,
         date=datetime(2025, 4, 20, 13, 45),  # Примерная дата
         cny_amount=120.0,
         currency_name='RUB',
@@ -37,11 +41,16 @@ async def fill_exchange_history():
     )
 
 async def main():
+    
     # Инициализация PostgreSQL
     await init_postgres()
 
     # Заполняем таблицу ExchangeHistory
     await fill_exchange_history()
+
+    # Получаем сумму для CNY за текущий месяц
+    total_cny = await ExchangeHistory.get_cny_amount_current_month()
+    print(f"Сумма CNY за текущий месяц: {total_cny}")
 
     # Получаем сумму для USD за текущий месяц
     usd_amount = await ExchangeHistory.get_currency_amount_for_month('USD')

@@ -187,6 +187,7 @@ class ExchangeHistory(Base, ModelAdmin):
     cny_amount: Mapped[float]  # Количество CNY
     currency_name: Mapped[str]  # Название другой валюты
     currency_amount: Mapped[float]  # Количество другой валюты
+    status: Mapped[str] # Статус обмена
 
 
     @classmethod
