@@ -8,6 +8,8 @@ from utils.user.user_details import *
 from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
+from db.models.models import ExchangeHistory
+
 
 
 router = Router()
@@ -16,6 +18,7 @@ router = Router()
 # Обработчик кнопки "Я оплатил"
 @router.callback_query(F.data == "payment_confirmed")
 async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
+
     state_message = await callback.message.edit_text(photo_or_receipt_message)
     await state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
     await state.update_data({"last_id_message": state_message.message_id})
@@ -88,11 +91,14 @@ async def user_details(message: types.Message, state: FSMContext):
 
     # Логика по типу сообщения
     if message.photo:
-        caption="Подтвердите отправку реквизитов (фото):"
+        details = '(ваша фотография)'
+        caption = f"Подтвердите отправку реквизитов {details}"
     elif message.document:
-        caption=f"Подтвердите отправку реквизитов (документ)"
+        details = '(ваш документ)'
+        caption = f"Подтвердите отправку реквизитов {details}"
     elif message.text:
-        caption=f"Подтвердите реквизиты: {message.text}"
+        details = message.text
+        caption = f"Подтвердите реквизиты: {details}"
 
     sent_message = await bot.edit_message_text(
         chat_id=message.chat.id,
@@ -102,7 +108,29 @@ async def user_details(message: types.Message, state: FSMContext):
     )
 
     # Сохраняем новое сообщение для трекинга
-    await state.update_data({"last_id_message": sent_message.message_id})
+    await state.update_data({"last_id_message": sent_message.message_id,
+                             'details_user': details})
+
+
+# Обработчик кнопки "Подтверждаю"
+@router.callback_query(F.data == "user_confirm_details")
+async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext):
+
+    # Информация пользователя
+    data = await state.get_data()
+    id_exchange = data.get('id_exchange', '')
+    details_user = data.get('details', '')
+    sum_amout = data.get('sum_amout', '')
+
+    state_message = await callback.message.edit_text(generate_payment_message(sum_amout, details_user))
+    await state.update_data({"last_id_message": state_message.message_id})
+
+    # Изменяем статус
+    exchange_rate = await ExchangeHistory.get(id=id_exchange)
+    await exchange_rate.update(
+        status="waiting_for_payment_confirmation"
+    )
+
 
 
 # Обработчик кнопки "Надо исправить"
