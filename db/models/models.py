@@ -178,6 +178,7 @@ class ExchangeRate(Base, ModelAdmin):
 
 # Хранение истории обменов
 class ExchangeHistory(Base, ModelAdmin):
+    
     __tablename__ = 'exchange_history'
 
     id: Mapped[intpk]
@@ -188,6 +189,7 @@ class ExchangeHistory(Base, ModelAdmin):
     currency_name: Mapped[str]  # Название другой валюты
     currency_amount: Mapped[float]  # Количество другой валюты
     status: Mapped[str] # Статус обмена
+
 
     status_completed = "exchange_completed"
 
@@ -262,3 +264,4 @@ class ExchangeHistory(Base, ModelAdmin):
             )
             count = result.scalar()
             return count or 0
+        

@@ -1,5 +1,6 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
+from datetime import datetime
 
 from core.bot import bot
 from bot.templates.user.start import *
@@ -139,12 +140,36 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     sum_amount = data.get('sum_amout', 0)
     currency = data.get('exchange_type', '').split('_')[0].upper()
+    platform = data.get('exchange_type', '').split('_')[1].upper()
 
     partner_number = int(data.get('partner_number'))
     partner_id = settings.bot.PARTNERS[partner_number-1]
     await bot.send_message(chat_id=partner_id,
                            text=await format_exchange_request(amount=sum_amount, currency=currency),
                            reply_markup=await send_details(tg_id))
+    
+
+    # Добавляем историю обмена
+    now = datetime.now()
+    current_datetime = datetime(now.year, now.month, now.day, now.hour, now.minute)
+    cny_sum = sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}")
+    
+    new_exchange = await ExchangeHistory.create(
+        tg_id=tg_id,
+        partner_id=partner_id,
+        date=current_datetime,
+        cny_amount=cny_sum,
+        currency_name=currency,
+        currency_amount=sum_amount,
+        status="exchange_started"
+    )
+
+    # Сохраняем в БД
+    id_exchange = new_exchange.id
+    data.update({
+        "id_exchange": id_exchange
+    })
+    await state.update_data(data)
 
 
 # Вернуться в меню "Назад"
