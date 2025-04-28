@@ -148,12 +148,30 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     # Информация пользователя
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
-    details_user = data.get('details', '')
+    details_user = data.get('details_user', '')
     sum_amout = data.get('sum_amout', '')
-    message_type = data.get("message_type")
+    message_type = data.get("message_type", '')
 
+    # В зависимости от типа отправляем сообщение
+    if message_type in 'photo':
+        await callback.message.delete()
+        state_message = await bot.send_photo(
+            chat_id=callback.message.chat.id,
+            photo=details_user,
+            caption=generate_payment_message(sum_amout)
+        )
+
+    elif message_type in 'document':
+        await callback.message.delete()
+        state_message = await bot.send_document(
+            chat_id=callback.message.chat.id,
+            document=details_user,
+            caption=generate_payment_message(sum_amout)
+        )
+
+    else:
+        state_message = await callback.message.edit_text(generate_payment_message(sum_amout, details_user))
     
-    state_message = await callback.message.edit_text(generate_payment_message(sum_amout, details_user))
     await state.update_data({"last_id_message": state_message.message_id})
 
     # Изменяем статус
@@ -161,7 +179,6 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     await exchange_rate.update(
         status="waiting_for_payment_confirmation"
     )
-
 
 
 # Обработчик кнопки "Надо исправить"
@@ -179,7 +196,6 @@ async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
             chat_id=callback.message.chat.id,
             text=generate_requisites_message(exchange_type)
         )
-        await state.update_data(message_type="text")
     else:
         state_message = await callback.message.edit_text(
             text=generate_requisites_message(exchange_type)

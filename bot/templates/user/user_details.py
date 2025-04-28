@@ -10,6 +10,6 @@ def generate_requisites_message(exchange_type):
 photo_document_or_text_request_message = "❗️ Пожалуйста, отправьте фото, документ или текст"
 
 
-def generate_payment_message(sum: float, data: str) -> str:
+def generate_payment_message(sum: float, data: str='') -> str:
 
-    return f"Ожидайте зачисления:\nСумма: {sum}\nРеквизиты: {data}"
+    return f"Ожидайте зачисления:\nСумма: {sum}\nРеквизиты:\n{data}"
