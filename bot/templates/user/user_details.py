@@ -28,3 +28,7 @@ def get_no_payment_instructions(partner_id: int) -> str:
         "2\\. Если нет ответа 3 часа и более, напишите в поддержку\\."
     )
 
+
+def format_user_details(details: str='') -> str:
+    return f"Реквизиты пользователя:\n{details}"
+

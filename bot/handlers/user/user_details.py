@@ -145,6 +145,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
     partner_number = data.get('partner_number', '')
+    partner_id = settings.bot.PARTNERS[int(partner_number)-1]
     details_user = data.get('details_user', '')
     currency = data.get('exchange_type', '').split('_')[0].upper()
     platform = data.get('exchange_type', '').split('_')[1].upper()
@@ -152,25 +153,55 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
     message_type = data.get("message_type", '')
 
-    # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ
+    # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ и ПАРТНЁРУ
     if message_type in 'photo':
+        
         await callback.message.delete()
+
+        # Отправляем сообщение пользователю
         state_message = await bot.send_photo(
             chat_id=callback.message.chat.id,
             photo=details_user,
             caption=generate_payment_message(cny_sum)
         )
 
+        # Отправляем сообщение партнёру
+        await bot.send_photo(
+            chat_id=partner_id,
+            photo=details_user,
+            caption=format_user_details(),
+            reply_markup=create_payment_keyboard()
+        )
+
     elif message_type in 'document':
+
         await callback.message.delete()
+
+        # Отправляем сообщение пользователю
         state_message = await bot.send_document(
             chat_id=callback.message.chat.id,
             document=details_user,
             caption=generate_payment_message(cny_sum)
         )
 
+        # Отправляем сообщение партнёру
+        await bot.send_document(
+            chat_id=partner_id,
+            document=details_user,
+            caption=format_user_details(),
+            reply_markup=create_payment_keyboard()
+        )
+
     else:
-        state_message = await callback.message.edit_text(generate_payment_message(cny_sum, details_user))
+
+        state_message = await callback.message.edit_text(generate_payment_message(cny_sum, details_user)) # Пользователь
+
+        # Партнёр
+        await bot.send_message(
+            chat_id=partner_id,
+            text=format_user_details(details_user),
+            reply_markup=create_payment_keyboard()
+        )
     
     await state.update_data({"last_id_message": state_message.message_id})
 
@@ -186,7 +217,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     status = exchange.status
     if status == 'waiting_for_payment_confirmation':
         state_message = await callback.message.answer(
-            text=get_no_payment_instructions(settings.bot.PARTNERS[int(partner_number)-1]),
+            text=get_no_payment_instructions(),
             reply_markup=support_keyb,
             parse_mode="MarkdownV2"
         )
