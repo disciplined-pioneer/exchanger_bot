@@ -1,3 +1,4 @@
+from settings import settings
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 start_admin_keyb = InlineKeyboardMarkup(
@@ -22,7 +23,7 @@ update_rate_keyb = InlineKeyboardMarkup(
 
 start_user_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="Поддержка", url="https://www.google.com/")],
+        [InlineKeyboardButton(text="Поддержка", url=settings.bot.SUPPORT_LINK)],
         [InlineKeyboardButton(text="Выбрать партнёра", callback_data="select_partner")]
     ]
 )

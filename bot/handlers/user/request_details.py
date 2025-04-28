@@ -102,11 +102,11 @@ async def process_input(message: types.Message, state: FSMContext):
 
         # Формируем текст для сообщения
         exchange_message = await format_exchange_message(
-            sum=float(text),
+            sum=round(float(text)),
             currency=currency,
             platform=platform
         )
-        await state.update_data({"sum_amout": float(text)})
+        await state.update_data({"sum_amout": round(float(text))})
 
         # Изменяем сообщение с суммой и данными обмена
         await bot.edit_message_text(
@@ -154,6 +154,7 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
     current_datetime = datetime(now.year, now.month, now.day, now.hour, now.minute)
     cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
     
+    # Сохраняем в БД
     new_exchange = await ExchangeHistory.create(
         tg_id=tg_id,
         partner_id=partner_id,
@@ -164,7 +165,6 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
         status="exchange_started"
     )
 
-    # Сохраняем в БД
     id_exchange = new_exchange.id
     data.update({
         "id_exchange": id_exchange

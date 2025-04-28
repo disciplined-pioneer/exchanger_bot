@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
@@ -9,7 +10,6 @@ from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
 from db.models.models import ExchangeHistory, ExchangeRate
-
 
 
 router = Router()
@@ -144,6 +144,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     # Информация пользователя
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
+    partner_number = data.get('partner_number', '')
     details_user = data.get('details_user', '')
     currency = data.get('exchange_type', '').split('_')[0].upper()
     platform = data.get('exchange_type', '').split('_')[1].upper()
@@ -151,7 +152,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
     message_type = data.get("message_type", '')
 
-    # В зависимости от типа отправляем сообщение
+    # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ
     if message_type in 'photo':
         await callback.message.delete()
         state_message = await bot.send_photo(
@@ -178,6 +179,19 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     await exchange_rate.update(
         status="waiting_for_payment_confirmation"
     )
+
+    # Ждём 5 минут и проверяем статус
+    await asyncio.sleep(300)
+    exchange = await ExchangeHistory.get(id=id_exchange)
+    status = exchange.status
+    if status == 'waiting_for_payment_confirmation':
+        state_message = await callback.message.answer(
+            text=get_no_payment_instructions(settings.bot.PARTNERS[int(partner_number)-1]),
+            reply_markup=support_keyb,
+            parse_mode="MarkdownV2"
+        )
+
+        await state.update_data({"last_id_message": state_message.message_id})
 
 
 # Обработчик кнопки "Надо исправить"

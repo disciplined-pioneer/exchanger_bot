@@ -23,6 +23,7 @@ class BotConfig(BaseSettings):
     TOKEN: str
     PARTNERS: list[int] | None = []
     ADMINS: list[int] | None = []
+    SUPPORT_LINK: str
     COMMANDS: list[BotCommand] = [
         BotCommand(command='start', description='Запустить бота 🚀'),
     ]

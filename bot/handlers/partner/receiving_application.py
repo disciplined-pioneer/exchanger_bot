@@ -26,11 +26,24 @@ async def send_details(callback: types.CallbackQuery, state: FSMContext):
 async def save_details(message: types.Message, state: FSMContext):
 
     await message.delete()
-    details_text = message.text.strip()
-    await state.update_data(details=details_text)
-
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
+
+    # Проверка на текст
+    try:
+        if not message.text:
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=last_bot_message_id,
+                text="❗️ Пожалуйста, введите реквизиты в формате текста"
+            )
+            return
+    except:
+        pass
+        return
+    
+    details_text = message.text.strip()
+    await state.update_data(details=details_text)
 
     await bot.edit_message_text(
         chat_id=message.chat.id,
@@ -52,12 +65,9 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         storage=state.storage,
         key=state.key.__class__(bot_id=state.key.bot_id, chat_id=tg_id, user_id=tg_id)
     )
-
-    user_data = await user_state.get_data()
-    print(f'\nСостояние партнёра: {partner_data}')
-    print(f'\nСостояние пользователя: {user_data}\n')
-
+   
     # Отправляем реквизиты
+    user_data = await user_state.get_data()
     details = partner_data.get('details', '')
     sum = user_data.get('sum_amout', '')
     currency = user_data.get('exchange_type', '').split('_')[0].upper()
