@@ -170,7 +170,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             chat_id=partner_id,
             photo=details_user,
             caption=format_user_details(),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(callback.message.from_user.url)
         )
 
     elif message_type in 'document':
