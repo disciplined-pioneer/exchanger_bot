@@ -153,6 +153,8 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
     message_type = data.get("message_type", '')
 
+    user_link = f'tg://user?id={callback.from_user.id}'
+
     # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ и ПАРТНЁРУ
     if message_type in 'photo':
         
@@ -170,7 +172,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             chat_id=partner_id,
             photo=details_user,
             caption=format_user_details(),
-            reply_markup=create_payment_keyboard(callback.message.from_user.url)
+            reply_markup=create_payment_keyboard(user_link)
         )
 
     elif message_type in 'document':
@@ -189,7 +191,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             chat_id=partner_id,
             document=details_user,
             caption=format_user_details(),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(user_link)
         )
 
     else:
@@ -200,7 +202,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         await bot.send_message(
             chat_id=partner_id,
             text=format_user_details(details_user),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(user_link)
         )
     
     await state.update_data({"last_id_message": state_message.message_id})
