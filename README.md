@@ -1,8 +1,166 @@
-Конечно, вот переведённые статусы в нужном формате:
+# 💱 Обменник Бот обменник - exchanger_306
+
+Телеграм-бот для обмена валют с поддержкой трёх ролей: **Админ**, **Партнёр**, **Пользователь**.
+
+## 📌 Возможности
+
+### 👤 Пользователь
+- Запрашивает обмен валют
+- Указывает желаемую сумму, валюту и реквизиты
+- Получает подтверждение от партнёра
+
+### 🤝 Партнёр
+- Изменяет текущий курс обмена
+- Обрабатывает заявки пользователей
+- Отправляет результат обмена
+
+### 🛠 Админ
+- Просматривает статистику всех обменов
+- Отправляет массовые сообщения пользователям (рассылки)
+
+---
+
+## ⚙️ Настройка окружения
+
+Перед запуском необходимо создать файл `.env` в корне проекта со следующими переменными:
+
+```env
+# Данные для подключения к PostgreSQL
+POSTGRES_NAME=your_database_name
+POSTGRES_HOST=your_host
+POSTGRES_PORT=your_port
+POSTGRES_PASSWORD=your_password
+POSTGRES_USER=your_user
+
+# Токен Telegram-бота
+BOT_TOKEN=your_telegram_bot_token
+
+# ID админов и партнёров
+BOT_ADMINS=[admin_telegram_ids]
+BOT_PARTNERS=[partner_telegram_ids]
+
+# Ссылка на поддержку (можно заменить на ваш сайт или Telegram-юзер)
+BOT_SUPPORT_LINK=https://your_support_link
+```
+
+## Статусы в истории сообщений
 
 - обмен начат → exchange_started
 - ожидание подтверждения оплаты → waiting_for_payment_confirmation
 - оплата не получена → payment_not_received
 - обмен завершён → exchange_completed
 
-Теперь всё в snake_case и с маленькими буквами. Если нужны дополнительные изменения — сообщи!
+
+---
+
+## 🗂 Структура проекта
+
+```
+├─── bot
+│   ├─── handlers
+│   │   ├─── admin
+│   │   │   ├─── broadcast.py
+│   │   │   └─── statistics.py
+│   │   ├─── partner
+│   │   │   ├─── currency_rate_update.py 
+│   │   │   ├─── receiving_application.py
+│   │   │   └─── result_exchange.py      
+│   │   ├─── user
+│   │   │   ├─── exchange_confirmation.py
+│   │   │   ├─── request_details.py      
+│   │   │   ├─── start.py
+│   │   │   └─── user_details.py
+│   │   └─── __init__.py
+│   ├─── keyboards
+│   │   ├─── admin
+│   │   │   └─── broadcast.py
+│   │   ├─── partner
+│   │   │   ├─── currency_rate_update.py
+│   │   │   ├─── receiving_application.py
+│   │   │   └─── result_exchange.py
+│   │   ├─── user
+│   │   │   ├─── request_details.py
+│   │   │   ├─── start.py
+│   │   │   └─── user_details.py
+│   │   └─── __init__.py
+│   ├─── templates
+│   │   ├─── admin
+│   │   │   ├─── broadcast.py
+│   │   │   └─── statistics.py
+│   │   ├─── partner
+│   │   │   ├─── receiving_application.py
+│   │   │   └─── result_exchange.py
+│   │   ├─── user
+│   │   │   ├─── exchange_confirmation.py
+│   │   │   ├─── request_details.py
+│   │   │   ├─── start.py
+│   │   │   └─── user_details.py
+│   │   └─── __init__.py
+│   └─── __init__.py
+├─── core
+│   ├─── __init__.py
+│   ├─── bot.py
+│   └─── psql.py
+├─── db
+│   ├─── crud
+│   │   ├─── __init__.py
+│   │   └─── base.py
+│   ├─── models
+│   │   ├─── mapped_columns.py
+│   │   └─── models.py
+│   └─── __init__.py
+├─── utils
+│   ├─── admin
+│   │   └─── broadcast.py
+│   ├─── partner
+│   │   ├─── currency_rate_update.py
+│   │   └─── result_exchange.py
+│   └─── user
+│       ├─── request_details.py
+│       └─── user_details.py
+├─── .env
+├─── .gitignore
+├─── Dockerfile
+├─── README.md
+├─── bot.py
+├─── docker-compose.yml
+├─── requirements.txt
+├─── settings.py
+└─── test.py
+```
+
+---
+
+## 🚀 Быстрый старт
+
+```bash
+# Клонируем проект
+git clone https://github.com/your/repo.git
+cd your-repo
+
+# Создаём .env и заполняем его
+
+# Устанавливаем зависимости
+pip install -r requirements.txt
+
+# Запуск бота
+python bot.py
+```
+
+Или с помощью Docker:
+
+```bash
+docker-compose up --build
+```
+
+---
+
+## 🧪 Генерация тестовых данных
+
+Файл `test.py` используется для генерации фейковых данных обменов в базе данных — удобно для тестирования и отладки.
+
+```bash
+python test.py
+```
+
+---
