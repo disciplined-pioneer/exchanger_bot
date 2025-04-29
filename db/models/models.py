@@ -182,8 +182,8 @@ class ExchangeHistory(Base, ModelAdmin):
     __tablename__ = 'exchange_history'
 
     id: Mapped[intpk]
-    tg_id: Mapped[int]
-    partner_id: Mapped[int]
+    tg_id: Mapped[int] = mapped_column(BigInteger)
+    partner_id: Mapped[int] = mapped_column(BigInteger)
     date: Mapped[datetime]
     cny_amount: Mapped[float]  # Количество CNY
     currency_name: Mapped[str]  # Название другой валюты

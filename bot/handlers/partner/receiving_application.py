@@ -35,7 +35,7 @@ async def save_details(message: types.Message, state: FSMContext):
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text="❗️ Пожалуйста, введите реквизиты в формате текста"
+                text=enter_requisites_message
             )
             return
     except:
@@ -80,6 +80,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
     )
 
     await callback.message.edit_text(text=requisites_sent_message)
+    await state.update_data({'id_exchange': user_data.get('id_exchange', '')})
 
 
 # Отмена реквизитов
