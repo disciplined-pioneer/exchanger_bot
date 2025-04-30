@@ -16,3 +16,5 @@ def get_confirm_requisites_message(details_text):
 requisites_sent_message = '✅ Реквизиты были отправлены'
 
 enter_requisites_message = '❗️ Пожалуйста, введите реквизиты в формате текста'
+
+error_message_text = "❗️ Пожалуйста, используйте кнопку для отправки реквизитов"

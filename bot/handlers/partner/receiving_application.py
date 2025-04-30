@@ -14,7 +14,7 @@ router = Router()
 @router.message(ExchangeStates.partner_details)
 async def handle_unexpected_message(message: types.Message):
     await message.delete()
-    await message.answer("❗️ Пожалуйста, используйте кнопку для отправки реквизитов")
+    await message.answer(error_message_text)
 
 
 # Обработка кнопки "Отправить реквизиты"
