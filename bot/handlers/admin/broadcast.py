@@ -16,7 +16,7 @@ router = Router()
 @router.callback_query(F.data == "admin_broadcast")
 async def start_broadcast(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(BroadcastStates.waiting_for_content)
-    sent_message = await callback.message.edit_text("📨 Отправьте сообщение для рассылки:",
+    sent_message = await callback.message.edit_text("📨 Отправьте сообщение для рассылки (для отправки фото или документа вместе с текстом, отправьте их в одном сообщении):",
                                      reply_markup=cancel_keyboard())
     
     # Сохраняем message_id последнего сообщения бота
@@ -46,16 +46,19 @@ async def handle_content(message: Message, state: FSMContext):
             content_data["file_id"] = getattr(message, message.content_type).file_id
 
     # Редактируем предыдущее сообщение бота
-    sent_message = await bot.edit_message_text(
-        chat_id=message.chat.id,
-        message_id=last_bot_message_id,
-        text="Выберите форматирование:",
-        reply_markup=format_selection_keyboard()
-    )
-
-    # Обновляем ID последнего сообщения бота
-    await state.update_data(broadcast=content_data,
-                            last_bot_message_id=sent_message.message_id)
+    try:
+        sent_message = await bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=last_bot_message_id,
+            text="Выберите форматирование:",
+            reply_markup=format_selection_keyboard()
+        )
+    
+        # Обновляем ID последнего сообщения бота
+        await state.update_data(broadcast=content_data,
+                                last_bot_message_id=sent_message.message_id)
+    except:
+        pass
 
 
 # Обработка типа форматирования
@@ -88,26 +91,29 @@ async def ask_buttons(callback: types.CallbackQuery, state: FSMContext):
 @router.message(BroadcastStates.waiting_for_buttons)
 async def handle_buttons(message: Message, state: FSMContext):
 
-    await message.delete()
-    data = await state.get_data()
-    content = data["broadcast"]
+    try:
+        await message.delete()
+        data = await state.get_data()
+        content = data["broadcast"]
 
-    buttons = []
-    for row in message.text.split("\n"):
-        row_buttons = []
-        try:
-            for pair in row.split("|"):
-                text, url = map(str.strip, pair.split("-", 1))
-                row_buttons.append(InlineKeyboardButton(text=text, url=url))
-        except:
-            pass
-        buttons.append(row_buttons)
+        buttons = []
+        for row in message.text.split("\n"):
+            row_buttons = []
+            try:
+                for pair in row.split("|"):
+                    text, url = map(str.strip, pair.split("-", 1))
+                    row_buttons.append(InlineKeyboardButton(text=text, url=url))
+            except:
+                pass
+            buttons.append(row_buttons)
 
-    content["keyboard"] = buttons
-    await state.update_data(broadcast=content)
-    await message.answer("Превью с кнопками:")
-    await send_preview(message, content, content["parse_mode"])
-    await message.answer("Готово к отправке?", reply_markup=confirm_keyboard())
+        content["keyboard"] = buttons
+        await state.update_data(broadcast=content)
+        await message.answer("Превью с кнопками:")
+        await send_preview(message, content, content["parse_mode"])
+        await message.answer("Готово к отправке?", reply_markup=confirm_keyboard())
+    except:
+        pass
 
 
 # Подтверждение рассылки
@@ -148,3 +154,19 @@ async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
 async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_text("❌ Рассылка была отменена")
     await state.clear()
+
+
+# Обработак любых сообщений
+@router.message()
+async def handle_unexpected_message(message: Message, state: FSMContext):
+    state_data = await state.get_data()
+    current_state = state_data.get('state', None)
+
+    # Если состояние - ожидание контента для рассылки
+    if current_state == BroadcastStates.waiting_for_content:
+        await message.answer("❗️ Пожалуйста, отправьте текст, фото, видео или документ для рассылки.")
+
+    # Если состояние - ожидание кнопок для рассылки
+    elif current_state == BroadcastStates.waiting_for_buttons:
+        await message.answer("❗️ Пожалуйста, отправьте кнопки в правильном формате.")
+
