@@ -10,7 +10,15 @@ from utils.user.request_details import ExchangeStates
 router = Router()
 
 
+# Обработка сообщения
+@router.message(ExchangeStates.partner_details)
+async def handle_unexpected_message(message: types.Message):
+    await message.delete()
+    await message.answer("❗️ Пожалуйста, используйте кнопку для отправки реквизитов")
+
+
 # Обработка кнопки "Отправить реквизиты"
+@router.message(ExchangeStates.partner_details)
 @router.callback_query(F.data.startswith("send_details"))
 async def send_details(callback: types.CallbackQuery, state: FSMContext):
 

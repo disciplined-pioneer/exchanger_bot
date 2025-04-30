@@ -1,6 +1,5 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.base import StorageKey
 
 from core.bot import bot
 from utils.user.user_details import *

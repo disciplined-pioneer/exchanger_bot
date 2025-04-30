@@ -136,17 +136,25 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
     })
     await state.update_data(data)
 
-    # Отправляем сообщение нужному партнёру
+    # Считываем данные
     data = await state.get_data()
     sum_amount = data.get('sum_amout', 0)
     currency = data.get('exchange_type', '').split('_')[0].upper()
     platform = data.get('exchange_type', '').split('_')[1].upper()
 
+    # Отправляем сообщение нужному партнёру
     partner_number = int(data.get('partner_number'))
     partner_id = settings.bot.PARTNERS[partner_number-1]
     await bot.send_message(chat_id=partner_id,
                            text=await format_exchange_request(amount=sum_amount, currency=currency),
                            reply_markup=await send_details(tg_id))
+    
+    # Считываем состояние пользователя и переход в нужное состояние
+    partner_state = FSMContext(
+        storage=state.storage,
+        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=tg_id, user_id=partner_id)
+    )
+    await partner_state.set_state(ExchangeStates.partner_details)
     
 
     # Добавляем историю обмена
