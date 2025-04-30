@@ -12,7 +12,7 @@ async def fill_exchange_history():
         partner_id=123,
         date=datetime(2025, 4, 1, 10, 0),  # Примерная дата
         cny_amount=100.0,
-        currency_name='USD',
+        currency_name='USDT',
         currency_amount=12.0,
         status="exchange_started"
     )
@@ -21,7 +21,7 @@ async def fill_exchange_history():
         partner_id=123,
         date=datetime(2025, 4, 10, 15, 30),  # Примерная дата
         cny_amount=150.0,
-        currency_name='USD',
+        currency_name='USDT',
         currency_amount=18.0,
         status="exchange_completed"
     )
@@ -57,7 +57,7 @@ async def main():
     print(f"Сумма CNY за текущий месяц: {total_cny}")
 
     # Получаем сумму для USD за текущий месяц
-    usd_amount = await ExchangeHistory.get_currency_amount_for_month('USD')
+    usd_amount = await ExchangeHistory.get_currency_amount_for_month('USDT')
     print(f"Сумма USD за текущий месяц: {usd_amount}")
 
     # Получаем сумму для RUB за текущий месяц

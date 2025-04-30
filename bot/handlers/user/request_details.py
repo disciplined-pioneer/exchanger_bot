@@ -168,7 +168,7 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
         partner_id=partner_id,
         date=current_datetime,
         cny_amount=cny_sum,
-        currency_name=currency,
+        currency_name=currency.upper(),
         currency_amount=sum_amount,
         status="exchange_started"
     )

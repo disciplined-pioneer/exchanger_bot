@@ -25,9 +25,9 @@ async def cmd_start(message: Message, state: FSMContext):
         pass
 
 
-    await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
+    #await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
-    """tg_id = message.from_user.id
+    tg_id = message.from_user.id
     if tg_id in settings.bot.ADMINS: # Админ
         await message.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
 
@@ -37,5 +37,5 @@ async def cmd_start(message: Message, state: FSMContext):
     else: # Пользователь
         await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
-    await state.clear()"""
+    await state.clear()
         
