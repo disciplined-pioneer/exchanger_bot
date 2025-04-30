@@ -46,6 +46,7 @@ async def format_exchange_request(amount: float, currency: str) -> str:
     return (
         "Получение заявки на обмен:\n\n"
         f"Сумма: {amount}\n"
-        f"Валюта: {currency.upper()}"
+        f"Валюта: {currency.upper()}\n"
+        f"Нажмите на кнопку ниже для продолжения ⬇️"
     )
 
