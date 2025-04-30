@@ -12,7 +12,7 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
     # Проверка на завершённую сделку
     exchange_rate = await ExchangeHistory.get(id=id_exchange)
     if exchange_rate.status == 'exchange_completed':
-        return True, ''
+        return True, '' # Не нужно изменять
 
     # Изменяем кнопку
     try:
@@ -34,6 +34,8 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
         )
 
         print('Сделка завершилась автоматически')
-        return False, state_message
+        return False, state_message # Нужно изменить
+    
+    return True, '' # Не нужно изменять
     
     

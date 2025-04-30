@@ -4,6 +4,9 @@ from aiogram.fsm.context import FSMContext
 
 from utils.partner.currency_rate_update import *
 from bot.templates.user.start import get_exchange_rate
+from bot.keyboards.user.start import start_user_keyb
+from bot.templates.user.start import starting_user_message
+
 from bot.keyboards.user.start import update_rate_keyb
 from bot.keyboards.partner.currency_rate_update import *
 
@@ -94,7 +97,8 @@ async def ask_next(message: types.Message, state: FSMContext):
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text="✅ Курс валют был изменён!"
+                text="✅ Курс валют был изменён!",
+                reply_markup=back_menu
             )
         
         # Изменяем курс
@@ -128,6 +132,7 @@ async def ask_next(message: types.Message, state: FSMContext):
 # Обработка кнопки "Назад"
 @router.callback_query(F.data == "go_back")
 async def go_back(callback: types.CallbackQuery, state: FSMContext):
+
     data = await state.get_data()
 
     if data["index"] > 0:
@@ -143,4 +148,15 @@ async def go_back(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.delete()
         await callback.message.answer(text=await get_exchange_rate(), reply_markup=update_rate_keyb)
         await state.clear()
+
     await callback.answer()
+
+
+# Назад в меню - старт 
+@router.callback_query(F.data == "go_back_menu")
+async def go_back_menu(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.message.edit_text(
+        text=starting_user_message,
+        reply_markup=start_user_keyb
+    )

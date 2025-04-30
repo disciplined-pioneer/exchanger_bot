@@ -16,6 +16,7 @@ async def send_details(callback: types.CallbackQuery, state: FSMContext):
 
     tg_id = callback.data.split("_")[2]
     state_message = await callback.message.edit_text(input_requisites_message)
+    
     await state.set_state(ExchangeStates.details)
     await state.update_data({"last_id_message": state_message.message_id,
                              "tg_id": tg_id})
