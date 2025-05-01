@@ -27,17 +27,20 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(payment_confirmed_message)
 
     # Отправляем сообщение пользователю только с первой кнопкой
-    sent_message = await bot.send_message(
+    sent_message_user = await bot.send_message(
         chat_id=tg_id,
         text=partner_payment_confirmed_message,
         reply_markup=get_partial_exchange_completion_keyboard()
     )
 
     # Отложенное обновление клавиатуры через 30 минут
-    result, state_message = await update_keyboard_after_30_min(bot, tg_id, sent_message.message_id, id_exchange)
+    result, state_message_user_new = await update_keyboard_after_30_min(bot, tg_id, sent_message_user.message_id, id_exchange)
     if not result:
-        await bot.delete_message(chat_id=callback.message.chat.id, message_id=state_message.message_id)
-        await callback.message.answer(deal_auto_completed_message)
+        await bot.delete_message(chat_id=tg_id, message_id=state_message_user_new.message_id)
+        await bot.send_message(
+            chat_id=tg_id,
+            text=deal_auto_completed_message
+        )
 
     
 # Обработчик кнопки "Деньги не пришли" у партнёра

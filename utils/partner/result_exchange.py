@@ -16,26 +16,23 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
 
     # Изменяем кнопку
     try:
-        state_message = await bot.edit_message_reply_markup(
+        state_message_user = await bot.edit_message_reply_markup(
             chat_id=chat_id,
             message_id=message_id,
             reply_markup=get_full_exchange_completion_keyboard()
         )
     except Exception as e:
-        # Например, сообщение уже удалено или отредактировано вручную
         print(f"Ошибка при обновлении клавиатуры: {e}")
 
     # Проверка на то, что сделка завершена
-    await asyncio.sleep(10)  # 23,5 часа
+    await asyncio.sleep(2)  # 23,5 часа
+
     exchange_rate = await ExchangeHistory.get(id=id_exchange)
     if exchange_rate.status != 'exchange_completed':
         await exchange_rate.update(
             status="exchange_completed"
         )
 
-        print('Сделка завершилась автоматически')
-        return False, state_message # Нужно изменить
+        return False, state_message_user
     
-    return True, '' # Не нужно изменять
-    
-    
+    return True, ''
