@@ -127,6 +127,7 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
     # Сохраняем данные в состоянии
     tg_id = callback.from_user.id
     state_message = await callback.message.edit_text(text=waiting_details)
+    await state.set_state(ExchangeStates.plug)  # Переходим в состояние заглушки
 
     # Получаем текущие данные состояния
     data = await state.get_data()
@@ -178,6 +179,12 @@ async def start_exchange(callback: types.CallbackQuery, state: FSMContext):
         "id_exchange": id_exchange
     })
     await state.update_data(data)
+
+
+# Удаляем сообщения после перехода в заглушки
+@router.message(ExchangeStates.plug)
+async def plug(message: types.Message, state: FSMContext):
+    await message.delete()
 
 
 # Вернуться в меню "Назад"

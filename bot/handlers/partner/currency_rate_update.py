@@ -4,8 +4,6 @@ from aiogram.fsm.context import FSMContext
 
 from utils.partner.currency_rate_update import *
 from bot.templates.user.start import get_exchange_rate
-from bot.keyboards.user.start import start_user_keyb
-from bot.templates.user.start import starting_user_message
 
 from bot.keyboards.user.start import update_rate_keyb
 from bot.keyboards.partner.currency_rate_update import *
@@ -157,6 +155,6 @@ async def go_back(callback: types.CallbackQuery, state: FSMContext):
 async def go_back_menu(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text(
-        text=starting_user_message,
-        reply_markup=start_user_keyb
+        text=await get_exchange_rate(),
+        reply_markup=update_rate_keyb
     )

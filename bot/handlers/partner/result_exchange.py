@@ -63,7 +63,8 @@ async def user_not_paid(callback: types.CallbackQuery, state: FSMContext):
         storage=state.storage,
         key=StorageKey(bot_id=state.key.bot_id, chat_id=tg_id, user_id=tg_id)
     )
-    await user_state.set_state(PaymentState.user_details)
+
+    await user_state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
     await user_state.update_data({"last_id_message": state_message.message_id})
 
     exchange_rate = await ExchangeHistory.get(id=id_exchange)

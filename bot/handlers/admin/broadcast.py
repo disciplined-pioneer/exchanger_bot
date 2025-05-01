@@ -156,17 +156,3 @@ async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-# Обработак любых сообщений
-@router.message()
-async def handle_unexpected_message(message: Message, state: FSMContext):
-    state_data = await state.get_data()
-    current_state = state_data.get('state', None)
-
-    # Если состояние - ожидание контента для рассылки
-    if current_state == BroadcastStates.waiting_for_content:
-        await message.answer("❗️ Пожалуйста, отправьте текст, фото, видео или документ для рассылки.")
-
-    # Если состояние - ожидание кнопок для рассылки
-    elif current_state == BroadcastStates.waiting_for_buttons:
-        await message.answer("❗️ Пожалуйста, отправьте кнопки в правильном формате.")
-

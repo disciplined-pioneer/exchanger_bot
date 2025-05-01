@@ -10,15 +10,7 @@ from utils.user.request_details import ExchangeStates
 router = Router()
 
 
-# Обработка сообщения
-@router.message(ExchangeStates.partner_details)
-async def handle_unexpected_message(message: types.Message):
-    await message.delete()
-    await message.answer(error_message_text)
-
-
 # Обработка кнопки "Отправить реквизиты"
-@router.message(ExchangeStates.partner_details)
 @router.callback_query(F.data.startswith("send_details"))
 async def send_details(callback: types.CallbackQuery, state: FSMContext):
 
@@ -107,3 +99,10 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(ExchangeStates.details)
     await state.update_data({"last_id_message": state_message.message_id})
+
+
+# Обработка сообщений где это не нужно
+@router.message()
+async def handle_unexpected_message(message: types.Message, state: FSMContext):
+    if await state.get_state() is None:
+        await message.delete()
