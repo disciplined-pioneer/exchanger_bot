@@ -1,4 +1,5 @@
 from bot.handlers.user.start import router as start
+from bot.handlers.admin.ban import router as ban
 from bot.handlers.admin.broadcast import router as broadcast
 from bot.handlers.admin.statistics import router as statistics
 from bot.handlers.admin.add_partner import router as add_partner
@@ -14,6 +15,7 @@ from bot.handlers.partner.receiving_application import router as receiving_appli
 
 routers = [
     start,
+    ban,
     broadcast,
     statistics,
     add_partner,
