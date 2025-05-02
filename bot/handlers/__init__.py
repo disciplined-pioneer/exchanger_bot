@@ -3,6 +3,7 @@ from bot.handlers.admin.ban import router as ban
 from bot.handlers.admin.broadcast import router as broadcast
 from bot.handlers.admin.statistics import router as statistics
 from bot.handlers.admin.add_partner import router as add_partner
+from bot.handlers.admin.commissions import router as commissions
 
 from bot.handlers.user.user_details import router as user_details
 from bot.handlers.user.request_details import router as request_details
@@ -19,6 +20,7 @@ routers = [
     broadcast,
     statistics,
     add_partner,
+    commissions,
     
     user_details,
     request_details,

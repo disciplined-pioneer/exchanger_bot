@@ -8,7 +8,7 @@ from bot.keyboards.admin.add_partner import back_admin_keyb
 from bot.keyboards.partner.currency_rate_update import back_menu
 from bot.templates.user.start import starting_admin_message
 
-from db.models.models import Partners, Users
+from db.models.models import Partners
 
 
 router = Router()
@@ -94,20 +94,7 @@ async def ask_next(message: types.Message, state: FSMContext):
         name = values.get('name', '')
         telegram_id = values.get('telegram_id', 0)
 
-        # Сохранение в БД
-        await Users.create(
-            tg_id=telegram_id,
-            role='partner'
-        )
-
-        # Сохранение в БД
-        await Partners.create(
-            tg_id=telegram_id,
-            name=name,
-            active_pairs=[{'from': 'USDT', 'to': 'CNY'},
-                          {'from': 'RUB', 'to': 'CNY'}]
-        )
-
+        await adding_partner(telegram_id, name) # Добавление в БД
         
         # Отправляем сообщение
         await bot.edit_message_text(
