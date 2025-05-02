@@ -3,9 +3,10 @@ from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, Message
 
-from db.models.models import ExchangeHistory
+from db.models.models import Users
 from bot.keyboards.admin.broadcast import *
 from bot.templates.admin.broadcast import *
+from bot.keyboards.partner.currency_rate_update import back_menu
 from utils.admin.broadcast import create_url_keyboard, remove_urls, send_preview
 
 
@@ -123,11 +124,8 @@ async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
     content = data["broadcast"]
     parse_mode = content.get("parse_mode")
 
-    parse_mode = parse_mode
-
-    user_topics = await ExchangeHistory.all()
-    user_ids = list(set([u.tg_id for u in user_topics]))
-
+    # Получение списка всех пользователей без бана
+    user_ids = await Users.get_allowed_tg_ids()
     for user_id in user_ids:
         try:
             markup = create_url_keyboard(content["caption"], content.get("keyboard", []))
@@ -145,14 +143,18 @@ async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
         except Exception as e:
             print(f"Ошибка при отправке пользователю {user_id}: {e}")
 
-    await callback.message.edit_text("✅ Рассылка успешно завершена")
+    await callback.message.edit_text(
+        text="✅ Рассылка успешно завершена",
+        reply_markup=back_menu)
     await state.clear()
 
 
 # Отмена рассылки
 @router.callback_query(F.data == "cancel")
 async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text("❌ Рассылка была отменена")
+    await callback.message.edit_text(
+        text="❌ Рассылка была отменена",
+        reply_markup=back_menu)
     await state.clear()
 
 

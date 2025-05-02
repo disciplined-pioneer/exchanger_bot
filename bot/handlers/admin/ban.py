@@ -69,8 +69,7 @@ async def process_ban(message: types.Message, state: FSMContext):
     else: # Если пользователь не найден, создаем новой с ролью 'ban'
         await Users.create(tg_id=value, role='ban')
 
-
-
+    # Выводим результат
     await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=last_bot_message_id,

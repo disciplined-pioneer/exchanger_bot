@@ -148,6 +148,18 @@ class Users(Base, ModelAdmin):
     tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     role: Mapped[str]
 
+    @classmethod
+    async def get_allowed_tg_ids(cls) -> list[int]:
+        """
+        Возвращает список tg_id всех пользователей, у которых роль не 'ban'.
+        """
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(cls.tg_id).where(cls.role != 'ban')
+            )
+            return [row.tg_id for row in result]
+
+
 
 # Хранение списка всех партнёров
 class Partners(Base, ModelAdmin):
