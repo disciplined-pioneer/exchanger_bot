@@ -7,7 +7,7 @@ from bot.keyboards.partner.result_exchange import *
 
 async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
 
-    await asyncio.sleep(5)  # 30 минут
+    await asyncio.sleep(30 * 60)  # 30 минут
 
     # Проверка на завершённую сделку
     exchange_rate = await ExchangeHistory.get(id=id_exchange)
@@ -25,7 +25,7 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
         print(f"Ошибка при обновлении клавиатуры: {e}")
 
     # Проверка на то, что сделка завершена
-    await asyncio.sleep(2)  # 23,5 часа
+    await asyncio.sleep(23.5 * 60 * 60)  # 23,5 часа
 
     exchange_rate = await ExchangeHistory.get(id=id_exchange)
     if exchange_rate.status != 'exchange_completed':
