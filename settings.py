@@ -21,6 +21,7 @@ class PostgresConfig(BaseSettings):
 
 class BotConfig(BaseSettings):
     TOKEN: str
+    COMMISSION: float
     PARTNERS: list[int] | None = []
     ADMINS: list[int] | None = []
     SUPPORT_LINK: str

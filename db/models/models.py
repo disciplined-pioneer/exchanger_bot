@@ -160,7 +160,6 @@ class Users(Base, ModelAdmin):
             return [row.tg_id for row in result]
 
 
-
 # Хранение списка всех партнёров
 class Partners(Base, ModelAdmin):
     
@@ -207,6 +206,14 @@ class Exchanges(Base, ModelAdmin):
     payment_check: Mapped[str]
 
 
+# Хранение комиссий
+class Commissions(Base, ModelAdmin):
+    
+    __tablename__ = 'commissions'
+
+    id: Mapped[intpk]
+    date: Mapped[datetime]
+    ommissions = mapped_column(Float)
 
 
 # СТАРЫЕ, НО НЕ НЕЖНЫЕ БД В БУДУЩЕМ - НЕОБХОДИМО ИЗМЕНИТЬ РАБОТУ БОТА
