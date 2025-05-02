@@ -5,7 +5,11 @@ from utils.admin.commissions import *
 from bot.keyboards.admin.commissions import *
 from bot.templates.admin.commissions import *
 
+from datetime import datetime
+from db.models.models import Commissions
+
 from core.bot import bot
+from settings import settings
 
 
 router = Router()
@@ -54,6 +58,13 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 # Обработка кнопки "Я оплатил"
 @router.callback_query(F.data == "paid_commission")
 async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
+
+    # Добавляем комиссию в БД
+    now = datetime.now()
+    await Commissions.create(
+        date=now,
+        commissions=settings.bot.COMMISSION
+    )
 
     await callback.message.edit_text(
         text=payment_confirmed_message

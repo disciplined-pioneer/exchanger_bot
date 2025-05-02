@@ -3,7 +3,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 start_admin_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="💰 Запросить комиссии - ДОРАБОТАТЬ", callback_data="request_commissions")],
+        [InlineKeyboardButton(text="💰 Запросить комиссии", callback_data="request_commissions")],
         [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
         [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")],
         [InlineKeyboardButton(text="➕ Добавить партнёра", callback_data="add_partner")],

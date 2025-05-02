@@ -196,14 +196,73 @@ class Exchanges(Base, ModelAdmin):
     from_currency: Mapped[str]
     to_currency: Mapped[str]
 
-    amout_from = mapped_column(Float)
-    amout_to = mapped_column(Float)
+    amout_from: Mapped[float] = mapped_column(Float)
+    amout_to: Mapped[float] = mapped_column(Float)
 
     state: Mapped[str]
     created_at: Mapped[datetime]
     update_at: Mapped[datetime]
 
     payment_check: Mapped[str]
+
+    state_completed = "exchange_completed"
+
+    @classmethod
+    async def get_amout_to_current_month(cls) -> float:
+        """
+        Возвращает сумму amout_to за текущий месяц для завершённых обменов.
+        """
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+        next_month = datetime(now.year + 1, 1, 1) if now.month == 12 else datetime(now.year, now.month + 1, 1)
+
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.sum(cls.amout_to))
+                .where(
+                    cls.created_at >= start_of_month,
+                    cls.created_at < next_month,
+                    cls.state == cls.state_completed
+                )
+            )
+            total = result.scalar()
+            return total or 0.0
+
+    @classmethod
+    async def get_amout_from_for_month(cls, from_currency: str) -> float:
+        """
+        Получает сумму amout_from для указанной валюты за текущий месяц для завершённых обменов.
+        """
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.sum(cls.amout_from))
+                .where(
+                    cls.from_currency == from_currency,
+                    cls.created_at >= start_of_month,
+                    cls.state == cls.state_completed
+                )
+            )
+            total_amount = result.scalar()
+            return total_amount or 0.0
+
+    @classmethod
+    async def get_deal_count_by_partner(cls, partner_id: int) -> int:
+        """
+        Возвращает количество завершённых сделок с данным партнёром.
+        """
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.count())
+                .where(
+                    cls.partner_id == partner_id,
+                    cls.state == cls.state_completed
+                )
+            )
+            count = result.scalar()
+            return count or 0
 
 
 # Хранение комиссий
@@ -213,7 +272,26 @@ class Commissions(Base, ModelAdmin):
 
     id: Mapped[intpk]
     date: Mapped[datetime]
-    ommissions = mapped_column(Float)
+    commissions = mapped_column(Float)
+
+
+    @classmethod
+    async def get_monthly_commission_sum(cls) -> float:
+        """
+        Возвращает сумму всех комиссий за текущий месяц.
+        """
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+        next_month = datetime(now.year + 1, 1, 1) if now.month == 12 else datetime(now.year, now.month + 1, 1)
+
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(func.sum(cls.commissions))
+                .where(cls.date >= start_of_month, cls.date < next_month)
+            )
+            total = result.scalar()
+            return total or 0.0
+
 
 
 # СТАРЫЕ, НО НЕ НЕЖНЫЕ БД В БУДУЩЕМ - НЕОБХОДИМО ИЗМЕНИТЬ РАБОТУ БОТА
