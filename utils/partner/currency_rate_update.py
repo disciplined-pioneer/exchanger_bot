@@ -1,5 +1,6 @@
 from aiogram.fsm.state import StatesGroup, State
 
+
 class UpdateRates(StatesGroup):
     current_index = State()
     values = State()

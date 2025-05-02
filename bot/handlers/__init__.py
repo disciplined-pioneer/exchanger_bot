@@ -1,6 +1,7 @@
 from bot.handlers.user.start import router as start
 from bot.handlers.admin.broadcast import router as broadcast
 from bot.handlers.admin.statistics import router as statistics
+from bot.handlers.admin.add_partner import router as add_partner
 
 from bot.handlers.user.user_details import router as user_details
 from bot.handlers.user.request_details import router as request_details
@@ -15,6 +16,7 @@ routers = [
     start,
     broadcast,
     statistics,
+    add_partner,
     
     user_details,
     request_details,

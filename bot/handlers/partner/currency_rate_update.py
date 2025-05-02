@@ -5,9 +5,13 @@ from aiogram.fsm.context import FSMContext
 from utils.partner.currency_rate_update import *
 from bot.templates.user.start import get_exchange_rate
 
-from bot.keyboards.user.start import update_rate_keyb
-from bot.keyboards.partner.currency_rate_update import *
 
+from bot.keyboards.partner.currency_rate_update import *
+from bot.templates.user.start import starting_admin_message, starting_user_message
+from bot.keyboards.user.start import start_admin_keyb, start_user_keyb, update_rate_keyb
+
+
+from settings import settings
 from db.models.models import ExchangeRate
 
 
@@ -137,6 +141,7 @@ async def go_back(callback: types.CallbackQuery, state: FSMContext):
         data["index"] -= 1
         keys = list(LIST_CURRENCIES.keys())
         current_key = keys[data["index"]]
+        
         # Если курс уже был введён — удалить его
         if current_key in data["values"]:
             del data["values"][current_key]
@@ -154,7 +159,14 @@ async def go_back(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "go_back_menu")
 async def go_back_menu(callback: types.CallbackQuery, state: FSMContext):
 
-    await callback.message.edit_text(
-        text=await get_exchange_rate(),
-        reply_markup=update_rate_keyb
-    )
+    tg_id = callback.message.from_user.id
+    if tg_id in settings.bot.ADMINS: # Админ
+        await callback.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
+
+    elif tg_id in settings.bot.PARTNERS: # Парнёр
+        await callback.answer(text=await get_exchange_rate(), reply_markup=update_rate_keyb)
+
+    else: # Пользователь
+        await callback.answer(text=starting_user_message, reply_markup=start_user_keyb)
+
+    await state.clear()
