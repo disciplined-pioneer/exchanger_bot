@@ -1,6 +1,6 @@
 import logging
-from core.psql import async_db_session, engine
 from db.models.models import Base
+from core.psql import async_db_session, engine
 
 
 async def init_postgres() -> bool:

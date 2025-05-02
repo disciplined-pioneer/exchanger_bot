@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import TypeVar, Generic, Sequence
 
-from sqlalchemy import func
+from sqlalchemy import func, JSON
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.orm import Mapped, selectinload, load_only
 from sqlalchemy.sql import select, update as sqlalchemy_update
@@ -139,6 +138,65 @@ class ModelAdmin(Generic[T]):
             result = await session.execute(query)
             return result.scalars().all()
 
+
+# Хранение списка всех пользователей
+class Users(Base, ModelAdmin):
+    
+    __tablename__ = 'users'
+
+    id: Mapped[intpk]
+    tg_id: Mapped[int] = mapped_column(BigInteger)
+    role: Mapped[str]
+
+
+# Хранение списка всех партнёров
+class Partners(Base, ModelAdmin):
+    
+    __tablename__ = 'partners'
+
+    id: Mapped[intpk]
+    tg_id: Mapped[int] = mapped_column(BigInteger)
+    active_pairs: Mapped[dict] = mapped_column(JSON)
+
+
+# Хранение всех ставок
+class Rates(Base, ModelAdmin):
+    
+    __tablename__ = 'rates'
+
+    id: Mapped[intpk]
+    from_currency: Mapped[str]
+    to_currency: Mapped[str]
+    rate = mapped_column(Float)
+    partner_id: Mapped[int] = mapped_column(BigInteger)
+    date: Mapped[datetime]
+
+
+# Хранение всех обменов
+class Exchanges(Base, ModelAdmin):
+    
+    __tablename__ = 'exchanges'
+
+    id: Mapped[intpk]
+    client_id: Mapped[int] = mapped_column(BigInteger)
+    partner_id: Mapped[int] = mapped_column(BigInteger)
+
+    from_currency: Mapped[str]
+    to_currency: Mapped[str]
+
+    amout_from = mapped_column(Float)
+    amout_to = mapped_column(Float)
+
+    state: Mapped[str]
+    created_at: Mapped[datetime]
+    update_at: Mapped[datetime]
+
+    payment_check: Mapped[str]
+
+
+
+
+# СТАРЫЕ, НО НЕ НЕЖНЫЕ БД В БУДУЩЕМ - НЕОБХОДИМО ИЗМЕНИТЬ РАБОТУ БОТА
 
 # Хранение курса валют
 class ExchangeRate(Base, ModelAdmin):
