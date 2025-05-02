@@ -41,6 +41,8 @@ async def process_input(message: types.Message, state: FSMContext):
 
     # Валидация Telegram ID
     if key == "telegram_id":
+
+        # Проверка на число
         if not text.isdigit() or int(text) <= 0:
             try:
                 await bot.edit_message_text(
@@ -52,7 +54,21 @@ async def process_input(message: types.Message, state: FSMContext):
             except:
                 pass
             return
+        
+        # Для тех, кто уже есть в БД
         value = int(text)
+        user = await Partners.get(tg_id=value)
+        if user:
+            try:
+                await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text="❌ Партнёр с этиим ID уже существует, введите другой ID",
+                    reply_markup=back_admin_keyb
+                )
+            except:
+                pass
+            return
     else:
         value = text
 
@@ -87,6 +103,7 @@ async def ask_next(message: types.Message, state: FSMContext):
         # Сохранение в БД
         await Partners.create(
             tg_id=telegram_id,
+            name=name,
             active_pairs=[{'from': 'USDT', 'to': 'CNY'},
                           {'from': 'RUB', 'to': 'CNY'}]
         )

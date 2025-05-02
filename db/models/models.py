@@ -145,7 +145,7 @@ class Users(Base, ModelAdmin):
     __tablename__ = 'users'
 
     id: Mapped[intpk]
-    tg_id: Mapped[int] = mapped_column(BigInteger)
+    tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     role: Mapped[str]
 
 
@@ -155,7 +155,8 @@ class Partners(Base, ModelAdmin):
     __tablename__ = 'partners'
 
     id: Mapped[intpk]
-    tg_id: Mapped[int] = mapped_column(BigInteger)
+    tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+    name: Mapped[str]
     active_pairs: Mapped[dict] = mapped_column(JSON)
 
 
