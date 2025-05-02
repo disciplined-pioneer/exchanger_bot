@@ -159,14 +159,14 @@ async def go_back(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "go_back_menu")
 async def go_back_menu(callback: types.CallbackQuery, state: FSMContext):
 
-    tg_id = callback.message.from_user.id
+    tg_id = callback.from_user.id
     if tg_id in settings.bot.ADMINS: # Админ
-        await callback.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
+        await callback.message.edit_text(text=starting_admin_message, reply_markup=start_admin_keyb)
 
     elif tg_id in settings.bot.PARTNERS: # Парнёр
-        await callback.answer(text=await get_exchange_rate(), reply_markup=update_rate_keyb)
+        await callback.message.edit_text(text=await get_exchange_rate(), reply_markup=update_rate_keyb)
 
     else: # Пользователь
-        await callback.answer(text=starting_user_message, reply_markup=start_user_keyb)
+        await callback.message.edit_text(text=starting_user_message, reply_markup=start_user_keyb)
 
     await state.clear()

@@ -1,24 +1,16 @@
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from core.bot import bot
 
+from utils.admin.add_partner import *
 from bot.keyboards.user.start import start_admin_keyb
 from bot.keyboards.admin.add_partner import back_admin_keyb
 from bot.keyboards.partner.currency_rate_update import back_menu
-
 from bot.templates.user.start import starting_admin_message
+
 
 router = Router()
 
-class AddPartner(StatesGroup):
-    current_index = State()
-    values = State()
-
-PARTNER_QUESTIONS = {
-    "telegram_id": "Введите Telegram ID партнёра",
-    "name": "Введите имя партнёра"
-}
 
 # Старт добавления партнёра
 @router.callback_query(F.data == "add_partner")
@@ -30,6 +22,7 @@ async def start_add(callback: types.CallbackQuery, state: FSMContext):
 
     await ask_next(callback.message, state)
     await callback.answer()
+
 
 # Обработка ответа на вопрос
 @router.message(AddPartner.current_index)
@@ -77,14 +70,22 @@ async def ask_next(message: types.Message, state: FSMContext):
 
     # Проверка на конечный результат
     if index >= len(keys):
+
         await state.set_state(AddPartner.values)
+        values = data.get('values', {})
+        name = values.get('name', '')
+        telegram_id = values.get('telegram_id', 0)
+
+        # Сохранение в БД
+        
+        # Отправляем сообщение
         await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=data["last_bot_message_id"],
-            text="✅ Партнёр добавлен!",
+            text=f"✅ Партнёр <b>{name}</b> был добавлен!",
             reply_markup=back_menu
         )
-        print("Результаты:", data)  # или сохранить
+
         await state.clear()
         return
 

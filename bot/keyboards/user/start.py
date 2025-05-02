@@ -6,7 +6,7 @@ start_admin_keyb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="💰 Запросить комиссии - ДОРАБОТАТЬ", callback_data="request_commissions")],
         [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
         [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")],
-        [InlineKeyboardButton(text="➕ Добавить партнёра - ДОРАБОТАТЬ", callback_data="add_partner")],
+        [InlineKeyboardButton(text="➕ Добавить партнёра", callback_data="add_partner")],
         [InlineKeyboardButton(text="🚫 Бан - ДОРАБОТАТЬ", callback_data="ban_user")]
     ]
 )
