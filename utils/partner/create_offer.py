@@ -7,13 +7,6 @@ class CollectingCurrencyInfo(StatesGroup):
     exchange_rate = State()
 
 
-"""PARTNER_QUESTIONS = {
-    "range_limits": f"Вы выбрали направление: {platform.capitalize()} > {currency}\n Введите лимиты объявления в формате 100-500 (диапазон)",
-    "exchange_rate": f"Напишите курс обмена, сколько нужно заплатить {cur} что бы получить 1 CNY"
-}
-
-"""
-
 def validate_limits_input(text: str) -> tuple[bool, str | None]:
     """
     Проверяет, что ввод соответствует формату "100-500", оба числа > 0 и min < max.

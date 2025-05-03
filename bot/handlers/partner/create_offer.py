@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
 from bot.keyboards.partner.create_offer import *
+from bot.templates.partner.create_offer import *
 from bot.keyboards.partner.currency_rate_update import back_menu
 
 from utils.partner.create_offer import *
@@ -19,7 +20,7 @@ async def create_offer(callback: types.CallbackQuery, state: FSMContext):
 
     tg_id = callback.from_user.id
     await callback.message.edit_text(
-        text='Введите направление',
+        text=direction_input,
         reply_markup=await currency_keyboard(tg_id)
     )
     await state.set_state(CollectingCurrencyInfo.start)
@@ -34,7 +35,7 @@ async def change_value(callback: types.CallbackQuery, state: FSMContext):
     currency = callback_data[1].upper()
     
     msg = await callback.message.edit_text(
-        text=f'Вы выбрали направление: {platform} > {currency}\nВведите лимиты объявления в формате 100-500 (диапазон',
+        text=generate_announcement_message(platform, currency),
         reply_markup=create_offer_back_keyb
     )
 
@@ -74,7 +75,7 @@ async def range_limits(message: types.Message, state: FSMContext):
         msg = await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=last_bot_message_id,
-            text=f"Напишите курс обмена, сколько нужно заплатить {currency.upper()}, чтобы получить 1 CNY",
+            text=exchange_rate_message(currency),
             reply_markup=create_offer_back_keyb
         )
         await state.update_data(last_bot_message_id=msg.message_id)
@@ -115,7 +116,6 @@ async def range_limits(message: types.Message, state: FSMContext):
     except:
         return
     
-
     # Добавляем в БД
     await Rates.create(
         from_currency=currency,
@@ -127,17 +127,10 @@ async def range_limits(message: types.Message, state: FSMContext):
         date=datetime.now()
     )
 
-    text = (
-        '✅ Ваше объявление создано\n'
-        f'Направление: {platform} > {currency}\n'
-        f'Лимиты: {limits}\n'
-        f'Курс: 1 CNY = {exchange_rate} {currency}\n'
-    )
-
     msg = await bot.edit_message_text(
         chat_id=message.chat.id,
         message_id=last_bot_message_id,
-        text=text,
+        text=create_advertisement_message(platform, currency, limits, exchange_rate),
         reply_markup=back_menu
     )
  
@@ -147,6 +140,7 @@ async def range_limits(message: types.Message, state: FSMContext):
 # Обработка кнопки "Назад"
 @router.callback_query(F.data == "create_offer_go_back")
 async def create_offer_go_back(callback: types.CallbackQuery, state: FSMContext):
+
     data = await state.get_data()
     current_state = await state.get_state()
 
@@ -154,7 +148,7 @@ async def create_offer_go_back(callback: types.CallbackQuery, state: FSMContext)
     if current_state == CollectingCurrencyInfo.range_limits.state:
         await state.set_state(CollectingCurrencyInfo.start)
         await callback.message.edit_text(
-            text='Введите направление',
+            text=direction_input,
             reply_markup=await currency_keyboard(callback.from_user.id)
         )
         await callback.answer()
@@ -164,7 +158,7 @@ async def create_offer_go_back(callback: types.CallbackQuery, state: FSMContext)
         currency = data.get('currency', '')
         await state.set_state(CollectingCurrencyInfo.range_limits)
         await callback.message.edit_text(
-            text=f'Вы выбрали направление: {platform.capitalize()} > {currency.upper()}\nВведите лимиты объявления в формате 100-500 (диапазон)',
+            text=generate_announcement_message(platform, currency),
             reply_markup=create_offer_back_keyb
         )
         await callback.answer()
