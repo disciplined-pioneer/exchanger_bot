@@ -8,7 +8,7 @@ from bot.handlers import routers
 
 from settings import settings
 from db.crud.base import init_postgres
-from utils.init_users import register_initial_users
+from services.init_users import register_initial_users
 
 
 logging.basicConfig(level=logging.INFO)
