@@ -1,7 +1,6 @@
 import logging
 import asyncio
 from aiogram import Dispatcher
-from db.models.models import ExchangeRate
 from aiogram.types import BotCommandScopeDefault
 
 from core.bot import bot
@@ -9,6 +8,7 @@ from bot.handlers import routers
 
 from settings import settings
 from db.crud.base import init_postgres
+from utils.init_users import register_initial_users
 
 
 logging.basicConfig(level=logging.INFO)
@@ -20,14 +20,7 @@ dp.include_routers(*routers)
 async def main():
 
     await init_postgres()
-
-    # Заполняем таблицу нулями
-    exchange_rate = await ExchangeRate.get(id=1)
-    if exchange_rate is None: # Если нет курса валют
-       await ExchangeRate.create(usdt_alipay=0.0,
-                                usdt_wechat=0.0,
-                                rub_alipay=0.0,
-                                rub_wechat=0.0)
+    await register_initial_users() # Добавяем админов
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,
