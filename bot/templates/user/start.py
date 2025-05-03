@@ -5,7 +5,7 @@ starting_user_message = (
 )
 
 starting_parner_message = (
-    "Стартовый текст для админа"
+    "Стартовый текст для партёра"
 )
 
 starting_admin_message = (

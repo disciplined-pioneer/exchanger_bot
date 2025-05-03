@@ -32,7 +32,7 @@ async def get_partner_menu(tg_id: int):
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📢 Создать объявление - СДЕЛАТЬ", callback_data="create_offer")],
+            [InlineKeyboardButton(text="📢 Создать объявление", callback_data="create_offer")],
             [InlineKeyboardButton(text="📋 Мои объявления - СДЕЛАТЬ", callback_data="my_offers")],
             [InlineKeyboardButton(text=f"📥 Заявки ({count_exchanges}) - СДЕЛАТЬ", callback_data="view_requests")],
             [InlineKeyboardButton(text="📊 Статистика", callback_data="statistic_partner")]

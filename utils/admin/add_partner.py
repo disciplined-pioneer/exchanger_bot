@@ -1,7 +1,5 @@
-import asyncio
-from aiogram.fsm.state import StatesGroup, State
-
 from db.models.models import Partners, Users
+from aiogram.fsm.state import StatesGroup, State
 
 class AddPartner(StatesGroup):
     current_index = State()
@@ -31,6 +29,10 @@ async def adding_partner(tg_id: int, name: str):
     await Partners.create(
         tg_id=tg_id,
         name=name,
-        active_pairs=[{'from': 'USDT', 'to': 'CNY'},
-                        {'from': 'RUB', 'to': 'CNY'}]
+        active_pairs=[
+            {'from': 'USDT', 'to': 'CNY', 'platform': 'WeChat'},
+            {'from': 'USDT', 'to': 'CNY', 'platform': 'Alipay'},
+            
+            {'from': 'RUB', 'to': 'CNY', 'platform': 'Alipay'},
+            {'from': 'RUB', 'to': 'CNY', 'platform': 'WeChat'}]
     )

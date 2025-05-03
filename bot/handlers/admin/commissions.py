@@ -60,9 +60,8 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
     # Добавляем комиссию в БД
-    now = datetime.now()
     await Commissions.create(
-        date=now,
+        date=datetime.now(),
         commissions=settings.bot.COMMISSION
     )
 

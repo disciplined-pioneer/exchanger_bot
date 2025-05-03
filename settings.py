@@ -36,8 +36,15 @@ class BotConfig(BaseSettings):
 
 
 class Settings:
-    postgres = PostgresConfig()
-    bot = BotConfig()
+    
+    def __init__(self):
+        self.load()
 
+    def load(self):
+        self.postgres = PostgresConfig()
+        self.bot = BotConfig()
+
+    def reload(self):
+        self.load()
 
 settings = Settings()

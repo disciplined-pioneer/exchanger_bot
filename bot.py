@@ -21,6 +21,8 @@ async def main():
 
     await init_postgres()
     await register_initial_users() # Добавяем админов
+
+    print("АДМИНЫ:", settings.bot.ADMINS)
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,

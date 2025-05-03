@@ -179,7 +179,10 @@ class Rates(Base, ModelAdmin):
     id: Mapped[intpk]
     from_currency: Mapped[str]
     to_currency: Mapped[str]
-    rate = mapped_column(Float)
+
+    rate: Mapped[str]
+    platform: Mapped[str]
+    limits: Mapped[str]
     partner_id: Mapped[int] = mapped_column(BigInteger)
     date: Mapped[datetime]
 
