@@ -32,8 +32,10 @@ async def handle_partner(callback: types.CallbackQuery, state: FSMContext):
 
     # Сюда попадут все partner_1, partner_2 и т.д.
     partner_number = callback.data.split("_")[1]
-    await callback.message.edit_text(text=await get_partner_summary_text(partner_number),
-                                     reply_markup=exchange_keyboard)
+    await callback.message.edit_text(
+        text=await get_partner_summary_text(partner_number),
+        reply_markup=exchange_keyboard
+    )
     
     await state.update_data({"partner_number": partner_number}) # Сохраняем id в стостояние
     

@@ -1,6 +1,6 @@
 from aiogram import Router, F, types
-from bot.keyboards.user.start import back_admin_keyb, start_admin_keyb
 from bot.templates.user.start import starting_admin_message
+from bot.keyboards.user.start import back_admin_keyb, start_admin_keyb
 from bot.templates.admin.statistics import get_monthly_exchange_report
 
 
@@ -11,7 +11,7 @@ router = Router()
 @router.callback_query(F.data == "admin_stats")
 async def ask_buttons(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        await get_monthly_exchange_report(),
+        text=await get_monthly_exchange_report(),
         reply_markup=back_admin_keyb
     )
     await callback.answer()
@@ -21,7 +21,7 @@ async def ask_buttons(callback: types.CallbackQuery):
 @router.callback_query(F.data == "start_menu_admin")
 async def back_buttons(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        starting_admin_message,
+        text=starting_admin_message,
         reply_markup=start_admin_keyb
     )
     await callback.answer()

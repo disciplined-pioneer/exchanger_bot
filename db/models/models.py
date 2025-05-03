@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TypeVar, Generic, Sequence
 
-from sqlalchemy import func, JSON
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy import select, func, case, JSON
 
 from sqlalchemy.orm import Mapped, selectinload, load_only
 from sqlalchemy.sql import select, update as sqlalchemy_update
@@ -202,10 +202,45 @@ class Exchanges(Base, ModelAdmin):
     state: Mapped[str]
     created_at: Mapped[datetime]
     update_at: Mapped[datetime]
-
     payment_check: Mapped[str]
 
-    state_completed = "exchange_completed"
+    state_completed = "completed"
+
+    @classmethod
+    async def get_cny_sales_summary(cls) -> dict:
+        """
+        Возвращает сумму проданных CNY (amout_from, где from_currency == 'CNY') за день, неделю и месяц
+        для завершённых обменов.
+        """
+        now = datetime.now()
+        start_of_day = datetime(now.year, now.month, now.day)
+        start_of_week = start_of_day - timedelta(days=start_of_day.weekday())  # Понедельник
+        start_of_month = datetime(now.year, now.month, 1)
+
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(
+                    func.sum(
+                        case((cls.created_at >= start_of_day, cls.amout_from), else_=0.0)
+                    ).label("day_sum"),
+                    func.sum(
+                        case((cls.created_at >= start_of_week, cls.amout_from), else_=0.0)
+                    ).label("week_sum"),
+                    func.sum(
+                        case((cls.created_at >= start_of_month, cls.amout_from), else_=0.0)
+                    ).label("month_sum"),
+                ).where(
+                    cls.from_currency == "CNY",
+                    cls.state == cls.state_completed
+                )
+            )
+
+            row = result.first()
+            return {
+                "day": row.day_sum or 0.0,
+                "week": row.week_sum or 0.0,
+                "month": row.month_sum or 0.0,
+            }
 
     @classmethod
     async def get_amout_to_current_month(cls) -> float:

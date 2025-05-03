@@ -9,11 +9,13 @@ async def get_monthly_exchange_report() -> str:
     all_history_count = len(await Exchanges.all())
     sum_comissions = await Commissions.get_monthly_commission_sum()
 
-    return (
+    result = (
         "📆 Обменов за текущий месяц:\n\n"
         f"🇨🇳 CNY продано: {total_cny}\n"
         f"🇷🇺 RUB куплено: {total_rub}\n"
         f"🇺🇸 USDT куплено: {total_usdt}\n\n"
         f"Сделок проведено: {all_history_count}\n"
-        f"Комиссия заработано: {sum_comissions}"
+        f"На комиссиях заработано: {sum_comissions}"
     )
+
+    return result
