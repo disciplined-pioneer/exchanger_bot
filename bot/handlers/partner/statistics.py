@@ -1,7 +1,7 @@
 from aiogram import Router, F, types
 
 from bot.keyboards.user.start import get_partner_menu
-from bot.templates.user.start import get_exchange_rate
+from bot.templates.user.start import starting_parner_message
 
 from bot.templates.partner.statistics import *
 from bot.keyboards.partner.currency_rate_update import back_menu
@@ -26,7 +26,7 @@ async def back_buttons(callback: types.CallbackQuery):
 
     tg_id = callback.from_user.id
     await callback.message.edit_text(
-        text=await get_exchange_rate(),
+        text=starting_parner_message,
         reply_markup=await get_partner_menu(tg_id)
     )
     await callback.answer()

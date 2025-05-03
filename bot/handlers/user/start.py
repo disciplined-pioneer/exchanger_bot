@@ -44,7 +44,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
     elif tg_id in settings.bot.PARTNERS: # Парнёр
         await message.answer(
-            text=await get_exchange_rate(),
+            text=starting_parner_message,
             reply_markup=await get_partner_menu(tg_id)
         )
 
