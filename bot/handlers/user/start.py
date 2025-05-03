@@ -4,6 +4,7 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
+from utils.user.start import *
 from bot.keyboards.user.start import *
 from bot.templates.user.start import *
 
@@ -24,10 +25,17 @@ async def cmd_start(message: Message, state: FSMContext):
     except Exception:
         pass
 
+    
+    # Проверка на бан пользователя
+    tg_id = message.from_user.id
+    result_ban_user, role_user = await check_ban_status(tg_id)
+    if result_ban_user:
+        await message.answer(text='❌ Ваш аккаунт был забанен')
+        return
+
 
     #await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
-    tg_id = message.from_user.id
     if tg_id in settings.bot.ADMINS: # Админ
         await message.answer(text=starting_admin_message, reply_markup=start_admin_keyb)
 
@@ -38,4 +46,4 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
     await state.clear()
-        
+ 

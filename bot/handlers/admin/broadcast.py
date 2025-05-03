@@ -120,6 +120,7 @@ async def handle_buttons(message: Message, state: FSMContext):
 # Подтверждение рассылки
 @router.callback_query(F.data == "confirm_send")
 async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
+    
     data = await state.get_data()
     content = data["broadcast"]
     parse_mode = content.get("parse_mode")
