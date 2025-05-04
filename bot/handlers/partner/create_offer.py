@@ -4,7 +4,6 @@ from aiogram.fsm.context import FSMContext
 from core.bot import bot
 from bot.keyboards.partner.create_offer import *
 from bot.templates.partner.create_offer import *
-from bot.keyboards.partner.currency_rate_update import back_menu
 
 from utils.partner.create_offer import *
 

@@ -6,7 +6,6 @@ from aiogram.types import InlineKeyboardButton, Message
 from db.models.models import Users
 from bot.keyboards.admin.broadcast import *
 from bot.templates.admin.broadcast import *
-from bot.keyboards.partner.currency_rate_update import back_menu
 from utils.admin.broadcast import create_url_keyboard, remove_urls, send_preview
 
 

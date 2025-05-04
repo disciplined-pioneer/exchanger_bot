@@ -1,6 +1,13 @@
 from db.models.models import Partners
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+
+back_menu = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="🔙 Меню", callback_data="go_back_menu")]
+    ]
+)
+
 async def currency_keyboard(partner_id: int):
 
     info_partner = await Partners.get(tg_id=partner_id)

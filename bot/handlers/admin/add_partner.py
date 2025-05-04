@@ -3,9 +3,8 @@ from aiogram.fsm.context import FSMContext
 from core.bot import bot
 
 from utils.admin.add_partner import *
+from bot.keyboards.admin.add_partner import *
 from bot.keyboards.user.start import start_admin_keyb
-from bot.keyboards.admin.add_partner import back_admin_keyb
-from bot.keyboards.partner.currency_rate_update import back_menu
 from bot.templates.user.start import starting_admin_message
 
 from db.models.models import Partners

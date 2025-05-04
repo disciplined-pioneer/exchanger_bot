@@ -4,7 +4,7 @@ from bot.keyboards.user.start import get_partner_menu
 from bot.templates.user.start import starting_parner_message
 
 from bot.templates.partner.statistics import *
-from bot.keyboards.partner.currency_rate_update import back_menu
+from bot.keyboards.partner.statistics import back_menu
 
 
 router = Router()
