@@ -1,4 +1,6 @@
 import re
+from datetime import datetime
+from db.models.models import Rates
 from aiogram.fsm.state import StatesGroup, State
 
 class CollectingCurrencyInfo(StatesGroup):
@@ -40,3 +42,36 @@ def validate_exchange_rate(text: str) -> tuple[bool, str | None]:
         return False, "❗️ Пожалуйста, введите корректное число, например: 12.5"
 
     return True, None
+
+
+async def save_rate(currency: str, exchange_rate: str, platform: str, limits: str, partner_id: int) -> None:
+    """
+    Удаляет старую ставку и добавляет новую в таблицу Rates.
+
+    :param currency: Исходная валюта
+    :param exchange_rate: Курс
+    :param platform: Платформа
+    :param limits: Лимиты
+    :param partner_id: id партнёра
+    """
+
+    # Удаление предыдущей записи
+    record = await Rates.get(
+        from_currency=currency,
+        to_currency='CNY',
+        platform=platform,
+        partner_id=partner_id
+    )
+    if record:
+        await record.delete()
+
+    # Добавление новой записи
+    await Rates.create(
+        from_currency=currency,
+        to_currency='CNY',
+        rate=exchange_rate,
+        platform=platform,
+        limits=limits,
+        partner_id=partner_id,
+        date=datetime.now()
+    )

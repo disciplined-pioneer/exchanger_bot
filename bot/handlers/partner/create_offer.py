@@ -1,4 +1,3 @@
-from datetime import datetime
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
@@ -8,7 +7,7 @@ from bot.templates.partner.create_offer import *
 from bot.keyboards.partner.currency_rate_update import back_menu
 
 from utils.partner.create_offer import *
-from db.models.models import Rates
+
 
 
 router = Router()
@@ -116,17 +115,11 @@ async def range_limits(message: types.Message, state: FSMContext):
     except:
         return
     
-    # Добавляем в БД
-    await Rates.create(
-        from_currency=currency,
-        to_currency='CNY',
-        rate=exchange_rate,
-        platform=platform,
-        limits=limits,
-        partner_id=message.from_user.id,
-        date=datetime.now()
-    )
-
+    
+    # Добавляем в БД и удаляем, если запись уже есть
+    await save_rate(currency, exchange_rate, platform, limits, message.from_user.id)
+    
+    
     msg = await bot.edit_message_text(
         chat_id=message.chat.id,
         message_id=last_bot_message_id,
