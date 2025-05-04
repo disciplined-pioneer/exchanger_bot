@@ -30,9 +30,9 @@ async def adding_partner(tg_id: int, name: str):
         tg_id=tg_id,
         name=name,
         active_pairs=[
-            {'from': 'USDT', 'to': 'CNY', 'platform': 'WeChat'},
+            {'from': 'USDT', 'to': 'CNY', 'platform': 'Wechat'},
             {'from': 'USDT', 'to': 'CNY', 'platform': 'Alipay'},
             
             {'from': 'RUB', 'to': 'CNY', 'platform': 'Alipay'},
-            {'from': 'RUB', 'to': 'CNY', 'platform': 'WeChat'}]
+            {'from': 'RUB', 'to': 'CNY', 'platform': 'Wechat'}]
     )

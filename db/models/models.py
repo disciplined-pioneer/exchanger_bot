@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from typing import TypeVar, Generic, Sequence
 
+from typing import Optional
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy import select, func, case, JSON
+from sqlalchemy import select, case, desc, JSON, func 
 
 from sqlalchemy.orm import Mapped, selectinload, load_only
 from sqlalchemy.sql import select, update as sqlalchemy_update
@@ -185,6 +186,28 @@ class Rates(Base, ModelAdmin):
     limits: Mapped[str]
     partner_id: Mapped[int] = mapped_column(BigInteger)
     date: Mapped[datetime]
+
+    @classmethod
+    async def get_latest_rate(
+        cls,
+        from_currency: str,
+        to_currency: str,
+        platform: str,
+        partner_id: int
+    ) -> Optional["Rates"]:
+        async with async_db_session() as session:
+            result = await session.execute(
+                select(cls)
+                .where(
+                    cls.from_currency == from_currency,
+                    cls.to_currency == to_currency,
+                    cls.platform == platform,
+                    cls.partner_id == partner_id
+                )
+                .order_by(desc(cls.date))
+                .limit(1)
+            )
+            return result.scalar_one_or_none()
 
 
 # Хранение всех обменов
