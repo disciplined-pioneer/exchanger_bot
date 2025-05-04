@@ -13,7 +13,6 @@ from bot.handlers.partner.my_offers import router as my_offers
 from bot.handlers.partner.create_offer import router as create_offer
 from bot.handlers.partner.statistics import router as statistics_part
 from bot.handlers.partner.result_exchange import router as result_exchange
-from bot.handlers.partner.currency_rate_update import router as currency_rate_update
 from bot.handlers.partner.receiving_application import router as receiving_application
 
 
@@ -33,6 +32,5 @@ routers = [
     create_offer,
     statistics_part,
     result_exchange,
-    currency_rate_update,
     receiving_application
 ]
