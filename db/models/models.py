@@ -181,7 +181,7 @@ class Rates(Base, ModelAdmin):
     from_currency: Mapped[str]
     to_currency: Mapped[str]
 
-    rate: Mapped[str]
+    rate: Mapped[float] = mapped_column(Float)
     platform: Mapped[str]
     limits: Mapped[str]
     partner_id: Mapped[int] = mapped_column(BigInteger)

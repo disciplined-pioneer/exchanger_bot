@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-from db.models.models import Rates
 from aiogram.fsm.state import StatesGroup, State
 
 class CollectingCurrencyInfo(StatesGroup):
@@ -55,6 +54,8 @@ async def save_rate(currency: str, exchange_rate: str, platform: str, limits: st
     :param partner_id: id партнёра
     """
 
+    from db.models.models import Rates
+
     # Удаление предыдущей записи
     record = await Rates.get(
         from_currency=currency,
@@ -69,7 +70,7 @@ async def save_rate(currency: str, exchange_rate: str, platform: str, limits: st
     await Rates.create(
         from_currency=currency,
         to_currency='CNY',
-        rate=exchange_rate,
+        rate=float(exchange_rate),
         platform=platform,
         limits=limits,
         partner_id=partner_id,

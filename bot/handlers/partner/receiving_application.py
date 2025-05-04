@@ -104,5 +104,6 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
 # Обработка сообщений где это не нужно
 @router.message()
 async def handle_unexpected_message(message: types.Message, state: FSMContext):
-    if await state.get_state() is None:
-        await message.delete()
+    current_state = await state.get_state()    
+    #if current_state is None or current_state == '()':
+    await message.delete()

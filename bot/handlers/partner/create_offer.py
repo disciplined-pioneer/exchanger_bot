@@ -9,7 +9,6 @@ from bot.keyboards.partner.currency_rate_update import back_menu
 from utils.partner.create_offer import *
 
 
-
 router = Router()
 
 
