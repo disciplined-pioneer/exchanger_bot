@@ -9,6 +9,7 @@ from bot.handlers.user.user_details import router as user_details
 from bot.handlers.user.request_details import router as request_details
 from bot.handlers.user.exchange_confirmation import router as exchange_confirmation
 
+from bot.handlers.partner.view_requests import router as view_requests
 from bot.handlers.partner.my_offers import router as my_offers
 from bot.handlers.partner.create_offer import router as create_offer
 from bot.handlers.partner.statistics import router as statistics_part
@@ -28,6 +29,7 @@ routers = [
     request_details,
     exchange_confirmation,
 
+    view_requests,
     my_offers,
     create_offer,
     statistics_part,

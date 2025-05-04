@@ -14,11 +14,13 @@ back_menu = InlineKeyboardMarkup(
 )
 
 async def build_rates_keyboard_for_partner(partner_id: int) -> InlineKeyboardMarkup:
-    from db.models.models import Rates  # перемести внутрь, чтобы избежать циклического импорта
+
+    from db.models.models import Rates
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[]) 
     all_rates_partner = await Rates.filter(partner_id=partner_id)
 
+    # Проходимся по всем установленным курсам
     for rate_partner in all_rates_partner:
         rate = rate_partner.rate
         limits = rate_partner.limits
@@ -26,6 +28,7 @@ async def build_rates_keyboard_for_partner(partner_id: int) -> InlineKeyboardMar
         to_currency = rate_partner.to_currency
         platform = rate_partner.platform
 
+        # Добавляем кнопки
         button = InlineKeyboardButton(
             text=f'{rate} {from_currency} → {to_currency} ({platform}) | {limits}',
             callback_data=f'rate:{rate_partner.id}'

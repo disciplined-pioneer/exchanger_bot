@@ -225,11 +225,13 @@ class Exchanges(Base, ModelAdmin):
     amout_from: Mapped[float] = mapped_column(Float)
     amout_to: Mapped[float] = mapped_column(Float)
 
+    platform: Mapped[str]
     state: Mapped[str]
+
     created_at: Mapped[datetime]
     update_at: Mapped[datetime]
-    payment_check: Mapped[str]
 
+    payment_check: Mapped[str]
     state_completed = "completed"
 
     @classmethod

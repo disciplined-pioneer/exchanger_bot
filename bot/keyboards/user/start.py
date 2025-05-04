@@ -29,7 +29,7 @@ update_rate_keyb = InlineKeyboardMarkup(
 async def get_partner_menu(tg_id: int):
     
     # Заявки
-    exchanges = await Exchanges.get(partner_id=tg_id)
+    exchanges = await Exchanges.filter(partner_id=tg_id)
     count_exchanges = len(exchanges) if exchanges else 0
 
     # Объявления (смотрим количество существующих значений в БД)
@@ -52,7 +52,7 @@ async def get_partner_menu(tg_id: int):
         inline_keyboard=[
             [InlineKeyboardButton(text="📢 Создать объявление", callback_data="create_offer")],
             [InlineKeyboardButton(text=f"📋 Мои объявления ({count})", callback_data="my_offers")],
-            [InlineKeyboardButton(text=f"📥 Заявки ({count_exchanges}) - СДЕЛАТЬ", callback_data="view_requests")],
+            [InlineKeyboardButton(text=f"📥 Заявки ({count_exchanges})", callback_data="view_requests")],
             [InlineKeyboardButton(text="📊 Статистика", callback_data="statistic_partner")]
         ]
     )

@@ -1,6 +1,7 @@
 from settings import settings
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+
 def get_partial_exchange_completion_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
