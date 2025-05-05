@@ -43,7 +43,6 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
         reply_markup=await buttons_with_all_ads(currency, platform)
     )
 
-    #await state.set_state(PaymentState.user_details)
     await state.update_data(
         currency=currency,
         platform=platform
@@ -66,6 +65,90 @@ async def partner_id(callback: types.CallbackQuery, state: FSMContext):
 
     await state.update_data(partner_id=partner_id)
 
+
+# Обработка кнопки "Совершить обмен"
+@router.callback_query(F.data == "confirm_exchange")
+async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
+
+    data = await state.get_data()
+    currency = data.get('currency', '')
+    platform = data.get('platform', '')
+    partner_id = data.get('partner_id', 0)    
+
+    text, limits = await confirmation_amount(currency, platform, partner_id)
+    msg = await callback.message.edit_text(
+        text=text,
+        reply_markup=back_menu
+    )
+
+    await state.update_data(
+        last_id_message=msg.message_id,
+        limits=limits
+    )
+    await state.set_state(ExchangeStates.summ2)
+
+
+# Сохраняем сумму
+@router.message(ExchangeStates.summ2)
+async def process_input(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    currency = data.get("currency", '')
+    platform = data.get("platform", '')
+    partner_id = data.get("partner_id", '')
+
+    limits = data.get("limits", '')
+    limits_list = limits.split('-')
+    limit_low = int(limits_list[0])
+    limit_high = int(limits_list[1])
+
+    last_bot_message_id = data.get("last_id_message", 0)
+
+    try:
+
+        await message.delete()
+        text = message.text.replace(",", ".").strip()
+
+        try:
+            amount = float(text)
+            if amount <= 0:
+                # Если сумма отрицательная или 0, выводим сообщение
+                await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text=incorrect_data[0]
+                )
+                return
+            
+            # Проверка диапазона
+            if not (limit_low <= amount <= limit_high):
+                await bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=last_bot_message_id,
+                    text=incorrect_data[2] + limits
+                )
+                return
+            
+            # Если всё хорошо
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=last_bot_message_id,
+                text=await format_exchange_message(amount, currency, platform, partner_id)
+            )
+            await state.update_data(sum_amount=amount)
+            return
+            
+        except ValueError:
+            # Если введено не число
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=last_bot_message_id,
+                text=incorrect_data[1]
+            )
+            return
+
+    except:
+        pass
 
 # Обработка кнопки "Назад"
 @router.callback_query(F.data.startswith("go_back_exchange:"))
