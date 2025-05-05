@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import TypeVar, Generic, Sequence
 
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import select, case, desc, JSON, func 
 
@@ -171,6 +171,24 @@ class Partners(Base, ModelAdmin):
     name: Mapped[str]
     active_pairs: Mapped[dict] = mapped_column(JSON)
 
+    @classmethod
+    async def get_ids_by_from_and_platform(cls, from_currency: str, platform: str) -> List[int]:
+        """
+        Возвращает список ID партнёров, у которых в active_pairs есть указанные 'from' и 'platform'.
+        """
+        async with async_db_session() as session:
+            result = await session.execute(select(cls))
+            partners = result.scalars().all()
+
+            matching_ids = []
+            for partner in partners:
+                for pair in partner.active_pairs:
+                    if pair.get("from") == from_currency and pair.get("platform") == platform:
+                        matching_ids.append(partner.tg_id)
+                        break
+
+            return matching_ids
+    
 
 # Хранение всех ставок
 class Rates(Base, ModelAdmin):
@@ -195,6 +213,9 @@ class Rates(Base, ModelAdmin):
         platform: str,
         partner_id: int
     ) -> Optional["Rates"]:
+        
+        """Выозвращает последний (самый новый) курс обмена """
+
         async with async_db_session() as session:
             result = await session.execute(
                 select(cls)
