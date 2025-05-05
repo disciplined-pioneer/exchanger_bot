@@ -76,7 +76,7 @@ async def keyboard_exchange_confirm(currency: str, platform: str):
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="💱 Совершить обмен", callback_data="confirm_exchange")],
+            [InlineKeyboardButton(text="💱 Совершить обмен", callback_data="start_confirm_exchange")],
             [InlineKeyboardButton(text="🔙 Назад", callback_data=f"go_back_exchange:type_exchange:{currency}_{platform}")]
         ]
     )
@@ -87,5 +87,12 @@ async def keyboard_exchange_confirm(currency: str, platform: str):
 back_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text='🔙 Меню', callback_data='go_back_menu')]
+    ]
+)
+
+confirm_cancel_exchange = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='✅ Верно, начать обмен', callback_data='confirm_exchange')],
+        [InlineKeyboardButton(text='❌ Отменить обмен', callback_data='go_back_menu')]
     ]
 )

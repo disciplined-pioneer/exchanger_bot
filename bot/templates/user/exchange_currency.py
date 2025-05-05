@@ -76,7 +76,8 @@ async def format_exchange_message(sum: float, currency: str, platform: str, part
     cny_sum = round(sum/rate_info.rate)
     result = (
         f"\nВы отдаёте {sum} {currency.upper()}\n"
-        f"для получения {cny_sum} CNY на {platform.capitalize()}\n"
+        f"для получения {cny_sum} CNY на {platform.capitalize()}\n\n"
+        'ВНИМАНИЕ, ТУТ ПРЕДУПРЕЖДЕНИЕ'
     )
 
-    return result
+    return result, cny_sum

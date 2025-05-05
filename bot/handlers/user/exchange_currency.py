@@ -67,8 +67,8 @@ async def partner_id(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Обработка кнопки "Совершить обмен"
-@router.callback_query(F.data == "confirm_exchange")
-async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == "start_confirm_exchange")
+async def start_confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
     currency = data.get('currency', '')
@@ -116,7 +116,8 @@ async def process_input(message: types.Message, state: FSMContext):
                 await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text=incorrect_data[0]
+                    text=incorrect_data[0],
+                    reply_markup=back_menu
                 )
                 return
             
@@ -125,17 +126,21 @@ async def process_input(message: types.Message, state: FSMContext):
                 await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text=incorrect_data[2] + limits
+                    text=incorrect_data[2] + limits,
+                    reply_markup=back_menu
                 )
                 return
             
             # Если всё хорошо
+            text, cny_sum = await format_exchange_message(amount, currency, platform, partner_id)
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text=await format_exchange_message(amount, currency, platform, partner_id)
+                text=text,
+                reply_markup=confirm_cancel_exchange
             )
-            await state.update_data(sum_amount=amount)
+            await state.update_data(sum_amount=amount, cny_sum=cny_sum)
+            await state.set_state(ExchangeStates.plug2)
             return
             
         except ValueError:
@@ -143,12 +148,22 @@ async def process_input(message: types.Message, state: FSMContext):
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text=incorrect_data[1]
+                text=incorrect_data[1],
+                reply_markup=back_menu
             )
             return
 
     except:
         pass
+
+
+# Обработка кнопки "Совершить обмен"
+@router.callback_query(F.data == "confirm_exchange")
+async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.message.answer('Ожидайте реквизиты для оплаты (здесь будут написаны условия пополнения)')
+
 
 # Обработка кнопки "Назад"
 @router.callback_query(F.data.startswith("go_back_exchange:"))

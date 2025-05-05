@@ -7,3 +7,4 @@ class ExchangeStates(StatesGroup):
     partner_details = State()
 
     summ2 = State()
+    plug2 = State()
