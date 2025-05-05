@@ -62,6 +62,6 @@ async def get_partner_menu(tg_id: int):
 start_user_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Поддержка", url=settings.bot.SUPPORT_LINK)],
-        [InlineKeyboardButton(text="Выбрать партнёра", callback_data="select_partner")]
+        [InlineKeyboardButton(text="Обменять валюту", callback_data="exchange_currency")]
     ]
 )
