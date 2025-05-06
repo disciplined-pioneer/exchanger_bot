@@ -81,3 +81,15 @@ async def format_exchange_message(sum: float, currency: str, platform: str, part
     )
 
     return result, cny_sum
+
+
+async def format_exchange_request(amount: float, currency: str, platform: str) -> str:
+    return (
+        "Получение заявки на обмен:\n\n"
+        f"Сумма: {amount}\n"
+        f"Валюта: {currency.upper()}\n"
+        f"Платформа: {platform}\n\n"
+        f"Нажмите на кнопку ниже для продолжения ⬇️"
+    )
+
+select_ad_message = 'Выберите объявление'

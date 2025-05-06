@@ -39,7 +39,7 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
 
 
     await callback.message.edit_text(
-        text='Выберите объявление',
+        text=select_ad_message,
         reply_markup=await buttons_with_all_ads(currency, platform)
     )
 
@@ -85,11 +85,11 @@ async def start_confirm_exchange(callback: types.CallbackQuery, state: FSMContex
         last_id_message=msg.message_id,
         limits=limits
     )
-    await state.set_state(ExchangeStates.summ2)
+    await state.set_state(ExchangeStates.sum)
 
 
 # Сохраняем сумму
-@router.message(ExchangeStates.summ2)
+@router.message(ExchangeStates.sum)
 async def process_input(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
@@ -140,7 +140,7 @@ async def process_input(message: types.Message, state: FSMContext):
                 reply_markup=confirm_cancel_exchange
             )
             await state.update_data(sum_amount=amount, cny_sum=cny_sum)
-            await state.set_state(ExchangeStates.plug2)
+            await state.set_state(ExchangeStates.plug)
             return
             
         except ValueError:
@@ -163,6 +163,27 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_reply_markup(reply_markup=None)
     await callback.message.answer('Ожидайте реквизиты для оплаты (здесь будут написаны условия пополнения)')
+
+    data = await state.get_data()
+    tg_id = callback.from_user.id
+    partner_id = data.get('partner_id', 0)
+    sum_amount = data.get('sum_amount', 0)
+    currency = data.get('currency', '')
+    platform = data.get('platform', '')
+
+    # Отправляем сообщение нужному партнёру
+    await bot.send_message(chat_id=partner_id,
+                           text=await format_exchange_request(amount=sum_amount, currency=currency, platform=platform),
+                           reply_markup=await send_details(tg_id))
+    
+    # Считываем состояние пользователя и переход в нужное состояние
+    partner_state = FSMContext(
+        storage=state.storage,
+        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=partner_id, user_id=partner_id)
+    )
+    await partner_state.set_state(ExchangeStates.partner_details)
+    await partner_state.update_data(user_id=tg_id)
+    await partner_state.update_data(**data)
 
 
 # Обработка кнопки "Назад"

@@ -1,10 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 
 class ExchangeStates(StatesGroup):
-    summ = State()
+    sum = State()
     plug = State()
     details = State()
     partner_details = State()
-
-    summ2 = State()
-    plug2 = State()

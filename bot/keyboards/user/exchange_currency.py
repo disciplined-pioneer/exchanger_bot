@@ -96,3 +96,10 @@ confirm_cancel_exchange = InlineKeyboardMarkup(
         [InlineKeyboardButton(text='❌ Отменить обмен', callback_data='go_back_menu')]
     ]
 )
+
+async def send_details(tg_id):
+    return InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="📨 Отправить реквизиты", callback_data=f"send_details_{tg_id}")]
+    ]
+)

@@ -7,7 +7,6 @@ from bot.handlers.admin.commissions import router as commissions
 
 from bot.handlers.user.exchange_currency import router as exchange_currency
 from bot.handlers.user.user_details import router as user_details
-from bot.handlers.user.request_details import router as request_details
 from bot.handlers.user.exchange_confirmation import router as exchange_confirmation
 
 from bot.handlers.partner.view_requests import router as view_requests
@@ -28,7 +27,6 @@ routers = [
     
     exchange_currency,
     user_details,
-    request_details,
     exchange_confirmation,
 
     view_requests,

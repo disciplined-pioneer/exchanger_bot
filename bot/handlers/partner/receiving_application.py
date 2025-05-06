@@ -59,21 +59,21 @@ async def save_details(message: types.Message, state: FSMContext):
 async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
     partner_data = await state.get_data()
-    tg_id = int(partner_data.get('tg_id', ''))
+    user_id = int(partner_data.get('user_id', ''))
 
     # Считываем состояние пользователя
     user_state = FSMContext(
         storage=state.storage,
-        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=tg_id, user_id=tg_id)
+        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=user_id, user_id=user_id)
     )
    
-    # Отправляем реквизиты
+    # Отправляем реквизиты пользователю
     user_data = await user_state.get_data()
     details = partner_data.get('details', '')
-    sum = user_data.get('sum_amout', '')
-    currency = user_data.get('exchange_type', '').split('_')[0].upper()
+    sum = user_data.get('sum_amount', '')
+    currency = user_data.get('currency', '')
     await bot.send_message(
-        chat_id=tg_id,
+        chat_id=user_id,
         text=await create_payment_message(details=details,
                                           sum=sum,
                                           currency=currency),
@@ -101,7 +101,7 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data({"last_id_message": state_message.message_id})
 
 
-# Обработка сообщений где это не нужно
+# Удаление сообщений, не подключённых к состоянию
 @router.message()
 async def handle_unexpected_message(message: types.Message, state: FSMContext):
     current_state = await state.get_state()    

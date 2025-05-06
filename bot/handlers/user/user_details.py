@@ -20,8 +20,8 @@ router = Router()
 async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 
     state_message = await callback.message.edit_text(photo_or_receipt_message)
-    await state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
     await state.update_data({"last_id_message": state_message.message_id})
+    await state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
 
 
 # Обработчик для получения фото или файла
@@ -30,11 +30,10 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 
     await message.delete()
     data = await state.get_data()
-    last_bot_message_id = data.get("last_id_message")
+    partner_id = data.get("partner_id", '')
+    last_bot_message_id = data.get("last_id_message", 0)
 
     try:
-        partner_number = int(data.get('partner_number', '')) - 1
-        partner_id = settings.bot.PARTNERS[partner_number]
 
         if message.photo:
             sent_file = message.photo[-1]
@@ -57,18 +56,17 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             return
 
         # Сообщение пользователю
-        exchange_type = data.get('exchange_type', '').split('_')[1].capitalize()
+        platform = data.get('platform', '')
         state_message = await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text=generate_requisites_message(exchange_type)
+                    text=generate_requisites_message(platform)
                 )
         await state.update_data({"last_id_message": state_message.message_id})
         await state.set_state(PaymentState.user_details)
-        
 
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 
 # Обработчик для получения реквизитов пользователя

@@ -5,8 +5,8 @@ payment_confirmation_message = "Клиент подтвердил оплату �
 photo_or_document_request_message = "❗️ Пожалуйста, отправьте фото или документ"
 
 
-def generate_requisites_message(exchange_type):
-    return f"Введите свои реквизиты:\n{exchange_type}. Или загрузите QR-код для оплаты"
+def generate_requisites_message(platform: str=''):
+    return f"Введите свои реквизиты:\n{platform}. Или загрузите QR-код для оплаты"
 
 
 photo_document_or_text_request_message = "❗️ Пожалуйста, отправьте фото, документ или текст"

@@ -6,6 +6,7 @@ from utils.admin.add_partner import *
 from bot.keyboards.admin.add_partner import *
 from bot.keyboards.user.start import start_admin_keyb
 from bot.templates.user.start import starting_admin_message
+from bot.templates.admin.add_partner import *
 
 from db.models.models import Partners
 
@@ -47,7 +48,7 @@ async def process_input(message: types.Message, state: FSMContext):
                 await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text="❌ Telegram ID должен быть положительным числом!",
+                    text=invalid_telegram_id_message,
                     reply_markup=back_admin_keyb
                 )
             except:
@@ -62,7 +63,7 @@ async def process_input(message: types.Message, state: FSMContext):
                 await bot.edit_message_text(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
-                    text="❌ Партнёр с этиим ID уже существует, введите другой ID",
+                    text=partner_exists_message,
                     reply_markup=back_admin_keyb
                 )
             except:
@@ -99,7 +100,7 @@ async def ask_next(message: types.Message, state: FSMContext):
         await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=data["last_bot_message_id"],
-            text=f"✅ Партнёр <b>{name}</b> был добавлен!",
+            text=get_partner_added_message(name),
             reply_markup=back_menu
         )
 
