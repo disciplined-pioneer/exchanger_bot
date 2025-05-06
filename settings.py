@@ -21,6 +21,7 @@ class PostgresConfig(BaseSettings):
 
 class BotConfig(BaseSettings):
     TOKEN: str
+    GROUP_ID: int
     COMMISSION: float
     PARTNERS: list[int] | None = []
     ADMINS: list[int] | None = []

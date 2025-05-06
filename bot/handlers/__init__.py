@@ -18,7 +18,6 @@ from bot.handlers.partner.receiving_application import router as receiving_appli
 
 
 routers = [
-    start,
     ban,
     broadcast,
     statistics,
@@ -34,5 +33,6 @@ routers = [
     create_offer,
     statistics_part,
     result_exchange,
-    receiving_application
+    receiving_application,
+    start
 ]

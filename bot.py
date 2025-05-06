@@ -23,6 +23,11 @@ async def main():
     await register_initial_users() # Добавяем админов
 
     print("АДМИНЫ:", settings.bot.ADMINS)
+
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text='✅ Бот запущен'
+    )
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,
@@ -34,7 +39,7 @@ async def main():
 if __name__ == "__main__":
     
     try:
-        print("\nБот запущен ✅\n")
+        print("\n✅ Бот запущен\n")
         asyncio.run(main())
 
     except KeyboardInterrupt:

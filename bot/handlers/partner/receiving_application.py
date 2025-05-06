@@ -101,9 +101,3 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data({"last_id_message": state_message.message_id})
 
 
-# Удаление сообщений, не подключённых к состоянию
-@router.message()
-async def handle_unexpected_message(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()    
-    #if current_state is None or current_state == '()':
-    await message.delete()

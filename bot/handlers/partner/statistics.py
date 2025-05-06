@@ -23,33 +23,3 @@ async def ask_buttons(callback: types.CallbackQuery):
         reply_markup=back_menu
     )
     await callback.answer()
-
-
-# Обработка кнопки "Назад"
-@router.callback_query(F.data == "go_back_menu")
-async def back_buttons(callback: types.CallbackQuery, state: FSMContext):
-
-    tg_id = callback.from_user.id
-    info_users = await Users.get(tg_id=tg_id)
-    role = info_users.role
-
-    if role == 'admin': # Админ
-        await callback.message.edit_text(
-            text=starting_admin_message,
-            reply_markup=start_admin_keyb
-        )
-
-    elif role == 'partner': # Парнёр
-        await callback.message.edit_text(
-            text=starting_parner_message,
-            reply_markup=await get_partner_menu(tg_id)
-        )
-
-    else: # Пользователь
-        await callback.message.edit_text(
-            text=starting_user_message,
-            reply_markup=start_user_keyb
-        )
-
-    await state.clear()
-    await callback.answer()

@@ -2,6 +2,7 @@ from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
+from settings import settings
 from bot.keyboards.partner.create_offer import *
 from bot.templates.partner.create_offer import *
 
@@ -92,6 +93,7 @@ async def range_limits(message: types.Message, state: FSMContext):
 
     await message.delete()
     data = await state.get_data()
+    tg_id = message.from_user.id
     platform = data.get('platform', '')
     currency = data.get('currency', '')
     limits = data.get('limits', '')
@@ -123,6 +125,12 @@ async def range_limits(message: types.Message, state: FSMContext):
         message_id=last_bot_message_id,
         text=create_advertisement_message(platform, currency, limits, exchange_rate),
         reply_markup=back_menu
+    )
+
+    # Логгируем в группу
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text=f'🔄 Партнёр {tg_id} обновил курс:\nОбмен: {currency} → CNY ({platform}) = {exchange_rate}.\nЛимиты: {limits}'
     )
  
     await state.clear()
