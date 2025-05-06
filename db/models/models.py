@@ -276,7 +276,7 @@ class Exchanges(Base, ModelAdmin):
     @classmethod
     async def get_cny_sales_summary(cls) -> dict:
         """
-        Возвращает сумму проданных CNY (amout_from, где from_currency == 'CNY') за день, неделю и месяц
+        Возвращает сумму проданных CNY (amout_from, где to_currency == 'CNY') за день, неделю и месяц
         для завершённых обменов.
         """
         now = datetime.now()
@@ -297,7 +297,7 @@ class Exchanges(Base, ModelAdmin):
                         case((cls.created_at >= start_of_month, cls.amout_from), else_=0.0)
                     ).label("month_sum"),
                 ).where(
-                    cls.from_currency == "CNY",
+                    cls.to_currency == "CNY",
                     cls.state == cls.state_completed
                 )
             )
