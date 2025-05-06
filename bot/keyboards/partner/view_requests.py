@@ -5,10 +5,12 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 async def get_partner_exchanges_keyboard(partner_id: int, page: int = 1, per_page: int = 5) -> InlineKeyboardMarkup:
 
     from db.models.models import Exchanges
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
     
-    # Получаем все заявки партнёра
-    all_exchanges_partner = await Exchanges.filter(partner_id=partner_id)
+    # Поиск заявок не с 'COMPLETED' + id партнёра
+    all_exchanges = await Exchanges.exclude(state='COMPLETED')
+    all_exchanges_partner = [exchange for exchange in all_exchanges if exchange.partner_id == partner_id]
     
     # Рассчитываем нужный срез для пагинации
     start_index = (page - 1) * per_page

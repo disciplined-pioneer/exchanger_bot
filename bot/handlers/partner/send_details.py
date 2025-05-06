@@ -56,7 +56,7 @@ async def save_details(message: types.Message, state: FSMContext):
     except:
         pass
 
-    #await state.set_state(None)  # Снимаем состояние
+    await state.set_state(None)  # Снимаем состояние
 
 
 

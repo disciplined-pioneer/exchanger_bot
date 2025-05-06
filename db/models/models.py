@@ -139,6 +139,24 @@ class ModelAdmin(Generic[T]):
             result = await session.execute(query)
             return result.scalars().all()
 
+    @classmethod
+    async def exclude(cls, select_in_load: str | None = None, **kwargs) -> Sequence[T]:
+        """
+        # Возвращает все записи, которые не удовлетворяют фильтру (то есть, исключает значения).
+        :param select_in_load: Загрузить сразу связанную модель.
+        :param kwargs: Поля и значения для исключения.
+        :return: Перечень записей.
+        """
+        # Строим условия для исключения (не равно)
+        params = [getattr(cls, key) != val for key, val in kwargs.items()]
+        query = select(cls).where(*params)
+
+        if select_in_load:
+            query.options(selectinload(getattr(cls, select_in_load)))
+
+        async with async_db_session() as session:
+            result = await session.execute(query)
+            return result.scalars().all()
 
 # Хранение списка всех пользователей
 class Users(Base, ModelAdmin):

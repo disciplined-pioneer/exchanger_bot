@@ -21,7 +21,6 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
     id_exchange = data.get('id_exchange', 0)
-    print(f'\n{data}\n')
 
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
@@ -94,9 +93,6 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 @router.message(PaymentState.user_details)
 async def user_details(message: types.Message, state: FSMContext):
 
-    data = await state.get_data()
-    print(f'\n{data}\n')
-
     await message.delete()
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
@@ -168,9 +164,6 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     id_exchange = data.get('id_exchange', '')
     partner_id = data.get('partner_id', '')
     details_user = data.get('details_user', '')
-    currency = data.get('currency', 0)
-    platform = data.get('platform', '')
-    sum_amount = data.get('sum_amount', '')
     cny_sum = data.get('cny_sum', '')
     message_type = data.get("message_type", '')
 

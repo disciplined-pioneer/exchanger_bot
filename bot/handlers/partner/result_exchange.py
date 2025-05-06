@@ -50,6 +50,8 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
             text=deal_auto_completed_message
         )
 
+    await state.clear()
+
     
 # Обработчик кнопки "Деньги не пришли" у партнёра
 @router.callback_query(F.data == "not_paid_partner")

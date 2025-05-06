@@ -29,8 +29,8 @@ update_rate_keyb = InlineKeyboardMarkup(
 async def get_partner_menu(tg_id: int):
     
     # Заявки
-    exchanges = await Exchanges.filter(partner_id=tg_id)
-    count_exchanges = len(exchanges) if exchanges else 0
+    all_exchanges = await Exchanges.exclude(state='COMPLETED')
+    count_exchanges  = len([exchange for exchange in all_exchanges if exchange.partner_id == tg_id])
 
     # Объявления (смотрим количество существующих значений в БД)
     count = 0
