@@ -64,12 +64,17 @@ async def buttons_with_all_ads(currency: str, platform: str):
         )
         keyboard.inline_keyboard.append([button])
 
-
     keyboard.inline_keyboard.append([
         InlineKeyboardButton(text='🔙 Назад', callback_data='go_back_exchange:exchange_currency')
     ])
 
-    return keyboard
+    # В зависимости от количества отправляем сообщение
+    if len(keyboard.inline_keyboard) == 1:
+        text = '❕ В данный момент нет объявлений по данному курсу'
+    else:
+        text = 'Выберите объявление'
+
+    return keyboard, text
 
 
 async def keyboard_exchange_confirm(currency: str, platform: str):

@@ -51,7 +51,15 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
         except Exception as e:
             continue  # Переходим к следующему
 
-    await callback.message.edit_text(messages_sent_message)
+    await callback.message.edit_text(
+        text=messages_sent_message,
+        reply_markup=back_menu
+    )
+
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text='📊 Администратор запросил статистику за месяц'
+    )
     await state.clear()
 
 

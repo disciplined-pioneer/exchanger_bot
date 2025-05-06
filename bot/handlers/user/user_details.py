@@ -3,13 +3,13 @@ from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
-from settings import settings
 from utils.user.user_details import *
 
 from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
-from db.models.models import ExchangeHistory, ExchangeRate
+from datetime import datetime
+from db.models.models import Exchanges
 
 
 router = Router()
@@ -19,6 +19,17 @@ router = Router()
 @router.callback_query(F.data == "payment_confirmed")
 async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 
+    data = await state.get_data()
+    id_exchange = data.get('id_exchange', 0)
+    print(f'\n{data}\n')
+
+    # Изменяем статус
+    exchange_rate = await Exchanges.get(id=id_exchange)
+    await exchange_rate.update(
+        state="WAIT_PAYMENT",
+        update_at=datetime.now()
+    )
+
     state_message = await callback.message.edit_text(photo_or_receipt_message)
     await state.update_data({"last_id_message": state_message.message_id})
     await state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
@@ -27,6 +38,9 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 # Обработчик для получения фото или файла
 @router.message(PaymentState.waiting_for_receipt)
 async def handle_receipt(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    id_exchange = data.get('id_exchange', 0)
 
     await message.delete()
     data = await state.get_data()
@@ -54,24 +68,34 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             )
             await state.update_data({"last_id_message": state_message.message_id})
             return
+        
+        # Изменяем поле с чеком
+        exchange_rate = await Exchanges.get(id=id_exchange)
+        await exchange_rate.update(
+            payment_check=file_id,
+            update_at=datetime.now()
+        )
 
         # Сообщение пользователю
         platform = data.get('platform', '')
         state_message = await bot.edit_message_text(
-                    chat_id=message.chat.id,
-                    message_id=last_bot_message_id,
-                    text=generate_requisites_message(platform)
-                )
+            chat_id=message.chat.id,
+            message_id=last_bot_message_id,
+            text=generate_requisites_message(platform)
+        )
         await state.update_data({"last_id_message": state_message.message_id})
         await state.set_state(PaymentState.user_details)
 
-    except Exception as e:
-        print(e)
+    except:
+        pass
 
 
 # Обработчик для получения реквизитов пользователя
 @router.message(PaymentState.user_details)
 async def user_details(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    print(f'\n{data}\n')
 
     await message.delete()
     data = await state.get_data()
@@ -142,13 +166,12 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     # Информация пользователя
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
-    partner_number = data.get('partner_number', '')
-    partner_id = settings.bot.PARTNERS[int(partner_number)-1]
+    partner_id = data.get('partner_id', '')
     details_user = data.get('details_user', '')
-    currency = data.get('exchange_type', '').split('_')[0].upper()
-    platform = data.get('exchange_type', '').split('_')[1].upper()
-    sum_amount = data.get('sum_amout', '')
-    cny_sum = round(sum_amount/await ExchangeRate.get_exchange_rate(f"{currency.lower()}_{platform.lower()}"))
+    currency = data.get('currency', 0)
+    platform = data.get('platform', '')
+    sum_amount = data.get('sum_amount', '')
+    cny_sum = data.get('cny_sum', '')
     message_type = data.get("message_type", '')
 
     user_link = f'tg://user?id={callback.from_user.id}'
@@ -205,24 +228,16 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     
     await state.update_data({"last_id_message": state_message.message_id})
 
-    # Изменяем статус
-    exchange_rate = await ExchangeHistory.get(id=id_exchange)
-    await exchange_rate.update(
-        status="waiting_for_payment_confirmation"
-    )
-
     # Ждём 5 минут и проверяем статус
-    await asyncio.sleep(300)
-    exchange = await ExchangeHistory.get(id=id_exchange)
-    status = exchange.status
-    if status == 'waiting_for_payment_confirmation':
+    await asyncio.sleep(5)
+    exchange = await Exchanges.get(id=id_exchange)
+    state = exchange.state
+    if state == 'WAIT_PAYMENT':
         state_message = await callback.message.answer(
             text=get_no_payment_instructions(partner_id),
             reply_markup=support_keyb,
             parse_mode="MarkdownV2"
         )
-
-        await state.update_data({"last_id_message": state_message.message_id})
 
 
 # Обработчик кнопки "Надо исправить"
@@ -230,7 +245,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
-    exchange_type = data.get('exchange_type', '').split('_')[1].capitalize()
+    platform = data.get('platform', '')
     message_type = data.get("message_type")
     
     # В зависимости от типа отправляем сообщение
@@ -238,11 +253,11 @@ async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.delete()
         state_message = await bot.send_message(
             chat_id=callback.message.chat.id,
-            text=generate_requisites_message(exchange_type)
+            text=generate_requisites_message(platform)
         )
     else:
         state_message = await callback.message.edit_text(
-            text=generate_requisites_message(exchange_type)
+            text=generate_requisites_message(platform)
         )
 
     await state.set_state(PaymentState.user_details)

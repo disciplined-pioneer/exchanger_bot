@@ -9,8 +9,14 @@ async def display_available_exchanges():
     # Получаем все доступные обмены
     all_currencies = []
     partners_info = await Partners.all()
-    for info in partners_info:
 
+    # Если нет партнёров - нет обменов
+    if not partners_info:
+        text = '❕ В данный момент обменов нет!'
+        return text
+    
+    # Добавляемм обмены
+    for info in partners_info:
         active_pairs = info.active_pairs
         for currencies in active_pairs:
             all_currencies.append([currencies.get('from', ''), currencies.get('to', '')])
@@ -91,5 +97,3 @@ async def format_exchange_request(amount: float, currency: str, platform: str) -
         f"Платформа: {platform}\n\n"
         f"Нажмите на кнопку ниже для продолжения ⬇️"
     )
-
-select_ad_message = 'Выберите объявление'

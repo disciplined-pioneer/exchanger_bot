@@ -6,7 +6,8 @@ from utils.user.user_details import *
 from bot.templates.user.exchange_confirmation import *
 from bot.keyboards.partner.result_exchange import *
 
-from db.models.models import ExchangeHistory
+from datetime import datetime
+from db.models.models import Exchanges
 
 
 router = Router()
@@ -22,7 +23,8 @@ async def confirm_cny_received(callback: types.CallbackQuery, state: FSMContext)
     await callback.message.edit_text(exchange_completed_message)
 
     # Изменяем статус
-    exchange_rate = await ExchangeHistory.get(id=id_exchange)
+    exchange_rate = await Exchanges.get(id=id_exchange)
     await exchange_rate.update(
-        status="exchange_completed"
+        state="COMPLETED",
+        update_at=datetime.now()
     )

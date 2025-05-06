@@ -14,20 +14,11 @@ support_keyb = InlineKeyboardMarkup(
     ]
 )
 
-keyb = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Я оплатил", callback_data="")],
-        [InlineKeyboardButton(text="❌ Деньги не пришли", callback_data="")],
-        [InlineKeyboardButton(text=" Сложности с оплатой, написать клиенту в чат", url=settings.bot.SUPPORT_LINK)]
-    ]
-)
-
-
 def create_payment_keyboard(url_user) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Я оплатил", callback_data="user_paid")],
-            [InlineKeyboardButton(text="❌ Деньги не пришли", callback_data="user_not_paid")],
+            [InlineKeyboardButton(text="✅ Я оплатил", callback_data="paid_partner")],
+            [InlineKeyboardButton(text="❌ Деньги не пришли", callback_data="not_paid_partner")],
             [InlineKeyboardButton(text="💬 Сложности с оплатой, написать клиенту в чат", url=url_user)]
         ]
     )

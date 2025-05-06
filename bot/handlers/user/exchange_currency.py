@@ -40,10 +40,11 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
         currency = type_exchange.split('_')[0].upper()
         platform = type_exchange.split('_')[1].capitalize()
 
-
+    # Отправляем сообщение
+    keyboard, text = await buttons_with_all_ads(currency, platform)
     await callback.message.edit_text(
-        text=select_ad_message,
-        reply_markup=await buttons_with_all_ads(currency, platform)
+        text=text,
+        reply_markup=keyboard
     )
 
     await state.update_data(
@@ -177,7 +178,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     platform = data.get('platform', '')
 
     # Сохраняем начало обмена в БД
-    await Exchanges.create(
+    exchange = await Exchanges.create(
         client_id=tg_id,
         partner_id=partner_id,
         from_currency=currency,
@@ -202,7 +203,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
         key=state.key.__class__(bot_id=state.key.bot_id, chat_id=partner_id, user_id=partner_id)
     )
     await partner_state.set_state(ExchangeStates.partner_details)
-    await partner_state.update_data(user_id=tg_id)
+    await partner_state.update_data(user_id=tg_id, id_exchange=exchange.id)
     await partner_state.update_data(**data)
 
 

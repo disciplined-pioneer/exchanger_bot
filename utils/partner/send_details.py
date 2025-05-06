@@ -1,7 +1,7 @@
 import asyncio
 
 from core.bot import bot
-from db.models.models import ExchangeHistory
+from db.models.models import Exchanges
 from bot.keyboards.partner.result_exchange import *
 
 
@@ -10,8 +10,8 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
     await asyncio.sleep(30 * 60)  # 30 минут
 
     # Проверка на завершённую сделку
-    exchange_rate = await ExchangeHistory.get(id=id_exchange)
-    if exchange_rate.status == 'exchange_completed':
+    exchange_rate = await Exchanges.get(id=id_exchange)
+    if exchange_rate.status == 'COMPLETED':
         return True, '' # Не нужно изменять
 
     # Изменяем кнопку
@@ -27,10 +27,10 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
     # Проверка на то, что сделка завершена
     await asyncio.sleep(23.5 * 60 * 60)  # 23,5 часа
 
-    exchange_rate = await ExchangeHistory.get(id=id_exchange)
-    if exchange_rate.status != 'exchange_completed':
+    exchange_rate = await Exchanges.get(id=id_exchange)
+    if exchange_rate.status != 'COMPLETED':
         await exchange_rate.update(
-            status="exchange_completed"
+            status="COMPLETED"
         )
 
         return False, state_message_user

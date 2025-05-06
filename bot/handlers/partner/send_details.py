@@ -16,12 +16,10 @@ router = Router()
 @router.callback_query(F.data.startswith("send_details"))
 async def send_details(callback: types.CallbackQuery, state: FSMContext):
 
-    tg_id = callback.data.split("_")[2]
     state_message = await callback.message.edit_text(input_requisites_message)
     
     await state.set_state(ExchangeStates.details)
-    await state.update_data({"last_id_message": state_message.message_id,
-                             "tg_id": tg_id})
+    await state.update_data({"last_id_message": state_message.message_id})
 
 
 # Сохраняем введённые реквизиты
@@ -48,12 +46,18 @@ async def save_details(message: types.Message, state: FSMContext):
     details_text = message.text.strip()
     await state.update_data(details=details_text)
 
-    await bot.edit_message_text(
-        chat_id=message.chat.id,
-        message_id=last_bot_message_id,
-        text=get_confirm_requisites_message(details_text),
-        reply_markup=confirm_details_keyboard
-    )
+    try:
+        await bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=last_bot_message_id,
+            text=get_confirm_requisites_message(details_text),
+            reply_markup=confirm_details_keyboard
+        )
+    except:
+        pass
+
+    #await state.set_state(None)  # Снимаем состояние
+
 
 
 # обработка кнопкии "Подтверждаю"
