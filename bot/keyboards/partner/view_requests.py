@@ -1,6 +1,7 @@
 from settings import settings
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+
 # Добавляем все заявки как кнопки для каждого из партнёров
 async def get_partner_exchanges_keyboard(partner_id: int, page: int = 1, per_page: int = 5) -> InlineKeyboardMarkup:
 

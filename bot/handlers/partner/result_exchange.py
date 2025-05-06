@@ -4,7 +4,7 @@ from aiogram.fsm.storage.base import StorageKey
 
 from core.bot import bot
 from utils.user.user_details import *
-from utils.partner.send_details import *
+from utils.partner.result_exchange import *
 
 from bot.templates.partner.result_exchange import *
 from bot.keyboards.partner.result_exchange import *
