@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
 from db.models.models import Exchanges
+
 from utils.user.user_details import *
 from bot.templates.partner.view_requests import *
 from bot.keyboards.partner.view_requests import *

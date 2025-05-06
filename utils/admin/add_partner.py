@@ -16,16 +16,16 @@ PARTNER_QUESTIONS = {
 async def adding_partner(tg_id: int, name: str):
 
     user = await Users.get(tg_id=tg_id)
-    if user: # Если есть партнёр
+    if user: # Если есть пользователь с эти ID
         await user.update(role='partner')
 
-    else: # Если нет партнёра
+    else: # Если нет партнёра, добавляем
         await Users.create(
             tg_id=tg_id,
             role='partner'
         )
 
-    # Сохранение в БД
+    # Сохранение в БД со всеми партнёрами
     await Partners.create(
         tg_id=tg_id,
         name=name,

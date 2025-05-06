@@ -14,7 +14,7 @@ from bot.handlers.partner.my_offers import router as my_offers
 from bot.handlers.partner.create_offer import router as create_offer
 from bot.handlers.partner.statistics import router as statistics_part
 from bot.handlers.partner.result_exchange import router as result_exchange
-from bot.handlers.partner.receiving_application import router as receiving_application
+from bot.handlers.partner.send_details import router as receiving_application
 
 
 routers = [

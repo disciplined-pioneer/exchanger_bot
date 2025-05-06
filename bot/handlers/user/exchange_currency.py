@@ -6,6 +6,9 @@ from utils.user.exchange_currency import *
 from bot.keyboards.user.exchange_currency import *
 from bot.templates.user.exchange_currency import *
 
+from datetime import datetime
+from db.models.models import Exchanges
+
 
 router = Router()
 
@@ -164,12 +167,29 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_reply_markup(reply_markup=None)
     await callback.message.answer('Ожидайте реквизиты для оплаты (здесь будут написаны условия пополнения)')
 
+    # Получаем данные
     data = await state.get_data()
     tg_id = callback.from_user.id
+    cny_sum = data.get('cny_sum', 0)
     partner_id = data.get('partner_id', 0)
     sum_amount = data.get('sum_amount', 0)
     currency = data.get('currency', '')
     platform = data.get('platform', '')
+
+    # Сохраняем начало обмена в БД
+    await Exchanges.create(
+        client_id=tg_id,
+        partner_id=partner_id,
+        from_currency=currency,
+        to_currency="CNY",
+        amout_from=sum_amount,
+        amout_to=cny_sum,
+        platform=platform,
+        state="NEW",
+        created_at=datetime.now(),
+        update_at=datetime.now(),
+        payment_check="None"
+    )
 
     # Отправляем сообщение нужному партнёру
     await bot.send_message(chat_id=partner_id,

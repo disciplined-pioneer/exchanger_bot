@@ -3,10 +3,11 @@ from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
 from settings import settings
-from bot.keyboards.partner.create_offer import *
-from bot.templates.partner.create_offer import *
 
 from utils.partner.create_offer import *
+
+from bot.keyboards.partner.create_offer import *
+from bot.templates.partner.create_offer import *
 
 
 router = Router()

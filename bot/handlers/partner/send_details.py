@@ -2,8 +2,10 @@ from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
-from bot.keyboards.partner.receiving_application import *
-from bot.templates.partner.receiving_application import *
+
+from bot.keyboards.partner.send_details import *
+from bot.templates.partner.send_details import *
+
 from utils.user.request_details import ExchangeStates
 
 
