@@ -10,6 +10,7 @@ from bot.handlers.user.exchange_currency import router as exchange_currency
 from bot.handlers.user.user_details import router as user_details
 from bot.handlers.user.exchange_confirmation import router as exchange_confirmation
 
+from bot.handlers.partner.reply_to_user import router as reply_to_user
 from bot.handlers.partner.view_requests import router as view_requests
 from bot.handlers.partner.my_offers import router as my_offers
 from bot.handlers.partner.create_offer import router as create_offer
@@ -30,6 +31,7 @@ routers = [
     user_details,
     exchange_confirmation,
 
+    reply_to_user,
     view_requests,
     my_offers,
     create_offer,

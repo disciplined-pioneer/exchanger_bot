@@ -9,6 +9,7 @@ from utils.partner.result_exchange import *
 from bot.templates.partner.result_exchange import *
 from bot.keyboards.partner.result_exchange import *
 
+from settings import settings
 from datetime import datetime
 from db.models.models import Exchanges
 
