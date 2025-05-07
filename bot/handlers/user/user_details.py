@@ -236,7 +236,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     await state.update_data({"last_id_message": state_message.message_id})
 
     # Ждём 5 минут и проверяем статус
-    await asyncio.sleep(5)
+    await asyncio.sleep(5*60)
     exchange = await Exchanges.get(id=id_exchange)
     state = exchange.state
     if state == 'WAIT_PAYMENT':
