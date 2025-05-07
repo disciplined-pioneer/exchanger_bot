@@ -72,7 +72,7 @@ async def user_message(message: types.Message, state: FSMContext):
         # Отправляем сообщение партнёру
         await bot.send_message(
             chat_id=partner_id,
-            text=f'Сообщение от {tg_id}: {message.text}',
+            text=f'Сообщение от клиента {tg_id}: {message.text}',
             reply_markup=reply_to_user
         )
     except Exception as e:
