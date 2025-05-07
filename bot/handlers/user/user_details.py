@@ -93,66 +93,69 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 @router.message(PaymentState.user_details)
 async def user_details(message: types.Message, state: FSMContext):
 
-    await message.delete()
-    data = await state.get_data()
-    last_bot_message_id = data.get("last_id_message")
+    try:
+        await message.delete()
+        data = await state.get_data()
+        last_bot_message_id = data.get("last_id_message")
 
-    # Проверка на пустоту
-    if not (message.photo or message.document or message.text):
-        state_message = await bot.edit_message_text(
-            chat_id=message.chat.id,
-            message_id=last_bot_message_id,
-            text=photo_document_or_text_request_message,
-            reply_markup=None
-        )
-        await state.update_data({"last_id_message": state_message.message_id})
-        return
+        # Проверка на пустоту
+        if not (message.photo or message.document or message.text):
+            state_message = await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=last_bot_message_id,
+                text=photo_document_or_text_request_message,
+                reply_markup=None
+            )
+            await state.update_data({"last_id_message": state_message.message_id})
+            return
 
-    # Логика по типу сообщения
-    if message.photo:
-        
-        await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
-        
-        # Отправляем фотографию
-        details = message.photo[-1].file_id
-        sent_message = await bot.send_photo(
-            chat_id=message.chat.id,
-            photo=details,
-            caption=format_confirm_details(),
-            reply_markup=user_confirm_keyb
-        )
-        await state.update_data({"message_type": 'photo'})
-        
-    elif message.document:
+        # Логика по типу сообщения
+        if message.photo:
+            
+            await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
+            
+            # Отправляем фотографию
+            details = message.photo[-1].file_id
+            sent_message = await bot.send_photo(
+                chat_id=message.chat.id,
+                photo=details,
+                caption=format_confirm_details(),
+                reply_markup=user_confirm_keyb
+            )
+            await state.update_data({"message_type": 'photo'})
+            
+        elif message.document:
 
-        await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
+            await bot.delete_message(chat_id=message.chat.id, message_id=last_bot_message_id)
 
-        # Отправляем документ
-        details = message.document.file_id
-        sent_message = await bot.send_document(
-            chat_id=message.chat.id,
-            document=details,
-            caption=format_confirm_details(),
-            reply_markup=user_confirm_keyb
-        )
-        await state.update_data({"message_type": 'document'})
+            # Отправляем документ
+            details = message.document.file_id
+            sent_message = await bot.send_document(
+                chat_id=message.chat.id,
+                document=details,
+                caption=format_confirm_details(),
+                reply_markup=user_confirm_keyb
+            )
+            await state.update_data({"message_type": 'document'})
 
-    elif message.text:
+        elif message.text:
 
-        # Отправляем текст
-        details = message.text
-        sent_message = await bot.edit_message_text(
-            chat_id=message.chat.id,
-            text=format_confirm_details(details),
-            message_id=last_bot_message_id,
-            reply_markup=user_confirm_keyb
-        )
-        await state.update_data({"message_type": 'text'})
+            # Отправляем текст
+            details = message.text
+            sent_message = await bot.edit_message_text(
+                chat_id=message.chat.id,
+                text=format_confirm_details(details),
+                message_id=last_bot_message_id,
+                reply_markup=user_confirm_keyb
+            )
+            await state.update_data({"message_type": 'text'})
 
 
-    # Сохраняем новое сообщение для трекинга
-    await state.update_data({"last_id_message": sent_message.message_id,
-                             'details_user': details})
+        # Сохраняем новое сообщение для трекинга
+        await state.update_data({"last_id_message": sent_message.message_id,
+                                'details_user': details})
+    except:
+        pass
 
 
 # Обработчик кнопки "Подтверждаю"
@@ -219,6 +222,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             reply_markup=create_payment_keyboard(user_link)
         )
     
+    await state.set_state(None)
     await state.update_data({"last_id_message": state_message.message_id})
 
     # Ждём 5 минут и проверяем статус

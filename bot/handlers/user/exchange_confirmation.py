@@ -28,3 +28,5 @@ async def confirm_cny_received(callback: types.CallbackQuery, state: FSMContext)
         state="COMPLETED",
         update_at=datetime.now()
     )
+
+    await state.clear()

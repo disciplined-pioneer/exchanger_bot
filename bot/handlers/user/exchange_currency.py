@@ -192,6 +192,8 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
         payment_check="None"
     )
 
+    await state.update_data(id_exchange=exchange.id)
+
     # Отправляем сообщение нужному партнёру
     await bot.send_message(chat_id=partner_id,
                            text=await format_exchange_request(amount=sum_amount, currency=currency, platform=platform),
