@@ -1,0 +1,69 @@
+import os
+import asyncio
+import logging
+
+from core.bot import bot
+from settings import settings
+
+from datetime import datetime, timedelta
+from db.models.models import Exchanges
+
+async def run_every_ten_minutes():
+    
+    logging.info("🚀 Активируем задачу.")
+    await cancel_expired_exchanges()
+
+    await asyncio.sleep(600)
+    logging.info("🔁 Запущено ожидание 10 минут")
+
+
+async def cancel_expired_exchanges():
+    """
+    Проверяет все обмены и отменяет те, что не обновлялись >= 1 часа.
+    Отправляет уведомления клиенту, партнёру и в группу.
+    """
+    logging.info("🔍 Проверка заявок на истечение времени...")
+
+    all_exchanges = await Exchanges.all()
+    now = datetime.utcnow()
+
+    for exchange in all_exchanges:
+        if exchange.update_at is None:
+            continue
+
+        time_diff = exchange.update_at - now
+        if time_diff >= timedelta(hours=1) and exchange.state == 'NEW':
+
+            # Обновляем состояние обмена
+            await exchange.update(
+                state='CANCELLED',
+                update_at=datetime.now()
+            )
+
+            logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")
+
+            # Уведомляем участников и группу
+            await bot.send_message(
+                chat_id=exchange.partner_id,
+                text=f'⏰ Заявка с пользователем {exchange.client_id} была отменена по таймауту'
+            )
+
+            await bot.send_message(
+                chat_id=exchange.client_id,
+                text=f'⏰ Заявка с партнёром {exchange.partner_id} была отменена по таймауту'
+            )
+
+            await bot.send_message(
+                chat_id=settings.bot.GROUP_ID,
+                text=f'⏰ Заявка {exchange.id} была отменена по таймауту'
+            )
+
+            
+# Главный цикл репортера, запускается раз в 10 минут
+async def reporter_loop():
+    while True:
+        try:
+            await run_every_ten_minutes()
+
+        except Exception as e:
+            logging.error(f"Произошла ошибка: {e}")

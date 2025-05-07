@@ -8,6 +8,7 @@ from bot.handlers import routers
 
 from settings import settings
 from db.crud.base import init_postgres
+from services.report_timer import reporter_loop
 from services.init_users import register_initial_users
 
 
@@ -28,12 +29,16 @@ async def main():
         chat_id=settings.bot.GROUP_ID,
         text='✅ Бот запущен'
     )
+
+    asyncio.create_task(reporter_loop()) # Фоновая задача
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,
         scope=BotCommandScopeDefault()
     )
     await dp.start_polling(bot)
+
+    
 
 
 if __name__ == "__main__":
