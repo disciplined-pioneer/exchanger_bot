@@ -34,6 +34,8 @@ POSTGRES_USER=your_user
 
 # Токен Telegram-бота
 BOT_TOKEN=your_telegram_bot_token
+BOT_GROUP_ID=id вашей группы с '-'
+BOT_COMMISSION=значение комиссии
 
 # ID админов и партнёров
 BOT_ADMINS=[admin_telegram_ids]
@@ -59,40 +61,63 @@ BOT_SUPPORT_LINK=https://your_support_link
 ├─── bot
 │   ├─── handlers
 │   │   ├─── admin
-│   │   │   ├─── broadcast.py
-│   │   │   └─── statistics.py
+│   │   │   ├─── add_partner.py 
+│   │   │   ├─── ban.py
+│   │   │   ├─── broadcast.py   
+│   │   │   ├─── commissions.py 
+│   │   │   └─── statistics.py  
 │   │   ├─── partner
-│   │   │   ├─── currency_rate_update.py 
-│   │   │   ├─── receiving_application.py
-│   │   │   └─── result_exchange.py      
+│   │   │   ├─── create_offer.py
+│   │   │   ├─── my_offers.py
+│   │   │   ├─── reply_to_user.py
+│   │   │   ├─── result_exchange.py
+│   │   │   ├─── send_details.py
+│   │   │   ├─── statistics.py
+│   │   │   └─── view_requests.py
 │   │   ├─── user
+│   │   │   ├─── clear_state.py
 │   │   │   ├─── exchange_confirmation.py
-│   │   │   ├─── request_details.py      
+│   │   │   ├─── exchange_currency.py
 │   │   │   ├─── start.py
 │   │   │   └─── user_details.py
 │   │   └─── __init__.py
 │   ├─── keyboards
 │   │   ├─── admin
-│   │   │   └─── broadcast.py
+│   │   │   ├─── add_partner.py
+│   │   │   ├─── ban.py
+│   │   │   ├─── broadcast.py
+│   │   │   └─── commissions.py
 │   │   ├─── partner
-│   │   │   ├─── currency_rate_update.py
-│   │   │   ├─── receiving_application.py
-│   │   │   └─── result_exchange.py
+│   │   │   ├─── create_offer.py
+│   │   │   ├─── my_offers.py
+│   │   │   ├─── reply_to_user.py
+│   │   │   ├─── result_exchange.py
+│   │   │   ├─── send_details.py
+│   │   │   ├─── statistics.py
+│   │   │   └─── view_requests.py
 │   │   ├─── user
-│   │   │   ├─── request_details.py
+│   │   │   ├─── exchange_confirmation.py
+│   │   │   ├─── exchange_currency.py
 │   │   │   ├─── start.py
 │   │   │   └─── user_details.py
 │   │   └─── __init__.py
 │   ├─── templates
 │   │   ├─── admin
+│   │   │   ├─── add_partner.py
+│   │   │   ├─── ban.py
 │   │   │   ├─── broadcast.py
+│   │   │   ├─── commissions.py
 │   │   │   └─── statistics.py
 │   │   ├─── partner
-│   │   │   ├─── receiving_application.py
-│   │   │   └─── result_exchange.py
+│   │   │   ├─── create_offer.py
+│   │   │   ├─── my_offers.py
+│   │   │   ├─── result_exchange.py
+│   │   │   ├─── send_details.py
+│   │   │   ├─── statistics.py
+│   │   │   └─── view_requests.py
 │   │   ├─── user
 │   │   │   ├─── exchange_confirmation.py
-│   │   │   ├─── request_details.py
+│   │   │   ├─── exchange_currency.py
 │   │   │   ├─── start.py
 │   │   │   └─── user_details.py
 │   │   └─── __init__.py
@@ -109,14 +134,24 @@ BOT_SUPPORT_LINK=https://your_support_link
 │   │   ├─── mapped_columns.py
 │   │   └─── models.py
 │   └─── __init__.py
+├─── services
+│   ├─── init_users.py
+│   └─── report_timer.py
 ├─── utils
 │   ├─── admin
-│   │   └─── broadcast.py
+│   │   ├─── add_partner.py
+│   │   ├─── ban.py
+│   │   ├─── broadcast.py
+│   │   └─── commissions.py
 │   ├─── partner
-│   │   ├─── currency_rate_update.py
+│   │   ├─── create_offer.py
+│   │   ├─── my_offers.py
 │   │   └─── result_exchange.py
 │   └─── user
+│       ├─── exchange_confirmation.py
+│       ├─── exchange_currency.py
 │       ├─── request_details.py
+│       ├─── start.py
 │       └─── user_details.py
 ├─── .env
 ├─── .gitignore
@@ -125,8 +160,7 @@ BOT_SUPPORT_LINK=https://your_support_link
 ├─── bot.py
 ├─── docker-compose.yml
 ├─── requirements.txt
-├─── settings.py
-└─── test.py
+└─── settings.py
 ```
 
 ---

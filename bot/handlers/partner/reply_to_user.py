@@ -71,8 +71,6 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
     details_user = data.get('details_user', '')
     message_type = data.get("message_type", '')
 
-    print(data)
-
     # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ и ПАРТНЁРУ
     if message_type in 'photo':
         
