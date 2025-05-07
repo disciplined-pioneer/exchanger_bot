@@ -161,6 +161,9 @@ async def user_details(message: types.Message, state: FSMContext):
         # Сохраняем новое сообщение для трекинга
         await state.update_data({"last_id_message": sent_message.message_id,
                                 'details_user': details})
+        
+        await state.set_state(None)  # Снимаем состояние
+
     except:
         pass
 

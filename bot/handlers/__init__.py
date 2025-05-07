@@ -5,6 +5,7 @@ from bot.handlers.admin.statistics import router as statistics
 from bot.handlers.admin.add_partner import router as add_partner
 from bot.handlers.admin.commissions import router as commissions
 
+from bot.handlers.user.clear_state import router as clear_state
 from bot.handlers.user.exchange_currency import router as exchange_currency
 from bot.handlers.user.user_details import router as user_details
 from bot.handlers.user.exchange_confirmation import router as exchange_confirmation
@@ -18,6 +19,7 @@ from bot.handlers.partner.send_details import router as receiving_application
 
 
 routers = [
+    start,
     ban,
     broadcast,
     statistics,
@@ -34,5 +36,5 @@ routers = [
     statistics_part,
     result_exchange,
     receiving_application,
-    start
+    clear_state
 ]
