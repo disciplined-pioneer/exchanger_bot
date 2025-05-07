@@ -43,6 +43,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 
     await message.delete()
     data = await state.get_data()
+    tg_id = message.from_user.id
     partner_id = data.get("partner_id", '')
     last_bot_message_id = data.get("last_id_message", 0)
 
@@ -84,6 +85,12 @@ async def handle_receipt(message: types.Message, state: FSMContext):
         )
         await state.update_data({"last_id_message": state_message.message_id})
         await state.set_state(PaymentState.user_details)
+
+        # Логгирование в группу
+        await bot.send_message(
+            chat_id=settings.bot.GROUP_ID,
+            text=f"📎 Клиент {tg_id} отправил чек по заявке {id_exchange}"
+        )
 
     except:
         pass

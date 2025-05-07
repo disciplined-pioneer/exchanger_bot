@@ -6,6 +6,7 @@ from core.bot import bot
 from bot.keyboards.partner.send_details import *
 from bot.templates.partner.send_details import *
 
+from settings import settings
 from utils.user.request_details import ExchangeStates
 
 
@@ -59,13 +60,13 @@ async def save_details(message: types.Message, state: FSMContext):
     await state.set_state(None)  # Снимаем состояние
 
 
-
 # обработка кнопкии "Подтверждаю"
 @router.callback_query(F.data == "confirm_details")
 async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
+    tg_id = callback.from_user.id
     partner_data = await state.get_data()
-    user_id = int(partner_data.get('user_id', ''))
+    user_id = partner_data.get('user_id', '')
 
     # Считываем состояние пользователя
     user_state = FSMContext(
@@ -78,6 +79,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
     details = partner_data.get('details', '')
     sum = user_data.get('sum_amount', '')
     currency = user_data.get('currency', '')
+
     await bot.send_message(
         chat_id=user_id,
         text=await create_payment_message(details=details,
@@ -88,6 +90,12 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text(text=requisites_sent_message)
     await state.update_data({'id_exchange': user_data.get('id_exchange', '')})
+
+    # Логгирование в группу
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text=f"📤 Партнёр {tg_id} отправил реквизиты для оплаты по заявке {user_data.get('id_exchange', '')}" 
+    )
 
 
 # Отмена реквизитов

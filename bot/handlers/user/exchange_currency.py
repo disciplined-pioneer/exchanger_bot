@@ -6,6 +6,7 @@ from utils.user.exchange_currency import *
 from bot.keyboards.user.exchange_currency import *
 from bot.templates.user.exchange_currency import *
 
+from settings import settings
 from datetime import datetime
 from db.models.models import Exchanges
 
@@ -207,6 +208,12 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     await partner_state.set_state(ExchangeStates.partner_details)
     await partner_state.update_data(user_id=tg_id, id_exchange=exchange.id)
     await partner_state.update_data(**data)
+
+    # Логгирование в группу
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text=f"📝 Новая заявка от клиента {tg_id}. Направление: {currency} → CNY. Сумма: {sum_amount} {currency}"
+    )
 
 
 # Обработка кнопки "Назад"

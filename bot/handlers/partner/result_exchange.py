@@ -21,6 +21,7 @@ router = Router()
 async def user_paid(callback: types.CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
+    tg_id = callback.from_user.id
     user_id = data.get('user_id', 0)
     id_exchange = data.get('id_exchange', 0)
 
@@ -39,6 +40,12 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
         chat_id=user_id,
         text=partner_payment_confirmed_message,
         reply_markup=get_partial_exchange_completion_keyboard()
+    )
+
+    # Логгирование в группу
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text=f"✅ Партнёр {tg_id} подтвердил оплату по заявке {id_exchange}" 
     )
 
     # Отложенное обновление клавиатуры через 30 минут
