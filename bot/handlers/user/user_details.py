@@ -210,7 +210,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         state_message = await bot.send_document(
             chat_id=callback.message.chat.id,
             document=details_user,
-            caption=generate_payment_message()
+            caption=generate_payment_message(cny_sum)
         )
 
         # Отправляем сообщение партнёру
