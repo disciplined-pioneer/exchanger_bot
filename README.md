@@ -37,9 +37,8 @@ BOT_TOKEN=your_telegram_bot_token
 BOT_GROUP_ID=id вашей группы с '-'
 BOT_COMMISSION=значение комиссии
 
-# ID админов и партнёров
+# ID админов 
 BOT_ADMINS=[admin_telegram_ids]
-BOT_PARTNERS=[partner_telegram_ids]
 
 # Ссылка на поддержку (можно заменить на ваш сайт или Telegram-юзер)
 BOT_SUPPORT_LINK=https://your_support_link
