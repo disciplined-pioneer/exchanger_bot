@@ -71,10 +71,9 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
     details_user = data.get('details_user', '')
     message_type = data.get("message_type", '')
 
-    # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ и ПАРТНЁРУ
+    # В зависимости от типа отправляем сообщение ПАРТНЁРУ
+    await callback.message.delete()
     if message_type in 'photo':
-        
-        await callback.message.delete()
 
         # Отправляем сообщение партнёру
         await bot.send_photo(
@@ -85,8 +84,6 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
         )
 
     elif message_type in 'document':
-
-        await callback.message.delete()
 
         # Отправляем сообщение партнёру
         await bot.send_document(

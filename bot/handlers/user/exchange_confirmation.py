@@ -24,8 +24,7 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
     
     data = await state.get_data()
     id_exchange = data.get('id_exchange', 0)
-    
-    await callback.message.edit_text(exchange_completed_message)
+    partner_id = data.get('partner_id', 0)
 
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
@@ -34,6 +33,15 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
         update_at=datetime.now()
     )
 
+    await callback.message.edit_text(exchange_completed_message)
+
+    # Сообщение партнёру
+    await bot.send_message(
+        chat_id=partner_id,
+        text=exchange_completed_message_partner(callback.from_user.id, id_exchange)
+    )
+
+    
     await state.clear()
 
 

@@ -158,6 +158,7 @@ class ModelAdmin(Generic[T]):
             result = await session.execute(query)
             return result.scalars().all()
 
+
 # Хранение списка всех пользователей
 class Users(Base, ModelAdmin):
     

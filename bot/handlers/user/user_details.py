@@ -180,6 +180,14 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     cny_sum = data.get('cny_sum', '')
     message_type = data.get("message_type", '')
 
+    from aiogram.fsm.storage.base import StorageKey
+    partner_state = FSMContext(
+        storage=state.storage,
+        key=StorageKey(bot_id=state.key.bot_id, chat_id=partner_id, user_id=partner_id)
+    )
+    await partner_state.update_data(details_user=details_user, message_type=message_type)
+
+
     #user_link = f'tg://user?id={callback.from_user.id}'
 
     # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ и ПАРТНЁРУ
@@ -223,7 +231,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 
     else:
 
-        state_message = await callback.message.edit_text(generate_payment_message(cny_sum, details_user)) # Пользователь
+        state_message = await callback.message.edit_text(generate_payment_message(cny_sum, f"\nРеквизиты:\n{details_user}")) # Пользователь
 
         # Партнёр
         await bot.send_message(
