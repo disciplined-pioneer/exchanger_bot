@@ -11,7 +11,7 @@ from db.models.models import Users
 
 router = Router()
 
-import time
+
 # Обработка бана пользователя
 @router.callback_query(F.data == "ban_user")
 async def start_ban_user(callback: types.CallbackQuery, state: FSMContext):
@@ -55,7 +55,7 @@ async def process_ban(message: types.Message, state: FSMContext):
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text=partner_id_exists_message,
+                text=telegram_id_ban,
                 reply_markup=back_keyb
             )
         except:
