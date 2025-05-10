@@ -1,3 +1,4 @@
+from typing import List, Dict, Any
 from aiogram.types import BotCommand
 from pydantic_settings import BaseSettings
 
@@ -23,7 +24,7 @@ class BotConfig(BaseSettings):
     TOKEN: str
     GROUP_ID: int
     COMMISSION: float
-    PARTNERS: list[int] | None = []
+    PARTNERS: List[Dict[str, Any]]
     ADMINS: list[int] | None = []
     SUPPORT_LINK: str
     COMMANDS: list[BotCommand] = [

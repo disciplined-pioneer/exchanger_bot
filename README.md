@@ -39,6 +39,7 @@ BOT_COMMISSION=значение комиссии
 
 # ID админов 
 BOT_ADMINS=[admin_telegram_ids]
+BOT_PARTNERS=[{"tg_id": 123456789, "name": "Иван", "active_pairs": [{"from": "USDT", "to": "CNY", "platform": "Wechat"}]}]
 
 # Ссылка на поддержку (можно заменить на ваш сайт или Telegram-юзер)
 BOT_SUPPORT_LINK=https://your_support_link

@@ -16,8 +16,9 @@ async def register_initial_users():
             )
             print(f'Новый админ: {admin_id}')
 
-    """# Добавляем всех партнёров
-    for partner_id in settings.bot.PARTNERS:
+    # Добавляем всех партнёров
+    for partner in settings.bot.PARTNERS:
+        partner_id = partner.get('tg_id')
         user_info = await Users.get(tg_id=partner_id)
         if not user_info:
             await Users.create(
@@ -27,7 +28,7 @@ async def register_initial_users():
 
             await Partners.create(
                 tg_id=partner_id,
-                name='partner',
-                active=
+                name=partner.get("name", "Без имени"),
+                active_pairs=partner.get("active_pairs", [])
             )
-            print(f'Новый партнёр: {partner_id}')"""
+            print(f'Новый партнёр: {partner_id}')

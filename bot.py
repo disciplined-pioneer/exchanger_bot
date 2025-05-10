@@ -21,7 +21,7 @@ dp.include_routers(*routers)
 async def main():
 
     await init_postgres()
-    await register_initial_users() # Добавяем админов
+    await register_initial_users() # Добавляем админов и партнёров
 
     print("АДМИНЫ:", settings.bot.ADMINS)
 
