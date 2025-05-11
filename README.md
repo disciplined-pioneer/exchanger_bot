@@ -35,7 +35,7 @@ POSTGRES_USER=your_user
 # Токен Telegram-бота
 BOT_TOKEN=your_telegram_bot_token
 BOT_GROUP_ID=id вашей группы с '-'
-BOT_COMMISSION=значение комиссии
+BOT_COMMISSION=в процентах (0.2)
 
 # ID админов 
 BOT_ADMINS=[admin_telegram_ids]
