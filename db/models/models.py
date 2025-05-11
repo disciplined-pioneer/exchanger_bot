@@ -374,9 +374,10 @@ class Commissions(Base, ModelAdmin):
     __tablename__ = 'commissions'
 
     id: Mapped[intpk]
-    date: Mapped[datetime]
+    partner_id: Mapped[int] = mapped_column(BigInteger)
     commissions = mapped_column(Float)
-
+    date: Mapped[datetime]
+    
 
     @classmethod
     async def get_monthly_commission_sum(cls) -> float:

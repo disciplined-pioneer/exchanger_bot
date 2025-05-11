@@ -37,7 +37,7 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
             # Отправляем сообщение партнёру
             await bot.send_message(
                 chat_id=user.tg_id,
-                text=commission_payment_message(),
+                text=await commission_payment_message(),
                 reply_markup=paid_commission_keyb
             )
             
@@ -68,9 +68,11 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
     # Добавляем комиссию в БД
+    commissions = await Exchanges.get_amout_to_current_month() * settings.bot.COMMISSION
     await Commissions.create(
-        date=datetime.now(),
-        commissions=settings.bot.COMMISSION
+        partner_id=callback.from_user.id,
+        commissions=commissions,
+        date=datetime.now()
     )
 
     await callback.message.edit_text(
