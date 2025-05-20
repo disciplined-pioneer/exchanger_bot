@@ -13,9 +13,9 @@ async def run_every_ten_minutes():
     logging.info("🚀 Активируем задачу.")
     await cancel_expired_exchanges()
 
-    await asyncio.sleep(600)
     logging.info("🔁 Запущено ожидание 10 минут")
-
+    await asyncio.sleep(600)
+    
 
 async def cancel_expired_exchanges():
     """
@@ -31,7 +31,7 @@ async def cancel_expired_exchanges():
         if exchange.update_at is None:
             continue
 
-        time_diff = exchange.update_at - now
+        time_diff = now - exchange.update_at
         if time_diff >= timedelta(minutes=30) and exchange.state == 'NEW':
 
             # Обновляем состояние обмена
