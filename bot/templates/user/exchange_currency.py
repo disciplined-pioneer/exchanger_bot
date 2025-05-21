@@ -72,17 +72,30 @@ async def format_exchange_message(sum: float, currency: str, platform: str, id: 
     result = (
         f"\nВы отдаёте {sum} {currency.upper()}\n"
         f"для получения {cny_sum} CNY на {platform.capitalize()}\n\n"
-        'ВНИМАНИЕ, ТУТ ПРЕДУПРЕЖДЕНИЕ'
+        "❗️ ВНИМАНИЕ ❗️\n"
+        "Партнёр НИК сейчас получит вашу заявку на обмен.\n"
+        "Все сделки в боте застрахованы на сумму до 500 000 руб.\n\n"
+        "⚠️ Будьте максимально внимательны при оплате!\n"
+        "Если вы:\n"
+        "• переведёте на другой банк,\n"
+        "• укажете другое ФИО,\n"
+        "• разобьёте платёж на части,\n"
+        "• задержите оплату без согласования с партнёром —\n"
+        "<b>деньги будут потеряны.</b>\n"
+        "❌ Поддержка не сможет их вернуть.\n\n"
+        "🔁 При повторных обменах всегда запрашивайте новые реквизиты — старые могут быть неактуальны!"
     )
+
 
     return result, cny_sum
 
 
-async def format_exchange_request(amount: float, currency: str, platform: str) -> str:
+async def format_exchange_request(amount: float, currency: str, platform: str, cny_sum: int) -> str:
+
     return (
-        "Получение заявки на обмен:\n\n"
-        f"Сумма: {amount}\n"
-        f"Валюта: {currency.upper()}\n"
+        "Новая заявка на обмен:\n\n"
+        f"Клиент отдаёт: {amount} {currency.upper()}\n"
+        f"За: {cny_sum} CNY\n"
         f"Платформа: {platform}\n\n"
-        f"Нажмите на кнопку ниже для продолжения ⬇️"
+        f"Нажмите ниже, чтобы отправить клиенту реквизиты и условия оплаты ⬇️"
     )

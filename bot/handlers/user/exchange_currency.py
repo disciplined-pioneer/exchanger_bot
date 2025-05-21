@@ -199,7 +199,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     # Отправляем сообщение нужному партнёру
     await bot.send_message(chat_id=partner_id,
-                           text=await format_exchange_request(amount=sum_amount, currency=currency, platform=platform),
+                           text=await format_exchange_request(amount=sum_amount, currency=currency, platform=platform, cny_sum=cny_sum),
                            reply_markup=await send_details(tg_id))
     
     # Считываем состояние пользователя и переход в нужное состояние
