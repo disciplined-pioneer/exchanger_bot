@@ -9,7 +9,7 @@ async def commission_info_message():
 
 async def commission_payment_message():
     commissions = await Exchanges.get_amout_to_current_month() * settings.bot.COMMISSION
-    return f'Оплатите комиссию сервиса в размере {commissions} юаней на следующие реквизиты (Alipay):\n\n7-9644307030\n\Vinogradov Aleksandr'
+    return f'Оплатите комиссию сервиса в размере {commissions} юаней на следующие реквизиты (Alipay):\n\n7-9644307030\nVinogradov Aleksandr'
 
 
 messages_sent_message = '✅ Сообщения были отправлены партнёрам'
