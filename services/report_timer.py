@@ -32,7 +32,7 @@ async def cancel_expired_exchanges():
             continue
 
         time_diff = now - exchange.update_at
-        if time_diff >= timedelta(minutes=30) and exchange.state == 'NEW':
+        if time_diff >= timedelta(minutes=15) and exchange.state == 'NEW':
 
             # Обновляем состояние обмена
             await exchange.update(
