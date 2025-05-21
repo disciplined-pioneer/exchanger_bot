@@ -29,18 +29,13 @@ async def display_available_exchanges():
     return text
 
 
-async def partner_information(currency: str, platform: str, partner_id: int):
+async def partner_information(currency: str, id: int):
 
     from db.models.models import Partners, Exchanges, Rates
 
-    partner_info = await Partners.get(tg_id=partner_id)
-    count_exchanges = await Exchanges.get_deal_count_by_partner(partner_id)
-    rate_info = await Rates.get(
-        from_currency=currency,
-        to_currency='CNY',
-        platform=platform,
-        partner_id=partner_id
-    )
+    rate_info = await Rates.get(id=id)
+    partner_info = await Partners.get(tg_id=rate_info.partner_id)
+    count_exchanges = await Exchanges.get_deal_count_by_partner(partner_id=rate_info.partner_id)
 
     text = (
         f'Выбран партнёр: {partner_info.name}\n'
@@ -48,35 +43,29 @@ async def partner_information(currency: str, platform: str, partner_id: int):
         f'Курс: 1 CNY = {rate_info.rate} {currency}'
     )
 
-    return text
+    return text, rate_info.partner_id
 
 
-async def confirmation_amount(currency: str, platform: str, partner_id: int):
+async def confirmation_amount(currency: str, id: int):
 
     from db.models.models import Rates
 
     rate_info = await Rates.get(
-        from_currency=currency,
-        to_currency='CNY',
-        platform=platform,
-        partner_id=partner_id
+        id=id
     )
 
-    return f'Введите сумму в CNY от {rate_info.limits}', rate_info.limits
+    return f'Введите сумму в CNY диапазоне {rate_info.limits} {currency}', rate_info.limits
 
 
 incorrect_data = ['❗ Введите число, сумма которой положительная', '❗ Пожалуйста, введите корректную сумму числом', '❗ Пожалуйста, введите число в нужном диапазоне: ']
 
 
-async def format_exchange_message(sum: float, currency: str, platform: str, partner_id: int) -> str:
+async def format_exchange_message(sum: float, currency: str, platform: str, id: int) -> str:
 
     from db.models.models import Rates
 
     rate_info = await Rates.get(
-        from_currency=currency,
-        to_currency='CNY',
-        platform=platform,
-        partner_id=partner_id
+        id=id
     )
 
     cny_sum = round(sum/rate_info.rate)

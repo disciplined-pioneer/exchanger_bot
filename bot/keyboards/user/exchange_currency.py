@@ -54,15 +54,20 @@ async def buttons_with_all_ads(currency: str, platform: str):
         if rate is None:
             continue  # Пропускаем, если нет курса
 
-        info_partner = await Partners.get(tg_id=tg_id)
-        if info_partner is None:
-            continue  # Пропускаем, если нет партнёра
+        # Прогон по курсам
+        info_partners = await Partners.filter(tg_id=tg_id)
+        if not info_partners:
+            continue  # Пропускаем, если партнёры не найдены
 
-        button = InlineKeyboardButton(
-            text=f'{rate.rate} {currency} ({rate.limits}) - {info_partner.name}',
-            callback_data=f'partner_id:{tg_id}'
-        )
-        keyboard.inline_keyboard.append([button])
+        for partner in info_partners:
+            rates = await Rates.filter(partner_id=tg_id) 
+            for rate in rates:
+                button = InlineKeyboardButton(
+                    text=f'{rate.rate} {rate.from_currency} ({rate.limits}) - {partner.name}',
+                    callback_data=f'rate_id:{rate.id}'  # или partner.id, если точнее
+                )
+                keyboard.inline_keyboard.append([button])
+
 
     keyboard.inline_keyboard.append([
         InlineKeyboardButton(text='🔙 Назад', callback_data='go_back_exchange:exchange_currency')

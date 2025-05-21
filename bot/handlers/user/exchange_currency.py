@@ -55,20 +55,21 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
     
 
 # Обработка кнопки выбора партнёра
-@router.callback_query(F.data.startswith("partner_id:"))
-async def partner_id(callback: types.CallbackQuery, state: FSMContext):
+@router.callback_query(F.data.startswith("rate_id:"))
+async def partner(callback: types.CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
     currency = data.get('currency', '')
     platform = data.get('platform', '')
-    partner_id = int(callback.data.split(':')[1])
+    id = int(callback.data.split(':')[1])
 
+    text, partner_id = await partner_information(currency, id)
     await callback.message.edit_text(
-        text=await partner_information(currency, platform, partner_id),
+        text=text,
         reply_markup=await keyboard_exchange_confirm(currency, platform)
     )
 
-    await state.update_data(partner_id=partner_id)
+    await state.update_data(partner_id=partner_id, id_rates=id)
 
 
 # Обработка кнопки "Совершить обмен"
@@ -77,10 +78,9 @@ async def start_confirm_exchange(callback: types.CallbackQuery, state: FSMContex
 
     data = await state.get_data()
     currency = data.get('currency', '')
-    platform = data.get('platform', '')
-    partner_id = data.get('partner_id', 0)    
+    id_rates = data.get('id_rates')
 
-    text, limits = await confirmation_amount(currency, platform, partner_id)
+    text, limits = await confirmation_amount(currency, id_rates)
     msg = await callback.message.edit_text(
         text=text,
         reply_markup=back_menu
@@ -100,7 +100,7 @@ async def process_input(message: types.Message, state: FSMContext):
     data = await state.get_data()
     currency = data.get("currency", '')
     platform = data.get("platform", '')
-    partner_id = data.get("partner_id", '')
+    id_rates = data.get("id_rates")
 
     limits = data.get("limits", '')
     limits_list = limits.split('-')
@@ -124,6 +124,7 @@ async def process_input(message: types.Message, state: FSMContext):
                     text=incorrect_data[0],
                     reply_markup=back_menu
                 )
+                await state.set_state(ExchangeStates.sum)
                 return
             
             # Проверка диапазона
@@ -134,10 +135,11 @@ async def process_input(message: types.Message, state: FSMContext):
                     text=incorrect_data[2] + limits,
                     reply_markup=back_menu
                 )
+                await state.set_state(ExchangeStates.sum)
                 return
             
             # Если всё хорошо
-            text, cny_sum = await format_exchange_message(amount, currency, platform, partner_id)
+            text, cny_sum = await format_exchange_message(amount, currency, platform, id_rates)
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
