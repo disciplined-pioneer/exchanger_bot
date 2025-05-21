@@ -92,6 +92,7 @@ async def range_limits(message: types.Message, state: FSMContext):
 @router.message(CollectingCurrencyInfo.exchange_rate)
 async def exchange_rate(message: types.Message, state: FSMContext):
 
+    # Данные
     await message.delete()
     data = await state.get_data()
     tg_id = message.from_user.id
@@ -131,7 +132,7 @@ async def exchange_rate(message: types.Message, state: FSMContext):
     # Логгируем в группу
     await bot.send_message(
         chat_id=settings.bot.GROUP_ID,
-        text=f'🔄 Партнёр {tg_id} обновил курс:\nОбмен: {currency} → CNY ({platform}) = {exchange_rate}.\nЛимиты: {limits}'
+        text=f'🔄 Партнёр {tg_id} добавл курс:\nОбмен: {currency}-{platform} / {limits} {currency}. Курс: {exchange_rate}'
     )
  
     await state.clear()

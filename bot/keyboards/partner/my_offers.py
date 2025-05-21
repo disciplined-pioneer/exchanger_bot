@@ -30,7 +30,7 @@ async def build_rates_keyboard_for_partner(partner_id: int) -> InlineKeyboardMar
 
         # Добавляем кнопки
         button = InlineKeyboardButton(
-            text=f'{rate} {from_currency} → {to_currency} ({platform}) | {limits}',
+            text=f'{rate} {from_currency}-{platform} / {limits} {from_currency}',
             callback_data=f'rate:{rate_partner.id}'
         )
         keyboard.inline_keyboard.append([button])

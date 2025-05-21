@@ -34,18 +34,8 @@ async def get_partner_menu(tg_id: int):
 
     # Объявления (смотрим количество существующих значений в БД)
     count = 0
-    info_partner = await Partners.get(tg_id=tg_id)
-    active_pairs = info_partner.active_pairs
-    for info in active_pairs:
-        result = await Rates.get_latest_rate(
-            partner_id=tg_id,
-            from_currency=info.get('from', ''),
-            to_currency=info.get('to', ''),
-            platform=info.get('platform', '')
-        )
-
-        if result is not None:
-            count += 1
+    info_partner = await Rates.filter(partner_id=tg_id)
+    count = len(info_partner)
 
     # Возвращаем меню
     keyboard = InlineKeyboardMarkup(
