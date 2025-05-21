@@ -50,7 +50,7 @@ async def cancel_expired_exchanges():
 
             await bot.send_message(
                 chat_id=exchange.client_id,
-                text=f'⏰ Заявка с партнёром {exchange.partner_id} была отменена по таймауту'
+                text=f'⏰ Заявка с партнёром {exchange.partner_id} была отменена по таймауту. Возможно, сейчас тех работы, повторите заявку в рабочее время или через 30 минут (в рабочее время)'
             )
 
             await bot.send_message(
