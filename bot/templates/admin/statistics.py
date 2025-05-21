@@ -15,7 +15,7 @@ async def get_monthly_exchange_report() -> str:
         f"🇷🇺 RUB куплено: {total_rub}\n"
         f"🇺🇸 USDT куплено: {total_usdt}\n\n"
         f"Сделок проведено: {all_history_count}\n"
-        f"На комиссиях заработано: {sum_comissions}"
+        f"Заработано за месяц на комиссиях: {sum_comissions}"
     )
 
     return result
