@@ -45,7 +45,7 @@ async def change_value(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-# Обработка ввода диапазона
+# Обработка ввода лимитов
 @router.message(CollectingCurrencyInfo.range_limits)
 async def range_limits(message: types.Message, state: FSMContext):
 
@@ -88,9 +88,9 @@ async def range_limits(message: types.Message, state: FSMContext):
     await state.set_state(CollectingCurrencyInfo.exchange_rate)
 
 
-# Обработка ввода диапазона
+# Обработка курса обмена
 @router.message(CollectingCurrencyInfo.exchange_rate)
-async def range_limits(message: types.Message, state: FSMContext):
+async def exchange_rate(message: types.Message, state: FSMContext):
 
     await message.delete()
     data = await state.get_data()
