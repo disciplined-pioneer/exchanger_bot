@@ -53,7 +53,7 @@ async def partner_message(message: types.Message, state: FSMContext):
         # Отправляем сообщение пользователю
         await bot.send_message(
             chat_id=user_id,
-            text=f'Сообщение от продавца {tg_id}: {message.text}',
+            text=f'Сообщение от продавца {tg_id}:\n\n<b>"{message.text}"</b>\n\nЧтобы ответить, нажмите на кнопку "Ответить" и введите текст, иначе, сообщение не отправится',
             reply_markup=reply_to_partner
         )
     except Exception as e:

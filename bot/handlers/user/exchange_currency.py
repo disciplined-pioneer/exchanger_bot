@@ -170,7 +170,7 @@ async def process_input(message: types.Message, state: FSMContext):
 async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_reply_markup(reply_markup=None)
-    await callback.message.answer('Ожидайте реквизиты для оплаты (здесь будут написаны условия пополнения)')
+    await callback.message.answer('Ожидайте реквизиты для оплаты!')
 
     # Получаем данные
     data = await state.get_data()
