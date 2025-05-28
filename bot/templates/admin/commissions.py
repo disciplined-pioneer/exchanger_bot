@@ -17,6 +17,6 @@ messages_sent_message = '✅ Сообщения были отправлены п
 payment_confirmed_message = '✅ Вы подтвердили оплату'
 
 async def partner_paid_commission_message(tg_id):
-    partner = await Partners.get(tg_id=tg_id)
+    partner = await Partners.get(tg_id=tg_id)    
     commissions = await Exchanges.get_amout_to_current_month() * settings.bot.COMMISSION
     return f'Партнёр:\nID: {tg_id}, Имя: {partner.name}\nОплатил комиссию в размере {commissions} CNY'

@@ -84,7 +84,7 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
         try:
             await bot.send_message(
                 chat_id=tg_id,
-                text=await partner_paid_commission_message(tg_id)
+                text=await partner_paid_commission_message(callback.from_user.id)
             )
         except Exception as e:
             print(f"Не удалось отправить админу {tg_id}: {e}")
