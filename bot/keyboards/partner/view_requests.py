@@ -10,7 +10,7 @@ async def get_partner_exchanges_keyboard(partner_id: int, page: int = 1, per_pag
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
     
     # Поиск заявок не с 'COMPLETED' + id партнёра
-    all_exchanges = await Exchanges.exclude(state='COMPLETED')
+    all_exchanges = await Exchanges.exclude(state=['COMPLETED', 'CANCELLED'])
     all_exchanges_partner = [exchange for exchange in all_exchanges if exchange.partner_id == partner_id]
     
     # Рассчитываем нужный срез для пагинации

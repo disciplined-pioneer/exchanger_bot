@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import TypeVar, Generic, Sequence
 
 from typing import Optional, List
+from sqlalchemy import not_, or_
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import select, case, desc, JSON, func 
 
@@ -142,17 +143,24 @@ class ModelAdmin(Generic[T]):
     @classmethod
     async def exclude(cls, select_in_load: str | None = None, **kwargs) -> Sequence[T]:
         """
-        # Возвращает все записи, которые не удовлетворяют фильтру (то есть, исключает значения).
+        Возвращает записи, которые не соответствуют фильтрам (исключает значения).
         :param select_in_load: Загрузить сразу связанную модель.
         :param kwargs: Поля и значения для исключения.
+                    Если значение — список или кортеж, исключает все из этого списка.
         :return: Перечень записей.
         """
-        # Строим условия для исключения (не равно)
-        params = [getattr(cls, key) != val for key, val in kwargs.items()]
-        query = select(cls).where(*params)
+        conditions = []
+        for key, val in kwargs.items():
+            column = getattr(cls, key)
+            if isinstance(val, (list, tuple, set)):
+                conditions.append(not_(column.in_(val)))
+            else:
+                conditions.append(column != val)
+
+        query = select(cls).where(*conditions)
 
         if select_in_load:
-            query.options(selectinload(getattr(cls, select_in_load)))
+            query = query.options(selectinload(getattr(cls, select_in_load)))
 
         async with async_db_session() as session:
             result = await session.execute(query)
@@ -275,32 +283,35 @@ class Exchanges(Base, ModelAdmin):
     state_completed = "COMPLETED"
 
     @classmethod
-    async def get_cny_sales_summary(cls) -> dict:
+    async def get_cny_sales_summary(cls, partner_id: int | None = None) -> dict:
         """
-        Возвращает сумму проданных CNY (amout_from, где to_currency == 'CNY') за день, неделю и месяц
-        для завершённых обменов.
+        Возвращает сумму проданных CNY (amout_to где to_currency == 'CNY') за день, неделю и месяц
+        для завершённых обменов. Можно указать partner_id для фильтрации по партнёру.
         """
         now = datetime.now()
         start_of_day = datetime(now.year, now.month, now.day)
         start_of_week = start_of_day - timedelta(days=start_of_day.weekday())  # Понедельник
         start_of_month = datetime(now.year, now.month, 1)
 
+        filters = [
+            cls.to_currency == "CNY",
+            cls.state == cls.state_completed,
+            cls.partner_id == partner_id
+        ]
+
         async with async_db_session() as session:
             result = await session.execute(
                 select(
                     func.sum(
-                        case((cls.created_at >= start_of_day, cls.amout_from), else_=0.0)
+                        case((cls.created_at >= start_of_day, cls.amout_to), else_=0.0)
                     ).label("day_sum"),
                     func.sum(
-                        case((cls.created_at >= start_of_week, cls.amout_from), else_=0.0)
+                        case((cls.created_at >= start_of_week, cls.amout_to), else_=0.0)
                     ).label("week_sum"),
                     func.sum(
-                        case((cls.created_at >= start_of_month, cls.amout_from), else_=0.0)
+                        case((cls.created_at >= start_of_month, cls.amout_to), else_=0.0)
                     ).label("month_sum"),
-                ).where(
-                    cls.to_currency == "CNY",
-                    cls.state == cls.state_completed
-                )
+                ).where(*filters)
             )
 
             row = result.first()
@@ -309,6 +320,7 @@ class Exchanges(Base, ModelAdmin):
                 "week": row.week_sum or 0.0,
                 "month": row.month_sum or 0.0,
             }
+
 
     @classmethod
     async def get_amout_to_current_month(cls) -> float:
@@ -395,5 +407,3 @@ class Commissions(Base, ModelAdmin):
             )
             total = result.scalar()
             return total or 0.0
-
-
