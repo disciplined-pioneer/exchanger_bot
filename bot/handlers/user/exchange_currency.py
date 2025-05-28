@@ -101,6 +101,7 @@ async def process_input(message: types.Message, state: FSMContext):
     currency = data.get("currency", '')
     platform = data.get("platform", '')
     id_rates = data.get("id_rates")
+    partner_id = data.get('partner_id')
 
     limits = data.get("limits", '')
     limits_list = limits.split('-')
@@ -139,7 +140,7 @@ async def process_input(message: types.Message, state: FSMContext):
                 return
             
             # Если всё хорошо
-            text, cny_sum = await format_exchange_message(amount, currency, platform, id_rates)
+            text, cny_sum = await format_exchange_message(amount, currency, platform, id_rates, partner_id)
             await bot.edit_message_text(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,

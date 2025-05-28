@@ -60,11 +60,11 @@ async def buttons_with_all_ads(currency: str, platform: str):
             continue  # Пропускаем, если партнёры не найдены
 
         for partner in info_partners:
-            rates = await Rates.filter(partner_id=tg_id) 
+            rates = await Rates.filter(partner_id=tg_id, platform=platform, from_currency=currency) 
             for rate in rates:
                 button = InlineKeyboardButton(
                     text=f'{rate.rate} {rate.from_currency} ({rate.limits}) - {partner.name}',
-                    callback_data=f'rate_id:{rate.id}'  # или partner.id, если точнее
+                    callback_data=f'rate_id:{rate.id}'  # id обмена
                 )
                 keyboard.inline_keyboard.append([button])
 

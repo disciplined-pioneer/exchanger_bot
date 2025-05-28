@@ -49,31 +49,26 @@ async def partner_information(currency: str, id: int):
 async def confirmation_amount(currency: str, id: int):
 
     from db.models.models import Rates
-
-    rate_info = await Rates.get(
-        id=id
-    )
-
-    return f'Введите сумму в CNY диапазоне {rate_info.limits} {currency}', rate_info.limits
+    rate_info = await Rates.get(id=id)
+    return f'Введите сумму в {currency} диапазоне {rate_info.limits}', rate_info.limits
 
 
 incorrect_data = ['❗ Введите число, сумма которой положительная', '❗ Пожалуйста, введите корректную сумму числом', '❗ Пожалуйста, введите число в нужном диапазоне: ']
 
 
-async def format_exchange_message(sum: float, currency: str, platform: str, id: int) -> str:
+async def format_exchange_message(sum: float, currency: str, platform: str, id: int, partner_id: int) -> str:
 
-    from db.models.models import Rates
+    from db.models.models import Rates, Partners
 
-    rate_info = await Rates.get(
-        id=id
-    )
+    rate_info = await Rates.get(id=id)
+    partner = await Partners.get(tg_id=partner_id)
 
     cny_sum = round(sum/rate_info.rate)
     result = (
         f"\nВы отдаёте {sum} {currency.upper()}\n"
         f"для получения {cny_sum} CNY на {platform.capitalize()}\n\n"
         "❗️ ВНИМАНИЕ ❗️\n"
-        "Партнёр НИК сейчас получит вашу заявку на обмен.\n"
+        f'Партнёр "{partner.name}" сейчас получит вашу заявку на обмен.\n'
         "Все сделки в боте застрахованы на сумму до 500 000 руб.\n\n"
         "⚠️ Будьте максимально внимательны при оплате!\n"
         "Если вы:\n"
