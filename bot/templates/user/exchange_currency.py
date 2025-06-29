@@ -50,7 +50,13 @@ async def confirmation_amount(currency: str, id: int):
 
     from db.models.models import Rates
     rate_info = await Rates.get(id=id)
-    return f'Введите сумму в {currency} диапазоне {rate_info.limits}', rate_info.limits
+
+    currencies_text = {
+        'RUB': 'рублей',
+        'USDT': 'долларов',
+    }
+
+    return f'Введите сумму в диапазоне {rate_info.limits} {currencies_text.get(currency, '')}', rate_info.limits
 
 
 incorrect_data = ['❗ Введите число, сумма которой положительная', '❗ Пожалуйста, введите корректную сумму числом', '❗ Пожалуйста, введите число в нужном диапазоне: ']

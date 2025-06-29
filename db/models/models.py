@@ -280,6 +280,7 @@ class Exchanges(Base, ModelAdmin):
     update_at: Mapped[datetime]
 
     payment_check: Mapped[str]
+    
     state_completed = "COMPLETED"
 
     @classmethod
