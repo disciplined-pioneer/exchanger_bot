@@ -18,6 +18,7 @@ router = Router()
 @router.callback_query(F.data == "exchange_currency")
 async def exchange_currency(callback: types.CallbackQuery, state: FSMContext):
     
+    await callback.answer()
     await state.clear()
     await callback.message.edit_text(
         text=await display_available_exchanges(),
@@ -30,6 +31,7 @@ async def exchange_currency(callback: types.CallbackQuery, state: FSMContext):
 async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     # Если мы вернулиьсь с помощью "Назад"
+    await callback.answer()
     data = await state.get_data()
     currency = data.get('currency', '')
     platform = data.get('platform', '')
@@ -58,6 +60,7 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("rate_id:"))
 async def partner(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     currency = data.get('currency', '')
     platform = data.get('platform', '')
@@ -76,6 +79,7 @@ async def partner(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "start_confirm_exchange")
 async def start_confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     currency = data.get('currency', '')
     id_rates = data.get('id_rates')
@@ -169,6 +173,7 @@ async def process_input(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "confirm_exchange")
 async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
     await callback.message.answer('Ожидайте реквизиты для оплаты!')
 
@@ -223,7 +228,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 async def go_back_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     #await exchange_currency(callback, state)
-
+    await callback.answer()
     type_back = callback.data.split(':')[1]
     if type_back == 'exchange_currency':
         await exchange_currency(callback, state)

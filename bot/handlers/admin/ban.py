@@ -16,6 +16,7 @@ router = Router()
 @router.callback_query(F.data == "ban_user")
 async def start_ban_user(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     state_message = await callback.message.edit_text(
         text=telegram_id_message,
         reply_markup=back_keyb

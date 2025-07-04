@@ -17,6 +17,7 @@ router = Router()
 @router.callback_query(F.data.startswith("send_details"))
 async def send_details(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     state_message = await callback.message.edit_text(input_requisites_message)
     
     await state.set_state(ExchangeStates.details)
@@ -64,6 +65,7 @@ async def save_details(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "confirm_details")
 async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     tg_id = callback.from_user.id
     partner_data = await state.get_data()
     user_id = partner_data.get('user_id', '')
@@ -102,6 +104,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "edit_details")
 async def edit_details(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     last_bot_message_id = data.get("last_id_message")
 
@@ -113,5 +116,3 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(ExchangeStates.details)
     await state.update_data({"last_id_message": state_message.message_id})
-
-

@@ -15,6 +15,8 @@ router = Router()
 # Обработка рассылки
 @router.callback_query(F.data == "admin_broadcast")
 async def start_broadcast(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.answer()
     await state.set_state(BroadcastStates.waiting_for_content)
     sent_message = await callback.message.edit_text("📨 Отправьте сообщение для рассылки (для отправки фото или документа вместе с текстом, отправьте их в одном сообщении):",
                                      reply_markup=cancel_keyboard())
@@ -64,6 +66,8 @@ async def handle_content(message: Message, state: FSMContext):
 # Обработка типа форматирования
 @router.callback_query(F.data.startswith("set_mode:"))
 async def set_parse_mode(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.answer()
     mode = callback.data.split(":")[1]
     data = await state.get_data()
     content = data["broadcast"]
@@ -79,6 +83,8 @@ async def set_parse_mode(callback: types.CallbackQuery, state: FSMContext):
 # Добавление url кнопок
 @router.callback_query(F.data == "add_buttons")
 async def ask_buttons(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.answer()
     await callback.message.edit_text(
         "Отправьте кнопки в формате:\n\nКупить - https://site.ru | Каталог - https://site.ru/catalog",
         reply_markup=cancel_keyboard()
@@ -120,6 +126,7 @@ async def handle_buttons(message: Message, state: FSMContext):
 @router.callback_query(F.data == "confirm_send")
 async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
     
+    await callback.answer()
     data = await state.get_data()
     content = data["broadcast"]
     parse_mode = content.get("parse_mode")
@@ -152,6 +159,8 @@ async def confirm_broadcast(callback: types.CallbackQuery, state: FSMContext):
 # Отмена рассылки
 @router.callback_query(F.data == "cancel")
 async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.answer()
     await callback.message.edit_text(
         text="❌ Рассылка была отменена",
         reply_markup=back_menu)

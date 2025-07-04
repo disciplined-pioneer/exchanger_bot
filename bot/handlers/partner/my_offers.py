@@ -18,6 +18,7 @@ router = Router()
 @router.callback_query(F.data == "my_offers")
 async def my_offers(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     tg_id = callback.from_user.id
     await callback.message.edit_text(
         text=choose_ad_message,
@@ -29,6 +30,7 @@ async def my_offers(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith('rate:'))
 async def rate(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     rate_id = int(callback.data.split(':')[1])
     rate_info = await Rates.get(id=rate_id)
 
@@ -42,6 +44,7 @@ async def rate(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith('delete_rate:'))
 async def delete_rate(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     rate_id = int(callback.data.split(':')[1])
     rate = await Rates.get(id=rate_id)
     if rate:
@@ -61,6 +64,7 @@ async def delete_rate(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith('edit_rate:'))
 async def edit_rate(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     rate_id = int(callback.data.split(':')[1])
     rate = await Rates.get(id=rate_id)
 
@@ -116,8 +120,9 @@ async def save_rate(message: types.Message, state: FSMContext):
 # Универсальная обработка кнопки "Назад" с context'ом
 @router.callback_query(F.data.startswith("go_back_rate:"))
 async def go_back_rate(callback: types.CallbackQuery, state: FSMContext):
-    context = callback.data.split(":")[1]
 
+    await callback.answer()
+    context = callback.data.split(":")[1]
     if context == "rates_list":
         tg_id = callback.from_user.id
         await callback.message.edit_text(

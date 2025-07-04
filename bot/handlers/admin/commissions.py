@@ -19,6 +19,7 @@ router = Router()
 @router.callback_query(F.data == "request_commissions")
 async def start_commissions(callback: types.CallbackQuery, state: FSMContext):
     
+    await callback.answer()
     await callback.message.edit_text(
         text=await commission_info_message(),
         reply_markup=request_partner_keyboard
@@ -31,6 +32,7 @@ async def start_commissions(callback: types.CallbackQuery, state: FSMContext):
 async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
     # Отправляем сообщения партнёрам
+    await callback.answer()
     info_partners = await Partners.all()
     for user in info_partners:
         try:
@@ -68,6 +70,7 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
     # Добавляем комиссию в БД
+    await callback.answer()
     commissions = await Exchanges.get_amout_to_current_month() * settings.bot.COMMISSION
     await Commissions.create(
         partner_id=callback.from_user.id,

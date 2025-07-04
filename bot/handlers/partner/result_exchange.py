@@ -21,6 +21,7 @@ router = Router()
 @router.callback_query(F.data == "paid_partner")
 async def user_paid(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     tg_id = callback.from_user.id
     user_id = data.get('user_id', 0)
@@ -64,6 +65,7 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "not_paid_partner")
 async def user_not_paid(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     user_id = data.get('user_id', '')
     

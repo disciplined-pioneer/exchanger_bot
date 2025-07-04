@@ -17,6 +17,7 @@ router = Router()
 @router.callback_query(F.data == "reply_to_user")
 async def reply_user(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     user_id = data.get('user_id', 0)
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -65,6 +66,7 @@ async def partner_message(message: types.Message, state: FSMContext):
 async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
     # Информация
+    await callback.answer()
     await state.set_state(None)
     data = await state.get_data()
     partner_id = data.get('partner_id', '')

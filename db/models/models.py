@@ -289,7 +289,7 @@ class Exchanges(Base, ModelAdmin):
         Возвращает сумму проданных CNY (amout_to где to_currency == 'CNY') за день, неделю и месяц
         для завершённых обменов. Можно указать partner_id для фильтрации по партнёру.
         """
-        now = datetime.now()
+        now = now_moscow()
         start_of_day = datetime(now.year, now.month, now.day)
         start_of_week = start_of_day - timedelta(days=start_of_day.weekday())  # Понедельник
         start_of_month = datetime(now.year, now.month, 1)
@@ -328,7 +328,7 @@ class Exchanges(Base, ModelAdmin):
         """
         Возвращает сумму amout_to за текущий месяц для завершённых обменов.
         """
-        now = datetime.now()
+        now = now_moscow()
         start_of_month = datetime(now.year, now.month, 1)
         next_month = datetime(now.year + 1, 1, 1) if now.month == 12 else datetime(now.year, now.month + 1, 1)
 
@@ -349,7 +349,7 @@ class Exchanges(Base, ModelAdmin):
         """
         Получает сумму amout_from для указанной валюты за текущий месяц для завершённых обменов.
         """
-        now = datetime.now()
+        now = now_moscow()
         start_of_month = datetime(now.year, now.month, 1)
 
         async with async_db_session() as session:

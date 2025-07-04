@@ -19,6 +19,7 @@ router = Router()
 @router.callback_query(F.data == "payment_confirmed")
 async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     id_exchange = data.get('id_exchange', 0)
 
@@ -172,6 +173,7 @@ async def user_details(message: types.Message, state: FSMContext):
 async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
     # Информация пользователя
+    await callback.answer()
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
     partner_id = data.get('partner_id', '')
@@ -258,6 +260,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 @router.callback_query(F.data == "user_edit_details")
 async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     platform = data.get('platform', '')
     message_type = data.get("message_type")

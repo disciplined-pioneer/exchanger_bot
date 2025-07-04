@@ -14,6 +14,8 @@ router = Router()
 # Обработка получения статистики
 @router.callback_query(F.data == "statistic_partner")
 async def ask_buttons(callback: types.CallbackQuery):
+
+    await callback.answer()
     await callback.message.edit_text(
         text=await get_statistics_partners(partner_id=callback.from_user.id),
         reply_markup=back_menu

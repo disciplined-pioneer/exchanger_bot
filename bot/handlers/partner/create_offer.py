@@ -17,6 +17,7 @@ router = Router()
 @router.callback_query(F.data == "create_offer")
 async def create_offer(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     tg_id = callback.from_user.id
     await callback.message.edit_text(
         text=direction_input,
@@ -29,6 +30,7 @@ async def create_offer(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("change_value_"))
 async def change_value(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     callback_data = callback.data[len("change_value_"):].split('_')
     platform = callback_data[0].capitalize()
     currency = callback_data[1].upper()
@@ -142,6 +144,7 @@ async def exchange_rate(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "create_offer_go_back")
 async def create_offer_go_back(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     data = await state.get_data()
     current_state = await state.get_state()
 

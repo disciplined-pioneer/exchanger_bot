@@ -16,6 +16,7 @@ router = Router()
 @router.callback_query(F.data == "view_requests")
 async def view_requests(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     partner_id = callback.from_user.id
     await callback.message.edit_text(
         text=choose_request_message,
@@ -29,6 +30,7 @@ async def view_requests(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith('exchanges_prev:'))
 async def next_page(call: types.CallbackQuery, state: FSMContext):
 
+    await call.answer()
     page = int(call.data.split(":")[1])
     keyboard = await get_partner_exchanges_keyboard(partner_id=call.from_user.id, page=page)
     await call.message.edit_reply_markup(reply_markup=keyboard)
@@ -39,6 +41,7 @@ async def next_page(call: types.CallbackQuery, state: FSMContext):
 async def exchange(callback: types.CallbackQuery, state: FSMContext):
 
     # Получаем всю информацию
+    await callback.answer()
     exchanges_id = int(callback.data.split(':')[1])
     info_exchanges = await Exchanges.get(id=exchanges_id)
     platform = info_exchanges.platform 

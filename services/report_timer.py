@@ -15,8 +15,8 @@ async def run_every_ten_minutes():
     logging.info("🚀 Активируем задачу.")
     await cancel_expired_exchanges()
 
-    logging.info("🔁 Запущено ожидание 10 минут")
-    await asyncio.sleep(600)
+    logging.info("🔁 Запущено ожидание 5 минут")
+    await asyncio.sleep(300)
     
 
 async def cancel_expired_exchanges():
@@ -60,7 +60,7 @@ async def cancel_expired_exchanges():
             )
 
             
-# Главный цикл репортера, запускается раз в 10 минут
+# Главный цикл репортера, запускается раз в 5 минут
 async def reporter_loop():
     while True:
         try:

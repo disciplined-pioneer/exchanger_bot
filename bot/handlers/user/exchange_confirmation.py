@@ -22,6 +22,7 @@ router = Router()
 @router.callback_query(F.data == "confirm_receipt_money")
 async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext):
     
+    await callback.answer()
     data = await state.get_data()
     id_exchange = data.get('id_exchange', 0)
     partner_id = data.get('partner_id', 0)
@@ -48,6 +49,7 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
 @router.callback_query(F.data == "not_receive_money")
 async def not_receive_money(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     state_message = await callback.message.edit_text(
         text='Напишите сообщение продавцу',
         reply_markup=back_confirmation
@@ -90,6 +92,7 @@ async def user_message(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "back_confirmation")
 async def backconfirmation(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     await state.set_state(None) # Если вернулись от "Назад"
     await callback.message.edit_text(
         text=partner_payment_confirmed_message,

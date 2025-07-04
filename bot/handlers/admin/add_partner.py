@@ -18,6 +18,7 @@ router = Router()
 @router.callback_query(F.data == "add_partner")
 async def start_add(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
     await callback.message.delete()
     await state.set_data({"index": 0, "values": {}})
     await state.set_state(AddPartner.current_index)
@@ -124,6 +125,8 @@ async def ask_next(message: types.Message, state: FSMContext):
 # Обработка кнопки "Назад"
 @router.callback_query(F.data == "go_back_admin")
 async def go_back(callback: types.CallbackQuery, state: FSMContext):
+
+    await callback.answer()
     data = await state.get_data()
     index = data.get("index", 0)
 

@@ -28,6 +28,8 @@ async def handle_unexpected_message(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "go_back_menu")
 async def back_buttons(callback: types.CallbackQuery, state: FSMContext):
 
+    await callback.answer()
+
     tg_id = callback.from_user.id
     info_users = await Users.get(tg_id=tg_id)
     role = info_users.role
