@@ -33,8 +33,7 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
     exchange_rate = await Exchanges.get(id=id_exchange)
     if exchange_rate.state != 'COMPLETED':
         await exchange_rate.update(
-            state="COMPLETED",
-            update_at=datetime.now()
+            state="COMPLETED"
         )
 
         return False, state_message_user

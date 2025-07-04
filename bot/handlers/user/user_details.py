@@ -25,8 +25,7 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
     await exchange_rate.update(
-        state="WAIT_PAYMENT",
-        update_at=datetime.now()
+        state="WAIT_PAYMENT"
     )
 
     state_message = await callback.message.edit_text(photo_or_receipt_message)

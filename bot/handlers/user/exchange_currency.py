@@ -7,8 +7,8 @@ from bot.keyboards.user.exchange_currency import *
 from bot.templates.user.exchange_currency import *
 
 from settings import settings
-from datetime import datetime
 from db.models.models import Exchanges
+from db.models.mapped_columns import now_moscow
 
 
 router = Router()
@@ -191,8 +191,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
         amout_to=cny_sum,
         platform=platform,
         state="NEW",
-        created_at=datetime.now(),
-        update_at=datetime.now(),
+        created_at=now_moscow(),
         payment_check="None"
     )
 

@@ -277,7 +277,7 @@ class Exchanges(Base, ModelAdmin):
     state: Mapped[str]
 
     created_at: Mapped[datetime]
-    update_at: Mapped[datetime]
+    update_at: Mapped[datetime] = mapped_column(default=now_moscow)
 
     payment_check: Mapped[str]
     

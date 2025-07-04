@@ -7,6 +7,7 @@ from settings import settings
 
 from datetime import datetime, timedelta
 from db.models.models import Exchanges
+from db.models.mapped_columns import now_moscow
 
 
 async def run_every_ten_minutes():
@@ -26,7 +27,7 @@ async def cancel_expired_exchanges():
     logging.info("🔍 Проверка заявок на истечение времени...")
 
     all_exchanges = await Exchanges.all()
-    now = datetime.utcnow()
+    now = now_moscow()
 
     for exchange in all_exchanges:
         if exchange.update_at is None:
@@ -37,8 +38,7 @@ async def cancel_expired_exchanges():
 
             # Обновляем состояние обмена
             await exchange.update(
-                state='CANCELLED',
-                update_at=datetime.now()
+                state='CANCELLED'
             )
 
             logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")

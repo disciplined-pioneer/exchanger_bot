@@ -29,8 +29,7 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
     await exchange_rate.update(
-        state="PAID",
-        update_at=datetime.now()
+        state="PAID"
     )
 
     await callback.message.delete()

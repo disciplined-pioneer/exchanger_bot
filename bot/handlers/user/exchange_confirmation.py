@@ -29,8 +29,7 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
     await exchange_rate.update(
-        state="COMPLETED",
-        update_at=datetime.now()
+        state="COMPLETED"
     )
 
     await callback.message.edit_text(exchange_completed_message)
