@@ -322,7 +322,6 @@ class Exchanges(Base, ModelAdmin):
                 "month": row.month_sum or 0.0,
             }
 
-
     @classmethod
     async def get_amout_to_current_month(cls) -> float:
         """

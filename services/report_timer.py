@@ -26,39 +26,45 @@ async def cancel_expired_exchanges():
     """
     logging.info("🔍 Проверка заявок на истечение времени...")
 
-    all_exchanges = await Exchanges.all()
+    all_exchanges = await Exchanges.exclude(state='CANCELLED') # Все заявки, кроме уже отменённых
     now = now_moscow()
 
     for exchange in all_exchanges:
-        if exchange.update_at is None:
-            continue
 
-        time_diff = now - exchange.update_at
-        if (time_diff >= timedelta(minutes=15) and exchange.state == 'NEW') or (time_diff >= timedelta(days=1)):
+        try:
 
-            # Обновляем состояние обмена
-            await exchange.update(
-                state='CANCELLED'
-            )
+            if exchange.update_at is None:
+                continue
 
-            logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")
+            time_diff = now - exchange.update_at
+            if (time_diff >= timedelta(minutes=15) and exchange.state == 'NEW') or (time_diff >= timedelta(days=1)):
 
-            # Уведомляем участников и группу
-            await bot.send_message(
-                chat_id=exchange.partner_id,
-                text=f'⏰ Заявка с пользователем {exchange.client_id} была отменена по таймауту'
-            )
+                # Обновляем состояние обмена
+                await exchange.update(
+                    state='CANCELLED'
+                )
 
-            await bot.send_message(
-                chat_id=exchange.client_id,
-                text=f'⏰ Заявка с партнёром {exchange.partner_id} была отменена по таймауту. Возможно, сейчас тех работы, повторите заявку в рабочее время или через 30 минут (в рабочее время)'
-            )
+                logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")
 
-            await bot.send_message(
-                chat_id=settings.bot.GROUP_ID,
-                text=f'⏰ Заявка {exchange.id} была отменена по таймауту'
-            )
+                # Уведомляем участников и группу
+                await bot.send_message(
+                    chat_id=exchange.partner_id,
+                    text=f'⏰ Заявка с пользователем {exchange.client_id} была отменена по таймауту'
+                )
 
+                await bot.send_message(
+                    chat_id=exchange.client_id,
+                    text=f'⏰ Заявка с партнёром {exchange.partner_id} была отменена по таймауту. Возможно, сейчас тех работы, повторите заявку в рабочее время или через 30 минут (в рабочее время)'
+                )
+
+                await bot.send_message(
+                    chat_id=settings.bot.GROUP_ID,
+                    text=f'⏰ Заявка {exchange.id} была отменена по таймауту'
+                )
+
+        except Exception as e:
+            logging.error(f"Произошла ошибка при отмене завки: {e}")
+        
             
 # Главный цикл репортера, запускается раз в 5 минут
 async def reporter_loop():
