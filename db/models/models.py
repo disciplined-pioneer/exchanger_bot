@@ -321,7 +321,40 @@ class Exchanges(Base, ModelAdmin):
                 "week": row.week_sum or 0.0,
                 "month": row.month_sum or 0.0,
             }
+        
+    @classmethod
+    async def get_partner_commission(cls, partner_id: int) -> int:
+        """
+        Возвращает округлённую сумму комиссии (4%), которую должен оплатить партнёр
+        — с учётом уже оплаченных комиссий.
+        """
+        from settings import settings
+        async with async_db_session() as session:
+            # 1. Сумма всех сделок по partner_id
+            result = await session.execute(
+                select(func.sum(cls.amout_to)).where(
+                    cls.state == cls.state_completed,
+                    cls.partner_id == partner_id
+                )
+            )
+            total_volume = result.scalar() or 0.0
 
+            # 2. Считаем, сколько он должен
+            total_commission = total_volume * settings.bot.COMMISSION
+
+            # 3. Сколько уже оплатил
+            paid_result = await session.execute(
+                select(func.sum(Commissions.commissions)).where(
+                    Commissions.partner_id == partner_id
+                )
+            )
+            already_paid = paid_result.scalar() or 0.0
+
+            # 4. Что осталось оплатить
+            to_pay = max(total_commission - already_paid, 0.0)
+
+            return int(round(to_pay))
+        
     @classmethod
     async def get_amout_to_current_month(cls) -> float:
         """
@@ -342,6 +375,32 @@ class Exchanges(Base, ModelAdmin):
             )
             total = result.scalar()
             return total or 0.0
+
+    @classmethod
+    async def get_total_unpaid_commission(cls) -> int:
+        """
+        Возвращает сумму комиссии (4%) от всех завершённых обменов за всё время,
+        минус реально оплаченные комиссии. Округлённая сумма.
+        """
+        from settings import settings
+        async with async_db_session() as session:
+            # Общая сумма по завершённым сделкам
+            total_result = await session.execute(
+                select(func.sum(cls.amout_to)).where(cls.state == cls.state_completed)
+            )
+            total_volume = total_result.scalar() or 0.0
+
+            # 4% от этого — сколько всего ДОЛЖНО быть оплачено
+            total_commission_required = total_volume * settings.bot.COMMISSION
+
+            # Реально оплачено по всем (в идеале — надо связывать с партнёрами)
+            paid_result = await session.execute(
+                select(func.sum(Commissions.commissions))
+            )
+            total_paid = paid_result.scalar() or 0.0
+
+            unpaid_commission = max(total_commission_required - total_paid, 0.0)
+            return int(round(unpaid_commission))
 
     @classmethod
     async def get_amout_from_for_month(cls, from_currency: str) -> float:
@@ -387,8 +446,8 @@ class Commissions(Base, ModelAdmin):
 
     id: Mapped[intpk]
     partner_id: Mapped[int] = mapped_column(BigInteger)
-    commissions = mapped_column(Float)
-    date: Mapped[datetime]
+    commissions: Mapped[float] = mapped_column(Float)
+    date: Mapped[datetime] = mapped_column(default=now_moscow)
     
 
     @classmethod

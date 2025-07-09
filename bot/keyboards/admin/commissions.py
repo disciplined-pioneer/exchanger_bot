@@ -7,11 +7,13 @@ request_partner_keyboard = InlineKeyboardMarkup(
     ]
 )
 
-paid_commission_keyb = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Я оплатил", callback_data="paid_commission")]
-    ]
-)
+def paid_commission_keyb(commissions):
+    keyb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="✅ Я оплатил", callback_data=f"paid_commission:{commissions}")]
+        ]
+    )
+    return keyb
 
 back_menu = InlineKeyboardMarkup(
     inline_keyboard=[

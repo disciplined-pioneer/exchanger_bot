@@ -37,17 +37,16 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
     for user in info_partners:
         try:
             # Отправляем сообщение партнёру
+            commissions = await Exchanges.get_partner_commission(user.tg_id)
             await bot.send_message(
                 chat_id=user.tg_id,
-                text=await commission_payment_message(),
-                reply_markup=paid_commission_keyb
+                text=await commission_payment_message(commissions),
+                reply_markup=paid_commission_keyb(commissions)
             )
             
             # Активируем ему состояние
-            partner_state = FSMContext(
-                storage=state.storage,
-                key=state.key.__class__(bot_id=state.key.bot_id, chat_id=user.tg_id, user_id=user.tg_id)
-            )
+            partner_state = FSMContext(bot=bot, storage=state.storage, chat=user.tg_id, user=user.tg_id)
+            await partner_state.update_data(commissions=commissions)
             await partner_state.set_state(RequestCommissions.request)
 
         except Exception as e:
@@ -66,16 +65,16 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Обработка кнопки "Я оплатил"
-@router.callback_query(F.data == "paid_commission")
+@router.callback_query(F.data.startswith("paid_commission"))
 async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
     # Добавляем комиссию в БД
     await callback.answer()
-    commissions = await Exchanges.get_amout_to_current_month() * settings.bot.COMMISSION
+    commissions = int(callback.data.split(':')[1])
+    
     await Commissions.create(
         partner_id=callback.from_user.id,
-        commissions=commissions,
-        date=datetime.now()
+        commissions=commissions
     )
 
     await callback.message.edit_text(
@@ -87,7 +86,7 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
         try:
             await bot.send_message(
                 chat_id=tg_id,
-                text=await partner_paid_commission_message(callback.from_user.id)
+                text=await partner_paid_commission_message(callback.from_user.id, commissions)
             )
         except Exception as e:
             print(f"Не удалось отправить админу {tg_id}: {e}")
