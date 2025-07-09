@@ -90,7 +90,6 @@ async def format_exchange_message(sum: float, currency: str, platform: str, id: 
 
     return result, cny_sum
 
-
 async def format_exchange_request(amount: float, currency: str, platform: str, cny_sum: int) -> str:
 
     return (
@@ -100,3 +99,7 @@ async def format_exchange_request(amount: float, currency: str, platform: str, c
         f"Платформа: {platform}\n\n"
         f"Нажмите ниже, чтобы отправить клиенту реквизиты и условия оплаты ⬇️"
     )
+
+
+def format_log_message(tg_id: int, currency: str, sum_amount: float) -> str:
+    return f"📝 Новая заявка от клиента {tg_id}. Направление: {currency} → CNY. Сумма: {sum_amount} {currency}"

@@ -19,7 +19,9 @@ async def create_offer(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
     tg_id = callback.from_user.id
-    await callback.message.edit_text(
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+    await callback.message.answer(
         text=direction_input,
         reply_markup=await currency_keyboard(tg_id)
     )
@@ -34,8 +36,10 @@ async def change_value(callback: types.CallbackQuery, state: FSMContext):
     callback_data = callback.data[len("change_value_"):].split('_')
     platform = callback_data[0].capitalize()
     currency = callback_data[1].upper()
-    
-    msg = await callback.message.edit_text(
+
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+    msg = await callback.message.answer(
         text=generate_announcement_message(platform, currency),
         reply_markup=create_offer_back_keyb
     )
@@ -43,8 +47,6 @@ async def change_value(callback: types.CallbackQuery, state: FSMContext):
     await state.set_data({'platform': platform, 'currency': currency})
     await state.update_data(last_bot_message_id=msg.message_id)
     await state.set_state(CollectingCurrencyInfo.range_limits)
-
-    await callback.answer()
 
 
 # Обработка ввода лимитов
@@ -58,30 +60,37 @@ async def range_limits(message: types.Message, state: FSMContext):
 
     # Проверка на корректное значение диапазона
     result, text_error = validate_limits_input(message.text)
-    try:
-        if not result:
-            msg = await bot.edit_message_text(
+    if not result:
+        try:
+            await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
+                reply_markup=None
+            )
+            msg = await bot.send_message(
+                chat_id=message.chat.id,
                 text=text_error,
                 reply_markup=create_offer_back_keyb
             )
             await state.update_data(last_bot_message_id=msg.message_id)
+        except:
             return
-    except:
-        return
 
     # Обновляем сообщение бота
     try:
-        msg = await bot.edit_message_text(
+        await bot.edit_message_reply_markup(
             chat_id=message.chat.id,
             message_id=last_bot_message_id,
+            reply_markup=None
+        )
+        msg = await bot.send_message(
+            chat_id=message.chat.id,
             text=exchange_rate_message(currency),
             reply_markup=create_offer_back_keyb
         )
         await state.update_data(last_bot_message_id=msg.message_id)
-    except Exception as e:
-        print(f"Не удалось отредактировать сообщение: {e}")
+    except:
+        return
     
     # Обновляем состояние
     await state.update_data(
@@ -106,37 +115,50 @@ async def exchange_rate(message: types.Message, state: FSMContext):
 
     # Проверка на корректное значение валюты
     result, text_error = validate_exchange_rate(exchange_rate)
-    try:
-        if not result:
-            msg = await bot.edit_message_text(
+    if not result:
+        try:
+            # Убираем кнопки из старого сообщения
+            await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
+                reply_markup=None
+            )
+            # Отправляем новое сообщение с ошибкой и кнопками
+            msg = await bot.send_message(
+                chat_id=message.chat.id,
                 text=text_error,
                 reply_markup=create_offer_back_keyb
             )
             await state.update_data(last_bot_message_id=msg.message_id)
+        except:
             return
+
+    # Добавляем в БД и удаляем, если запись уже есть
+    await save_rate(currency, exchange_rate, platform, limits, tg_id)
+
+    try:
+        # Убираем кнопки из старого сообщения
+        await bot.edit_message_reply_markup(
+            chat_id=message.chat.id,
+            message_id=last_bot_message_id,
+            reply_markup=None
+        )
+        # Отправляем новое сообщение с объявлением и кнопками
+        msg = await bot.send_message(
+            chat_id=message.chat.id,
+            text=create_advertisement_message(platform, currency, limits, exchange_rate),
+            reply_markup=back_menu
+        )
+        await state.update_data(last_bot_message_id=msg.message_id)
     except:
         return
     
-    
-    # Добавляем в БД и удаляем, если запись уже есть
-    await save_rate(currency, exchange_rate, platform, limits, message.from_user.id)
-    
-    
-    msg = await bot.edit_message_text(
-        chat_id=message.chat.id,
-        message_id=last_bot_message_id,
-        text=create_advertisement_message(platform, currency, limits, exchange_rate),
-        reply_markup=back_menu
-    )
-
     # Логгируем в группу
     await bot.send_message(
         chat_id=settings.bot.GROUP_ID,
-        text=f'🔄 Партнёр {tg_id} добавл курс:\nОбмен: {currency}-{platform} / {limits} {currency}. Курс: {exchange_rate}'
+        text=format_partner_rate_log(tg_id, currency, platform, limits, exchange_rate)
     )
- 
+
     await state.clear()
 
 
@@ -148,21 +170,25 @@ async def create_offer_go_back(callback: types.CallbackQuery, state: FSMContext)
     data = await state.get_data()
     current_state = await state.get_state()
 
+    # Убираем кнопки из старого сообщения
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
     # Переходы к предыдущим состояниям
     if current_state == CollectingCurrencyInfo.range_limits.state:
         await state.set_state(CollectingCurrencyInfo.start)
-        await callback.message.edit_text(
+        await callback.message.answer(
             text=direction_input,
             reply_markup=await currency_keyboard(callback.from_user.id)
         )
-        await callback.answer()
 
     elif current_state == CollectingCurrencyInfo.exchange_rate.state:
         platform = data.get('platform', '')
         currency = data.get('currency', '')
         await state.set_state(CollectingCurrencyInfo.range_limits)
-        await callback.message.edit_text(
+        await callback.message.answer(
             text=generate_announcement_message(platform, currency),
             reply_markup=create_offer_back_keyb
         )
-        await callback.answer()

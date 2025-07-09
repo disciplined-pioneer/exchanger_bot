@@ -16,8 +16,15 @@ router = Router()
 async def ask_buttons(callback: types.CallbackQuery):
 
     await callback.answer()
-    await callback.message.edit_text(
+
+    # Убираем кнопки из старого сообщения, не меняя текст
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    # Отправляем новое сообщение с текстом статистики и кнопкой "Назад"
+    await callback.message.answer(
         text=await get_statistics_partners(partner_id=callback.from_user.id),
         reply_markup=back_menu
     )
-    await callback.answer()

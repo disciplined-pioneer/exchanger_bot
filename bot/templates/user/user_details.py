@@ -32,3 +32,16 @@ def get_no_payment_instructions(partner_id: int) -> str:
 def format_user_details(details: str='') -> str:
     return f"Реквизиты пользователя:\n{details}"
 
+
+def format_receipt_log(tg_id: int, id_exchange: int) -> str:
+    return f"📎 Клиент {tg_id} отправил чек по заявке {id_exchange}"
+
+def format_seller_message(tg_id, message_text):
+    return (
+        f'Сообщение от продавца {tg_id}:\n\n'
+        f'<b>"{message_text}"</b>\n\n'
+        'Чтобы ответить, нажмите на кнопку "Ответить" и введите текст, иначе, сообщение не отправится'
+    )
+
+def get_sent_confirmation():
+    return 'Сообщение было отправлено пользователю'

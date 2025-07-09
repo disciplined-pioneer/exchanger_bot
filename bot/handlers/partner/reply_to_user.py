@@ -44,21 +44,26 @@ async def partner_message(message: types.Message, state: FSMContext):
     await state.set_state(None)
 
     try:
-        # Удаляем сообщения
-        await bot.edit_message_text(
-            text='Сообщение было отправлено пользователю',
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await bot.edit_message_reply_markup(
             chat_id=message.from_user.id,
-            message_id=last_id_message
+            message_id=last_id_message,
+            reply_markup=None
+        )
+        # Отправляем новое сообщение с подтверждением
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text=get_sent_confirmation()
         )
 
         # Отправляем сообщение пользователю
         await bot.send_message(
             chat_id=user_id,
-            text=f'Сообщение от продавца {tg_id}:\n\n<b>"{message.text}"</b>\n\nЧтобы ответить, нажмите на кнопку "Ответить" и введите текст, иначе, сообщение не отправится',
+            text=format_seller_message(tg_id, message.text),
             reply_markup=reply_to_partner
         )
-    except Exception as e:
-        print(e)
+    except:
+        return
 
 
 # Обработчик кнопки "Назад" в подтверждене оплаты
@@ -73,8 +78,13 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
     details_user = data.get('details_user', '')
     message_type = data.get("message_type", '')
 
+    # Убираем кнопки из старого сообщения
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
     # В зависимости от типа отправляем сообщение ПАРТНЁРУ
-    await callback.message.delete()
     if message_type in 'photo':
 
         # Отправляем сообщение партнёру

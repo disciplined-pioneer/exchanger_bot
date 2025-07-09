@@ -33,7 +33,13 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
         update_at=now_moscow()
     )
 
-    await callback.message.delete()
+    # Убираем кнопки из старого сообщения, не меняя текст
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    # Отправляем новое сообщение с подтверждением оплаты
     await callback.message.answer(payment_confirmed_message)
 
     # Отправляем сообщение пользователю только с первой кнопкой
@@ -68,9 +74,14 @@ async def user_not_paid(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
     data = await state.get_data()
     user_id = data.get('user_id', '')
-    
-    # Сообщение партнёру
-    await callback.message.delete()
+
+    # Убираем кнопки из старого сообщения, не меняя текст
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    # Отправляем новое сообщение с подтверждением партнёру
     await callback.message.answer(message_sent_to_user)
 
     # Отправляем сообщение пользователю

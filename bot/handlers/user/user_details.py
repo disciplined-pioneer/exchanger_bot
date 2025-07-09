@@ -30,7 +30,13 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
         update_at=now_moscow()
     )
 
-    state_message = await callback.message.edit_text(photo_or_receipt_message)
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    state_message = await callback.message.answer(photo_or_receipt_message)
     await state.update_data({"last_id_message": state_message.message_id})
     await state.set_state(PaymentState.waiting_for_receipt)  # Переходим в состояние ожидания файла
 
@@ -39,13 +45,12 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
 @router.message(PaymentState.waiting_for_receipt)
 async def handle_receipt(message: types.Message, state: FSMContext):
 
-    data = await state.get_data()
-    id_exchange = data.get('id_exchange', 0)
-
+    # Данные
     await message.delete()
     data = await state.get_data()
     tg_id = message.from_user.id
     partner_id = data.get("partner_id", '')
+    id_exchange = data.get('id_exchange', 0)
     last_bot_message_id = data.get("last_id_message", 0)
 
     try:
@@ -62,9 +67,8 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             await bot.send_document(partner_id, file_id, caption=payment_confirmation_message)
 
         else:
-            state_message = await bot.edit_message_text(
+            state_message = await bot.send_message(
                 chat_id=message.chat.id,
-                message_id=last_bot_message_id,
                 text=photo_or_document_request_message
             )
             await state.update_data({"last_id_message": state_message.message_id})
@@ -79,9 +83,8 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 
         # Сообщение пользователю
         platform = data.get('platform', '')
-        state_message = await bot.edit_message_text(
+        state_message = await bot.send_message(
             chat_id=message.chat.id,
-            message_id=last_bot_message_id,
             text=generate_requisites_message(platform)
         )
         await state.update_data({"last_id_message": state_message.message_id})
@@ -90,7 +93,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
         # Логгирование в группу
         await bot.send_message(
             chat_id=settings.bot.GROUP_ID,
-            text=f"📎 Клиент {tg_id} отправил чек по заявке {id_exchange}"
+            text=format_receipt_log(tg_id, id_exchange)
         )
 
     except:
@@ -108,11 +111,14 @@ async def user_details(message: types.Message, state: FSMContext):
 
         # Проверка на пустоту
         if not (message.photo or message.document or message.text):
-            state_message = await bot.edit_message_text(
+            await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
-                text=photo_document_or_text_request_message,
                 reply_markup=None
+            )
+            state_message = await bot.send_message(
+                chat_id=message.chat.id,
+                text=photo_document_or_text_request_message
             )
             await state.update_data({"last_id_message": state_message.message_id})
             return
@@ -150,14 +156,18 @@ async def user_details(message: types.Message, state: FSMContext):
 
             # Отправляем текст
             details = message.text
-            sent_message = await bot.edit_message_text(
+
+            await bot.edit_message_reply_markup(
+                chat_id=message.chat.id,
+                message_id=last_bot_message_id,
+                reply_markup=None
+            )
+            sent_message = await bot.send_message(
                 chat_id=message.chat.id,
                 text=format_confirm_details(details),
-                message_id=last_bot_message_id,
                 reply_markup=user_confirm_keyb
             )
             await state.update_data({"message_type": 'text'})
-
 
         # Сохраняем новое сообщение для трекинга
         await state.update_data({"last_id_message": sent_message.message_id,
@@ -173,7 +183,6 @@ async def user_details(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "user_confirm_details")
 async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
-    # Информация пользователя
     await callback.answer()
     data = await state.get_data()
     id_exchange = data.get('id_exchange', '')
@@ -189,22 +198,18 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     )
     await partner_state.update_data(details_user=details_user, message_type=message_type)
 
+    if message_type == 'photo':
 
-    #user_link = f'tg://user?id={callback.from_user.id}'
-
-    # В зависимости от типа отправляем сообщение ПОЛЬЗОВАТЕЛЮ и ПАРТНЁРУ
-    if message_type in 'photo':
-        
         await callback.message.delete()
 
-        # Отправляем сообщение пользователю
+        # Сообщение пользователю
         state_message = await bot.send_photo(
             chat_id=callback.message.chat.id,
             photo=details_user,
             caption=generate_payment_message(cny_sum)
         )
 
-        # Отправляем сообщение партнёру
+        # Сообщение партнёру
         await bot.send_photo(
             chat_id=partner_id,
             photo=details_user,
@@ -212,18 +217,18 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             reply_markup=create_payment_keyboard()
         )
 
-    elif message_type in 'document':
+    elif message_type == 'document':
 
         await callback.message.delete()
 
-        # Отправляем сообщение пользователю
+        # Сообщение пользователю
         state_message = await bot.send_document(
             chat_id=callback.message.chat.id,
             document=details_user,
             caption=generate_payment_message(cny_sum)
         )
 
-        # Отправляем сообщение партнёру
+        # Сообщение партнёру
         await bot.send_document(
             chat_id=partner_id,
             document=details_user,
@@ -233,24 +238,25 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 
     else:
 
-        state_message = await callback.message.edit_text(generate_payment_message(cny_sum, f"\nРеквизиты:\n{details_user}")) # Пользователь
+        state_message = await callback.message.edit_text(
+            generate_payment_message(cny_sum, f"\nРеквизиты:\n{details_user}")
+        )
 
-        # Партнёр
         await bot.send_message(
             chat_id=partner_id,
             text=format_user_details(details_user),
             reply_markup=create_payment_keyboard()
         )
-    
+
     await state.set_state(None)
     await state.update_data({"last_id_message": state_message.message_id})
 
     # Ждём 5 минут и проверяем статус
-    await asyncio.sleep(5*60)
+    await asyncio.sleep(5 * 60)
     exchange = await Exchanges.get(id=id_exchange)
-    state = exchange.state
-    if state == 'WAIT_PAYMENT':
-        state_message = await callback.message.answer(
+    state_exchange = exchange.state
+    if state_exchange == 'WAIT_PAYMENT':
+        await callback.message.answer(
             text=get_no_payment_instructions(partner_id),
             reply_markup=support_keyb,
             parse_mode="MarkdownV2"
@@ -274,7 +280,13 @@ async def user_edit_details(callback: types.CallbackQuery, state: FSMContext):
             text=generate_requisites_message(platform)
         )
     else:
-        state_message = await callback.message.edit_text(
+        try:
+            # Убираем кнопки из старого сообщения, не меняя текст
+            await callback.message.edit_reply_markup(reply_markup=None)
+        except:
+            pass
+        state_message = await bot.send_message(
+            chat_id=callback.message.chat.id,
             text=generate_requisites_message(platform)
         )
 

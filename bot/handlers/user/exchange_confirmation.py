@@ -32,8 +32,13 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
         state="COMPLETED",
         update_at=now_moscow()
     )
-
-    await callback.message.edit_text(exchange_completed_message)
+    
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+    await callback.message.answer(exchange_completed_message)
 
     # Сообщение партнёру
     await bot.send_message(
@@ -41,7 +46,6 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
         text=exchange_completed_message_partner(callback.from_user.id, id_exchange)
     )
 
-    
     await state.clear()
 
 
@@ -50,8 +54,14 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
 async def not_receive_money(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
-    state_message = await callback.message.edit_text(
-        text='Напишите сообщение продавцу',
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    state_message = await callback.message.answer(
+        text=prompt_message_to_seller(),
         reply_markup=back_confirmation
     )
     await state.set_state(MessagingStates.user_message)
@@ -71,17 +81,23 @@ async def user_message(message: types.Message, state: FSMContext):
     await state.set_state(None)
 
     try:
-        # Удаляем сообщения
-        await bot.edit_message_text(
-            text='Сообщение было отправлено партнёру',
+        # Убираем клавиатуру с предыдущего сообщения, не меняя текст
+        await bot.edit_message_reply_markup(
             chat_id=message.from_user.id,
-            message_id=last_id_message
+            message_id=last_id_message,
+            reply_markup=None
+        )
+
+        # Отправляем новое сообщение вместо редактирования
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text=confirmation_message()
         )
 
         # Отправляем сообщение партнёру
         await bot.send_message(
             chat_id=partner_id,
-            text=f'Сообщение от клиента {tg_id}:\n\n<b>"{message.text}"</b>\n\nЧтобы ответить, нажмите на кнопку "Ответить" и введите текст, иначе, сообщение не отправится',
+            text=format_message_to_partner(tg_id, message.text),
             reply_markup=reply_to_user
         )
     except Exception as e:

@@ -59,7 +59,7 @@ async def cancel_expired_exchanges():
 
                 await bot.send_message(
                     chat_id=settings.bot.GROUP_ID,
-                    text=f'⏰ Заявка {exchange.id} была отменена по таймауту'
+                    text=f'⏰ Заявка №{exchange.id} была отменена по таймауту'
                 )
 
         except Exception as e:

@@ -15,3 +15,9 @@ def create_advertisement_message(platform, currency, limits, exchange_rate):
         f'Лимиты: {limits}\n'
         f'Курс: 1 CNY = {exchange_rate} {currency}\n'
     )
+
+def format_partner_rate_log(tg_id, currency, platform, limits, exchange_rate) -> str:
+    return (
+        f'🔄 Партнёр {tg_id} добавл курс:\n'
+        f'Обмен: {currency}-{platform} / {limits} {currency}. Курс: {exchange_rate}'
+    )

@@ -18,9 +18,15 @@ router = Router()
 @router.callback_query(F.data == "exchange_currency")
 async def exchange_currency(callback: types.CallbackQuery, state: FSMContext):
     
-    await callback.answer()
     await state.clear()
-    await callback.message.edit_text(
+    await callback.answer()
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    await callback.message.answer(
         text=await display_available_exchanges(),
         reply_markup=await output_all_possible_exchanges()
     )
@@ -30,7 +36,7 @@ async def exchange_currency(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("type_exchange:"))
 async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
 
-    # Если мы вернулиьсь с помощью "Назад"
+    # Если мы вернулись с помощью "Назад"
     await callback.answer()
     data = await state.get_data()
     currency = data.get('currency', '')
@@ -38,14 +44,18 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     if currency == '' and platform == '':
         
-        # Получаем данные из кноки
+        # Получаем данные из кнопки
         type_exchange = callback.data.split(':')[1]
         currency = type_exchange.split('_')[0].upper()
         platform = type_exchange.split('_')[1].capitalize()
 
-    # Отправляем сообщение
     keyboard, text = await buttons_with_all_ads(currency, platform)
-    await callback.message.edit_text(
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+    await callback.message.answer(
         text=text,
         reply_markup=keyboard
     )
@@ -54,7 +64,7 @@ async def type_exchange(callback: types.CallbackQuery, state: FSMContext):
         currency=currency,
         platform=platform
     )
-    
+
 
 # Обработка кнопки выбора партнёра
 @router.callback_query(F.data.startswith("rate_id:"))
@@ -67,7 +77,12 @@ async def partner(callback: types.CallbackQuery, state: FSMContext):
     id = int(callback.data.split(':')[1])
 
     text, partner_id = await partner_information(currency, id)
-    await callback.message.edit_text(
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+    await callback.message.answer(
         text=text,
         reply_markup=await keyboard_exchange_confirm(currency, platform)
     )
@@ -85,7 +100,12 @@ async def start_confirm_exchange(callback: types.CallbackQuery, state: FSMContex
     id_rates = data.get('id_rates')
 
     text, limits = await confirmation_amount(currency, id_rates)
-    msg = await callback.message.edit_text(
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+    msg = await callback.message.answer(
         text=text,
         reply_markup=back_menu
     )
@@ -123,9 +143,13 @@ async def process_input(message: types.Message, state: FSMContext):
             amount = float(text)
             if amount <= 0:
                 # Если сумма отрицательная или 0, выводим сообщение
-                await bot.edit_message_text(
+                await bot.edit_message_reply_markup(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
+                    reply_markup=None
+                )
+                await bot.send_message(
+                    chat_id=message.chat.id,
                     text=incorrect_data[0],
                     reply_markup=back_menu
                 )
@@ -134,9 +158,13 @@ async def process_input(message: types.Message, state: FSMContext):
             
             # Проверка диапазона
             if not (limit_low <= amount <= limit_high):
-                await bot.edit_message_text(
+                await bot.edit_message_reply_markup(
                     chat_id=message.chat.id,
                     message_id=last_bot_message_id,
+                    reply_markup=None
+                )
+                await bot.send_message(
+                    chat_id=message.chat.id,
                     text=incorrect_data[2] + limits,
                     reply_markup=back_menu
                 )
@@ -145,21 +173,31 @@ async def process_input(message: types.Message, state: FSMContext):
             
             # Если всё хорошо
             text, cny_sum = await format_exchange_message(amount, currency, platform, id_rates, partner_id)
-            await bot.edit_message_text(
+
+            await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
+                reply_markup=None
+            )
+            await bot.send_message(
+                chat_id=message.chat.id,
                 text=text,
                 reply_markup=confirm_cancel_exchange
             )
+
             await state.update_data(sum_amount=amount, cny_sum=cny_sum)
             await state.set_state(ExchangeStates.plug)
             return
             
         except ValueError:
             # Если введено не число
-            await bot.edit_message_text(
+            await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=last_bot_message_id,
+                reply_markup=None
+            )
+            await bot.send_message(
+                chat_id=message.chat.id,
                 text=incorrect_data[1],
                 reply_markup=back_menu
             )
@@ -174,7 +212,11 @@ async def process_input(message: types.Message, state: FSMContext):
 async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
-    await callback.message.edit_reply_markup(reply_markup=None)
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
     await callback.message.answer('Ожидайте реквизиты для оплаты!')
 
     # Получаем данные
@@ -203,9 +245,16 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(id_exchange=exchange.id)
 
     # Отправляем сообщение нужному партнёру
-    await bot.send_message(chat_id=partner_id,
-                           text=await format_exchange_request(amount=sum_amount, currency=currency, platform=platform, cny_sum=cny_sum),
-                           reply_markup=await send_details(tg_id))
+    await bot.send_message(
+        chat_id=partner_id,
+        text=await format_exchange_request(
+            amount=sum_amount,
+            currency=currency,
+            platform=platform,
+            cny_sum=cny_sum
+        ),
+        reply_markup=await send_details(tg_id)
+    )
     
     # Считываем состояние пользователя и переход в нужное состояние
     partner_state = FSMContext(
@@ -219,7 +268,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     # Логгирование в группу
     await bot.send_message(
         chat_id=settings.bot.GROUP_ID,
-        text=f"📝 Новая заявка от клиента {tg_id}. Направление: {currency} → CNY. Сумма: {sum_amount} {currency}"
+        text=format_log_message(tg_id, currency, sum_amount)
     )
 
 
