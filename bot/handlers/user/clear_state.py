@@ -34,23 +34,25 @@ async def back_buttons(callback: types.CallbackQuery, state: FSMContext):
     info_users = await Users.get(tg_id=tg_id)
     role = info_users.role
 
+    # Убираем кнопки с исходного сообщения, не меняя текст
+    await callback.message.edit_reply_markup(reply_markup=None)
+
     if role == 'admin': # Админ
-        await callback.message.edit_text(
+        await callback.message.answer(
             text=starting_admin_message,
             reply_markup=start_admin_keyb
         )
 
     elif role == 'partner': # Парнёр
-        await callback.message.edit_text(
+        await callback.message.answer(
             text=starting_parner_message,
             reply_markup=await get_partner_menu(tg_id)
         )
 
     else: # Пользователь
-        await callback.message.edit_text(
+        await callback.message.answer(
             text=starting_user_message,
             reply_markup=start_user_keyb
         )
 
     await state.clear()
-    await callback.answer()

@@ -9,7 +9,7 @@ from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
 from datetime import datetime
-from db.models.models import Exchanges
+from db.models.models import Exchanges, now_moscow
 
 
 router = Router()
@@ -26,7 +26,8 @@ async def payment_confirmed(callback: types.CallbackQuery, state: FSMContext):
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
     await exchange_rate.update(
-        state="WAIT_PAYMENT"
+        state="WAIT_PAYMENT",
+        update_at=now_moscow()
     )
 
     state_message = await callback.message.edit_text(photo_or_receipt_message)
@@ -73,7 +74,7 @@ async def handle_receipt(message: types.Message, state: FSMContext):
         exchange_rate = await Exchanges.get(id=id_exchange)
         await exchange_rate.update(
             payment_check=file_id,
-            update_at=datetime.now()
+            update_at=now_moscow()
         )
 
         # Сообщение пользователю

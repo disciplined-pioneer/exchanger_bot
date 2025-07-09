@@ -11,8 +11,7 @@ from bot.templates.user.exchange_confirmation import *
 from bot.templates.partner.result_exchange import *
 from bot.keyboards.partner.result_exchange import *
 
-from datetime import datetime
-from db.models.models import Exchanges
+from db.models.models import Exchanges, now_moscow
 
 
 router = Router()
@@ -30,7 +29,8 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
     await exchange_rate.update(
-        state="COMPLETED"
+        state="COMPLETED",
+        update_at=now_moscow()
     )
 
     await callback.message.edit_text(exchange_completed_message)

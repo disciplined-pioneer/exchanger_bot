@@ -23,7 +23,6 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer(text='❌ Ваш аккаунт был забанен')
         return
 
-
     #await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
     if role_user == 'admin': # Админ
@@ -43,3 +42,5 @@ async def cmd_start(message: Message, state: FSMContext):
             text=starting_user_message,
             reply_markup=start_user_keyb
         )
+
+    await message.delete()

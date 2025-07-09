@@ -1,10 +1,8 @@
 import asyncio
 
-from core.bot import bot
-from datetime import datetime
-
-from db.models.models import Exchanges
+from db.models.models import Exchanges, now_moscow
 from bot.keyboards.partner.result_exchange import *
+
 
 
 # 30 минутное ожидание
@@ -33,7 +31,8 @@ async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
     exchange_rate = await Exchanges.get(id=id_exchange)
     if exchange_rate.state != 'COMPLETED':
         await exchange_rate.update(
-            state="COMPLETED"
+            state="COMPLETED",
+            update_at=now_moscow()
         )
 
         return False, state_message_user
