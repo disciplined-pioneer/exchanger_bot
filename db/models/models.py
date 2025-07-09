@@ -1,8 +1,9 @@
+import math
 from datetime import datetime, timedelta
 from typing import TypeVar, Generic, Sequence
 
 from typing import Optional, List
-from sqlalchemy import not_, or_
+from sqlalchemy import not_
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import select, case, desc, JSON, func 
 
@@ -353,7 +354,7 @@ class Exchanges(Base, ModelAdmin):
             # 4. Что осталось оплатить
             to_pay = max(total_commission - already_paid, 0.0)
 
-            return int(round(to_pay))
+            return math.ceil(to_pay)
         
     @classmethod
     async def get_amout_to_current_month(cls) -> float:
@@ -400,7 +401,7 @@ class Exchanges(Base, ModelAdmin):
             total_paid = paid_result.scalar() or 0.0
 
             unpaid_commission = max(total_commission_required - total_paid, 0.0)
-            return int(round(unpaid_commission))
+            return math.ceil(unpaid_commission)
 
     @classmethod
     async def get_amout_from_for_month(cls, from_currency: str) -> float:
