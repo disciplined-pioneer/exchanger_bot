@@ -103,3 +103,11 @@ async def format_exchange_request(amount: float, currency: str, platform: str, c
 
 def format_log_message(tg_id: int, currency: str, sum_amount: float) -> str:
     return f"📝 Новая заявка от клиента {tg_id}. Направление: {currency} → CNY. Сумма: {sum_amount} {currency}"
+
+def waiting_for_payment_mess(partner_id: int) -> str:
+    text = (
+        f"Партнёр {partner_id} получил вашу заявку на обмен и уже готовит реквизиты – пожалуйста, ожидайте. "
+        "Обычно реквизиты отправляются в чат в течение 15 минут, если этого не произошло – сделка отменится автоматически.\n\n"
+        "Внимание! После получения реквизитов у вас будет 15 минут на оплату сделки, поэтому будьте на связи!"
+    )
+    return text

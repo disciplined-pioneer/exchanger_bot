@@ -211,15 +211,8 @@ async def process_input(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "confirm_exchange")
 async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
-    await callback.answer()
-    try:
-        # Убираем кнопки из старого сообщения, не меняя текст
-        await callback.message.edit_reply_markup(reply_markup=None)
-    except:
-        pass
-    await callback.message.answer('Ожидайте реквизиты для оплаты!')
-
     # Получаем данные
+    await callback.answer()
     data = await state.get_data()
     tg_id = callback.from_user.id
     cny_sum = data.get('cny_sum', 0)
@@ -227,6 +220,13 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     sum_amount = data.get('sum_amount', 0)
     currency = data.get('currency', '')
     platform = data.get('platform', '')
+
+    try:
+        # Убираем кнопки из старого сообщения, не меняя текст
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+    await callback.message.answer(waiting_for_payment_mess(partner_id))
 
     # Сохраняем начало обмена в БД
     exchange = await Exchanges.create(

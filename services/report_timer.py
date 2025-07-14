@@ -10,13 +10,13 @@ from db.models.models import Exchanges
 from db.models.mapped_columns import now_moscow
 
 
-async def run_every_ten_minutes():
+async def run_one_minutes():
     
     logging.info("🚀 Активируем задачу.")
     await cancel_expired_exchanges()
 
-    logging.info("🔁 Запущено ожидание 5 минут")
-    await asyncio.sleep(300)
+    logging.info("🔁 Запущено ожидание 1 минуты")
+    await asyncio.sleep(60)
     
 
 async def cancel_expired_exchanges():
@@ -49,7 +49,11 @@ async def cancel_expired_exchanges():
                 # Уведомляем участников и группу
                 await bot.send_message(
                     chat_id=exchange.partner_id,
-                    text=f'⏰ Заявка с пользователем {exchange.client_id} была отменена по таймауту'
+                    text=(
+                        "⏰ Сделка отменена автоматически, так как вы не отметили платеж завершённым.\n\n"
+                        "Ранее отправленные вам реквизиты уже не актуальны – НЕ ПЕРЕВОДИТЕ ОПЛАТУ ПО НИМ!\n\n"
+                        "Если обмен для вас ещё актуален – создайте новую заявку на обмен."
+                    )
                 )
 
                 await bot.send_message(
@@ -66,11 +70,11 @@ async def cancel_expired_exchanges():
             logging.error(f"Произошла ошибка при отмене завки: {e}")
         
             
-# Главный цикл репортера, запускается раз в 5 минут
+# Главный цикл репортера, запускается раз в 1 минуту
 async def reporter_loop():
     while True:
         try:
-            await run_every_ten_minutes()
+            await run_one_minutes()
 
         except Exception as e:
             logging.error(f"Произошла ошибка: {e}")
