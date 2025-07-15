@@ -7,7 +7,7 @@ class AddPartner(StatesGroup):
 
 
 PARTNER_QUESTIONS = {
-    "telegram_id": "Введите Telegram ID партнёра",
+    "telegram_id": "Введите Telegram ID партнёра (ID можно узнать тут: @idtechwbot)",
     "name": "Введите имя партнёра"
 }
 
