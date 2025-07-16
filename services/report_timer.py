@@ -46,25 +46,37 @@ async def cancel_expired_exchanges():
 
                 logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")
 
-                # Уведомляем участников и группу
-                await bot.send_message(
-                    chat_id=exchange.partner_id,
-                    text=(
-                        "⏰ Сделка отменена автоматически, так как вы не отметили платеж завершённым.\n\n"
-                        "Ранее отправленные вам реквизиты уже не актуальны – НЕ ПЕРЕВОДИТЕ ОПЛАТУ ПО НИМ!\n\n"
-                        "Если обмен для вас ещё актуален – создайте новую заявку на обмен."
+                try:
+                    # Уведомляем клиента
+                    await bot.send_message(
+                        chat_id=exchange.client_id,
+                        text=(
+                            "⏰ Сделка отменена автоматически, так как вы не отметили платеж завершённым.\n\n"
+                            "Ранее отправленные вам реквизиты уже не актуальны – НЕ ПЕРЕВОДИТЕ ОПЛАТУ ПО НИМ!\n\n"
+                            "Если обмен для вас ещё актуален – создайте новую заявку на обмен."
+                        )
                     )
-                )
+                except Exception as e:
+                    logging.warning(f"Не удалось отправить сообщение клиенту {exchange.client_id}: {e}")
 
-                await bot.send_message(
-                    chat_id=exchange.client_id,
-                    text=f'⏰ Заявка с партнёром {exchange.partner_id} была отменена по таймауту. Возможно, сейчас тех работы, повторите заявку в рабочее время или через 30 минут (в рабочее время)'
-                )
+                try:
+                    # Уведомляем партнёра
+                    await bot.send_message(
+                        chat_id=exchange.partner_id,
+                        text=f'⏰ Заявка с пользователем {exchange.partner_id} №{exchange.id} была отменена по таймауту'
+                    )
+                except Exception as e:
+                    logging.warning(f"Не удалось отправить сообщение партнёру {exchange.partner_id}: {e}")
 
-                await bot.send_message(
-                    chat_id=settings.bot.GROUP_ID,
-                    text=f'⏰ Заявка №{exchange.id} была отменена по таймауту'
-                )
+                try:
+                    # Уведомляем группу
+                    await bot.send_message(
+                        chat_id=settings.bot.GROUP_ID,
+                        text=f'⏰ Заявка №{exchange.id} была отменена по таймауту'
+                    )
+                except Exception as e:
+                    logging.warning(f"Не удалось отправить сообщение в группу {settings.bot.GROUP_ID}: {e}")
+
 
         except Exception as e:
             logging.error(f"Произошла ошибка при отмене завки: {e}")

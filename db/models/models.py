@@ -326,11 +326,12 @@ class Exchanges(Base, ModelAdmin):
     @classmethod
     async def get_partner_commission(cls, partner_id: int) -> int:
         """
-        Возвращает округлённую сумму комиссии (4%), которую должен оплатить партнёр
+        Возвращает сумму комиссии (4%), которую должен оплатить партнёр
         — с учётом уже оплаченных комиссий.
         """
         from settings import settings
         async with async_db_session() as session:
+
             # 1. Сумма всех сделок по partner_id
             result = await session.execute(
                 select(func.sum(cls.amout_to)).where(
@@ -354,7 +355,50 @@ class Exchanges(Base, ModelAdmin):
             # 4. Что осталось оплатить
             to_pay = max(total_commission - already_paid, 0.0)
 
-            return math.ceil(to_pay)
+            return round(to_pay, 2)
+        
+    @classmethod
+    async def get_partners_with_debt_count(cls) -> int:
+        """
+        Возвращает количество партнёров, которые ещё должны заплатить комиссию.
+        """
+        from settings import settings
+        async with async_db_session() as session:
+            # Подзапрос: сумма завершённых сделок по каждому партнёру
+            subquery_total = (
+                select(
+                    cls.partner_id,
+                    func.sum(cls.amout_to).label("total_volume")
+                )
+                .where(cls.state == cls.state_completed)
+                .group_by(cls.partner_id)
+                .subquery()
+            )
+
+            # Подзапрос: сумма оплаченных комиссий по каждому партнёру
+            subquery_paid = (
+                select(
+                    Commissions.partner_id,
+                    func.sum(Commissions.commissions).label("paid_commission")
+                )
+                .group_by(Commissions.partner_id)
+                .subquery()
+            )
+
+            # Соединяем и считаем, у кого задолженность > 0
+            stmt = (
+                select(func.count())
+                .select_from(subquery_total
+                            .outerjoin(subquery_paid, subquery_total.c.partner_id == subquery_paid.c.partner_id))
+                .where(
+                    (subquery_total.c.total_volume * settings.bot.COMMISSION) >
+                    func.coalesce(subquery_paid.c.paid_commission, 0)
+                )
+            )
+
+            result = await session.execute(stmt)
+            count = result.scalar()
+            return count or 0
         
     @classmethod
     async def get_amout_to_current_month(cls) -> float:
@@ -381,10 +425,11 @@ class Exchanges(Base, ModelAdmin):
     async def get_total_unpaid_commission(cls) -> int:
         """
         Возвращает сумму комиссии (4%) от всех завершённых обменов за всё время,
-        минус реально оплаченные комиссии. Округлённая сумма.
+        минус реально оплаченные комиссии
         """
         from settings import settings
         async with async_db_session() as session:
+            
             # Общая сумма по завершённым сделкам
             total_result = await session.execute(
                 select(func.sum(cls.amout_to)).where(cls.state == cls.state_completed)
@@ -401,7 +446,7 @@ class Exchanges(Base, ModelAdmin):
             total_paid = paid_result.scalar() or 0.0
 
             unpaid_commission = max(total_commission_required - total_paid, 0.0)
-            return math.ceil(unpaid_commission)
+            return round(unpaid_commission, 2)
 
     @classmethod
     async def get_amout_from_for_month(cls, from_currency: str) -> float:
@@ -456,7 +501,7 @@ class Commissions(Base, ModelAdmin):
         """
         Возвращает сумму всех комиссий за текущий месяц.
         """
-        now = datetime.now()
+        now = now_moscow()
         start_of_month = datetime(now.year, now.month, 1)
         next_month = datetime(now.year + 1, 1, 1) if now.month == 12 else datetime(now.year, now.month + 1, 1)
 

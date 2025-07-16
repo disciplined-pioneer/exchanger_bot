@@ -70,7 +70,7 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
 
     # Добавляем комиссию в БД
     await callback.answer()
-    commissions = int(callback.data.split(':')[1])
+    commissions = float(callback.data.split(':')[1])
     
     await Commissions.create(
         partner_id=callback.from_user.id,
