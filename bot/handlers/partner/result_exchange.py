@@ -7,7 +7,6 @@ from utils.user.user_details import *
 from utils.partner.result_exchange import *
 
 from bot.templates.partner.result_exchange import *
-from bot.keyboards.partner.result_exchange import *
 
 from settings import settings
 from db.models.models import Exchanges, now_moscow
@@ -39,9 +38,6 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
     except:
         pass
 
-    # Отправляем новое сообщение с подтверждением оплаты
-    await callback.message.answer(payment_confirmed_message)
-
     # Отправляем сообщение пользователю только с первой кнопкой
     sent_message_user = await bot.send_message(
         chat_id=user_id,
@@ -49,6 +45,9 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
         reply_markup=get_partial_exchange_completion_keyboard()
     )
 
+    # Отправляем новое сообщение с подтверждением оплаты
+    await callback.message.answer(payment_confirmed_message)
+    
     # Логгирование в группу
     await bot.send_message(
         chat_id=settings.bot.GROUP_ID,

@@ -26,7 +26,7 @@ async def cancel_expired_exchanges():
     """
     logging.info("🔍 Проверка заявок на истечение времени...")
 
-    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED']) # Все заявки, кроме уже отменённых или завершённых
+    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED', 'PAID']) # Все заявки, кроме уже отменённых или завершённых
     now = now_moscow()
 
     for exchange in all_exchanges:

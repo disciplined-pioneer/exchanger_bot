@@ -8,7 +8,7 @@ async def display_available_exchanges():
 
     # Получаем все доступные обмены
     all_currencies = []
-    partners_info = await Partners.all()
+    partners_info = await Partners.filter(status=True)
 
     # Если нет партнёров - нет обменов
     if not partners_info:

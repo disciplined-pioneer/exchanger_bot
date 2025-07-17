@@ -5,7 +5,7 @@ from typing import TypeVar, Generic, Sequence
 from typing import Optional, List
 from sqlalchemy import not_
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy import select, case, desc, JSON, func 
+from sqlalchemy import select, case, desc, JSON, func, Boolean
 
 from sqlalchemy.orm import Mapped, selectinload, load_only
 from sqlalchemy.sql import select, update as sqlalchemy_update
@@ -198,11 +198,16 @@ class Partners(Base, ModelAdmin):
     tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str]
     active_pairs: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        comment='True — партнёр работает, False — партнёр не работает'
+    )
 
     @classmethod
     async def get_ids_by_from_and_platform(cls, from_currency: str, platform: str) -> List[int]:
         """
-        Возвращает список ID партнёров, у которых в active_pairs есть указанные 'from' и 'platform'.
+        Возвращает список ID партнёров, у которых статус True и в active_pairs есть указанные 'from' и 'platform'.
         """
         async with async_db_session() as session:
             result = await session.execute(select(cls))
@@ -210,13 +215,15 @@ class Partners(Base, ModelAdmin):
 
             matching_ids = []
             for partner in partners:
+                if not partner.status:  # Пропускаем неактивных
+                    continue
+
                 for pair in partner.active_pairs:
                     if pair.get("from") == from_currency and pair.get("platform") == platform:
                         matching_ids.append(partner.tg_id)
                         break
 
             return matching_ids
-    
 
 # Хранение всех ставок
 class Rates(Base, ModelAdmin):

@@ -10,14 +10,13 @@ async def output_all_possible_exchanges():
 
     # Получаем все доступные курсы валют и платформы
     all_currencies = []
-    partners_info = await Partners.all()
+    partners_info = await Partners.filter(status=True)
     for info in partners_info:
 
         active_pairs = info.active_pairs
         for currencies in active_pairs:
             all_currencies.append([currencies.get('from', ''), currencies.get('platform', '')])
     
-
     # Получаем уникальные валюты и добавляем кнопки
     unique_data = [list(t) for t in set(tuple(sublist) for sublist in all_currencies)]
     for data in unique_data:

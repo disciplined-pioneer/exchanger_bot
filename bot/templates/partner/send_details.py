@@ -7,8 +7,6 @@ async def create_payment_message(details: str, sum: str, currency: str) -> str:
         f"ВЫ НЕ СМОЖЕТЕ ВЕРНУТЬ СВОИ ДЕНЬГИ В СЛУЧАЕ ЗАДЕРЖКИ ОПЛАТЫ!"
     )
 
-
-
 input_requisites_message = 'Введите свои реквизиты:'
 
 
