@@ -21,7 +21,7 @@ async def run_one_minutes():
 
 async def cancel_expired_exchanges():
     """
-    Проверяет все обмены и отменяет те, что не обновлялись >= 1 минут и имеют статус NEW или же, если сделка не обновлялась больше одного дня
+    Проверяет все обмены и отменяет те, что не обновлялись >= 15 минут и имеют статус NEW или же, если сделка не обновлялась больше одного дня
     Отправляет уведомления клиенту, партнёру и в группу.
     """
     logging.info("🔍 Проверка заявок на истечение времени...")
@@ -37,7 +37,7 @@ async def cancel_expired_exchanges():
                 continue
 
             time_diff = now - exchange.update_at
-            if (time_diff >= timedelta(minutes=15) and exchange.state == 'NEW') or (time_diff >= timedelta(minutes=1)):
+            if (time_diff >= timedelta(minutes=15) and exchange.state == 'NEW') or (time_diff >= timedelta(days=1)):
 
                 # Обновляем состояние обмена
                 await exchange.update(
