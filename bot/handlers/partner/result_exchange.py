@@ -41,7 +41,7 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
     # Отправляем сообщение пользователю только с первой кнопкой
     sent_message_user = await bot.send_message(
         chat_id=user_id,
-        text=partner_payment_confirmed_message,
+        text=await get_partner_payment_confirmed_message(callback.from_user.id),
         reply_markup=get_partial_exchange_completion_keyboard()
     )
 

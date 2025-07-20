@@ -38,16 +38,17 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
         try:
             # Отправляем сообщение партнёру
             commissions = await Exchanges.get_partner_commission(user.tg_id)
-            await bot.send_message(
-                chat_id=user.tg_id,
-                text=await commission_payment_message(commissions),
-                reply_markup=paid_commission_keyb(commissions)
-            )
-            
-            # Активируем ему состояние
-            partner_state = FSMContext(bot=bot, storage=state.storage, chat=user.tg_id, user=user.tg_id)
-            await partner_state.update_data(commissions=commissions)
-            await partner_state.set_state(RequestCommissions.request)
+            if commissions != 0:
+                await bot.send_message(
+                    chat_id=user.tg_id,
+                    text=await commission_payment_message(commissions),
+                    reply_markup=paid_commission_keyb(commissions)
+                )
+                
+                # Активируем ему состояние
+                partner_state = FSMContext(bot=bot, storage=state.storage, chat=user.tg_id, user=user.tg_id)
+                await partner_state.update_data(commissions=commissions)
+                await partner_state.set_state(RequestCommissions.request)
 
         except Exception as e:
             continue  # Переходим к следующему

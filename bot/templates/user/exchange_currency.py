@@ -56,7 +56,7 @@ async def confirmation_amount(currency: str, id: int):
         'USDT': 'долларов',
     }
 
-    return f'Введите сумму в диапазоне {rate_info.limits} {currencies_text.get(currency, '')}', rate_info.limits
+    return f'Введите сумму для обмена в диапазоне {rate_info.limits} {currencies_text.get(currency, '')}', rate_info.limits
 
 
 incorrect_data = ['❗ Введите число, сумма которой положительная', '❗ Пожалуйста, введите корректную сумму числом', '❗ Пожалуйста, введите число в нужном диапазоне: ']
@@ -104,10 +104,14 @@ async def format_exchange_request(amount: float, currency: str, platform: str, c
 def format_log_message(tg_id: int, currency: str, sum_amount: float) -> str:
     return f"📝 Новая заявка от клиента {tg_id}. Направление: {currency} → CNY. Сумма: {sum_amount} {currency}"
 
-def waiting_for_payment_mess(partner_id: int) -> str:
+async def waiting_for_payment_mess(partner_id: int) -> str:
+
+    from db.models.models import Partners
+
+    partner = await Partners.get(tg_id=partner_id)
     text = (
-        f"Партнёр {partner_id} получил вашу заявку на обмен и уже готовит реквизиты – пожалуйста, ожидайте. "
+        f"Партнёр {partner.name} получил вашу заявку на обмен и уже готовит реквизиты – пожалуйста, ожидайте. "
         "Обычно реквизиты отправляются в чат в течение 15 минут, если этого не произошло – сделка отменится автоматически.\n\n"
-        "Внимание! После получения реквизитов у вас будет 15 минут на оплату сделки, поэтому будьте на связи!"
+        "❗️ Внимание! После получения реквизитов у вас будет 15 минут на оплату сделки, поэтому будьте на связи! ❗️"
     )
     return text

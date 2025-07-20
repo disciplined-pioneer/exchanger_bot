@@ -288,6 +288,7 @@ class Exchanges(Base, ModelAdmin):
     update_at: Mapped[datetime] = mapped_column(default=now_moscow)
 
     payment_check: Mapped[str]
+    last_id_msg: Mapped[int | None] = mapped_column(BigInteger, default=None)
     
     state_completed = "COMPLETED"
 

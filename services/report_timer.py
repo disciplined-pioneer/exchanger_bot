@@ -26,7 +26,7 @@ async def cancel_expired_exchanges():
     """
     logging.info("🔍 Проверка заявок на истечение времени...")
 
-    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED', 'PAID']) # Все заявки, кроме уже отменённых или завершённых
+    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED', 'PAID', 'WAIT_PAYMENT']) # Все заявки, кроме уже отменённых или завершённых
     now = now_moscow()
 
     for exchange in all_exchanges:
@@ -37,23 +37,37 @@ async def cancel_expired_exchanges():
                 continue
 
             time_diff = now - exchange.update_at
-            if (time_diff >= timedelta(minutes=15) and exchange.state == 'NEW') or (time_diff >= timedelta(days=1)):
+            if (time_diff >= timedelta(minutes=15) and exchange.state == 'NEW') or (time_diff >= timedelta(seconds=1)):
 
                 # Обновляем состояние обмена
                 await exchange.update(
                     state='CANCELLED'
                 )
 
+                try:
+                    if exchange.last_id_msg is not None:
+                        await bot.edit_message_reply_markup(
+                            chat_id=exchange.client_id,
+                            message_id=exchange.last_id_msg,
+                            reply_markup=None
+                        )
+                except:
+                    pass
+
                 logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")
 
                 try:
+                    from db.models.models import Partners
+
+                    partner = await Partners.get(tg_id=exchange.partner_id)
+                    
                     # Уведомляем клиента
                     await bot.send_message(
                         chat_id=exchange.client_id,
-                        text=(
-                            "⏰ Сделка отменена автоматически, так как вы не отметили платеж завершённым.\n\n"
-                            "Ранее отправленные вам реквизиты уже не актуальны – НЕ ПЕРЕВОДИТЕ ОПЛАТУ ПО НИМ!\n\n"
-                            "Если обмен для вас ещё актуален – создайте новую заявку на обмен."
+                        text = (
+                            f"❌ Заявка с партнёром {partner.name} была отменена по таймауту – ранее присланные реквизиты более не активны.\n\n"
+                            f"НЕ СОВЕРШАЙТЕ НА НИХ ОПЛАТУ – ВЫ ПОТЕРЯЕТЕ ДЕНЬГИ.\n\n"
+                            f"Если обмен для вас ещё актуален – создайте новую заявку."
                         )
                     )
                 except Exception as e:

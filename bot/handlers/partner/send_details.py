@@ -7,6 +7,7 @@ from bot.keyboards.partner.send_details import *
 from bot.templates.partner.send_details import *
 
 from settings import settings
+from db.models.models import Exchanges
 from utils.user.request_details import ExchangeStates
 
 
@@ -91,6 +92,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
     details = partner_data.get('details', '')
     sum_amount = user_data.get('sum_amount', '')
     currency = user_data.get('currency', '')
+    id_exchange = user_data.get('id_exchange', '')
 
     # Удаляем клавиатуру у сообщения
     try:
@@ -103,7 +105,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         pass
 
     # Отправляем сообщение пользователю
-    await bot.send_message(
+    new_msg = await bot.send_message(
         chat_id=user_id,
         text=await create_payment_message(
             details=details,
@@ -112,6 +114,9 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         ),
         reply_markup=payment_keyboard
     )
+    
+    info_exchange = await Exchanges.get(id=id_exchange)
+    await info_exchange.update(last_id_msg=new_msg.message_id)
 
     # Отправляем новое сообщение партнёру
     await bot.send_message(
@@ -119,12 +124,12 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         text=requisites_sent_message
     )
 
-    await state.update_data({'id_exchange': user_data.get('id_exchange', '')})
+    await state.update_data({'id_exchange': id_exchange})
 
     # Логгирование в группу
     await bot.send_message(
         chat_id=settings.bot.GROUP_ID,
-        text=f"📤 Партнёр {tg_id} отправил реквизиты для оплаты по заявке {user_data.get('id_exchange', '')}"
+        text=f"📤 Партнёр {tg_id} отправил реквизиты для оплаты по заявке {id_exchange}"
     )
 
 

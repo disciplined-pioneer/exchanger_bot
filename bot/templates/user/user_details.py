@@ -21,11 +21,9 @@ def format_confirm_details(details: str='') -> str:
     return f"Подтвердите отправку реквизитов: {details}"
 
 
-def get_no_payment_instructions(partner_id: int) -> str:
+def get_no_payment_instructions() -> str:
     return (
-        "Если не пришли деньги:\n\n"
-        f"1\\. Напишите в чат партнеру: [связаться](tg://user\\?id\\={partner_id})\n\n"
-        "2\\. Если нет ответа 3 часа и более, напишите в поддержку\\."
+        "Если не пришли деньги, напишите в поддержку"
     )
 
 
@@ -36,9 +34,13 @@ def format_user_details(details: str='') -> str:
 def format_receipt_log(tg_id: int, id_exchange: int) -> str:
     return f"📎 Клиент {tg_id} отправил чек по заявке {id_exchange}"
 
-def format_seller_message(tg_id, message_text):
+async def format_seller_message(tg_id, message_text):
+
+    from db.models.models import Partners
+
+    partner = await Partners.get(tg_id=tg_id)
     return (
-        f'Сообщение от продавца {tg_id}:\n\n'
+        f'Сообщение от продавца {partner.name}:\n\n'
         f'<b>"{message_text}"</b>\n\n'
         'Чтобы ответить, нажмите на кнопку "Ответить" и введите текст, иначе, сообщение не отправится'
     )

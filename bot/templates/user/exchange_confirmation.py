@@ -11,7 +11,7 @@ def format_message_to_partner(tg_id: int, user_text: str) -> str:
     )
 
 def confirmation_message() -> str:
-    return 'Сообщение было отправлено партнёру'
+    return 'Сообщение было отправлено продавцу'
 
 def prompt_message_to_seller() -> str:
     return 'Напишите сообщение продавцу'

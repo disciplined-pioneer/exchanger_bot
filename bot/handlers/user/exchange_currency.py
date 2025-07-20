@@ -226,7 +226,9 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.edit_reply_markup(reply_markup=None)
     except:
         pass
-    await callback.message.answer(waiting_for_payment_mess(partner_id))
+
+    text = await waiting_for_payment_mess(partner_id)
+    await callback.message.answer(text)
 
     # Сохраняем начало обмена в БД
     exchange = await Exchanges.create(

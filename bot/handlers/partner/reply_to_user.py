@@ -44,12 +44,14 @@ async def partner_message(message: types.Message, state: FSMContext):
     await state.set_state(None)
 
     try:
+        
         # Убираем кнопки из старого сообщения, не меняя текст
         await bot.edit_message_reply_markup(
             chat_id=message.from_user.id,
             message_id=last_id_message,
             reply_markup=None
         )
+
         # Отправляем новое сообщение с подтверждением
         await bot.send_message(
             chat_id=message.from_user.id,
@@ -59,7 +61,7 @@ async def partner_message(message: types.Message, state: FSMContext):
         # Отправляем сообщение пользователю
         await bot.send_message(
             chat_id=user_id,
-            text=format_seller_message(tg_id, message.text),
+            text=await format_seller_message(tg_id, message.text),
             reply_markup=reply_to_partner
         )
     except:

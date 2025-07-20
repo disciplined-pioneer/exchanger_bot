@@ -257,7 +257,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     state_exchange = exchange.state
     if state_exchange == 'WAIT_PAYMENT':
         await callback.message.answer(
-            text=get_no_payment_instructions(partner_id),
+            text=get_no_payment_instructions(),
             reply_markup=support_keyb,
             parse_mode="MarkdownV2"
         )
