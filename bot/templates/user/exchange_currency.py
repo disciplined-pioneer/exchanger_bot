@@ -53,7 +53,7 @@ async def confirmation_amount(currency: str, id: int):
 
     currencies_text = {
         'RUB': 'рублей',
-        'USDT': 'долларов',
+        'USDT': 'USDT',
     }
 
     return f'Введите сумму для обмена в диапазоне {rate_info.limits} {currencies_text.get(currency, '')}', rate_info.limits
