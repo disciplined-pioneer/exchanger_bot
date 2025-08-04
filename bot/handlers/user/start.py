@@ -22,6 +22,13 @@ async def cmd_start(message: Message, state: FSMContext):
     if result_ban_user:
         await message.answer(text='❌ Ваш аккаунт был забанен')
         return
+    
+    # Ищем уже активные сделки
+    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED'])
+    if all_exchanges:
+        await message.delete()
+        await message.answer(there_deal_message)
+        return
 
     #await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
