@@ -11,3 +11,9 @@ reply_to_partner = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Ответить", callback_data="not_receive_money")]
     ]
 )
+
+new_message_user_keyb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Написать новое сообщение", callback_data="reply_to_user")]
+    ]
+)

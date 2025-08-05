@@ -3,12 +3,10 @@ import asyncio
 from db.models.models import Exchanges, now_moscow
 from bot.keyboards.partner.result_exchange import *
 
-
-
 # 30 минутное ожидание
 async def update_keyboard_after_30_min(bot, chat_id, message_id, id_exchange):
 
-    await asyncio.sleep(5)  # 30 минут
+    await asyncio.sleep(30*60)  # 30 минут
 
     # Проверка на завершённую сделку
     exchange_rate = await Exchanges.get(id=id_exchange)

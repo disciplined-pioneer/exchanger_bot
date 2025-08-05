@@ -7,8 +7,8 @@ from utils.user.user_details import *
 
 from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
+from bot.keyboards.partner.result_exchange import get_full_exchange_completion_keyboard
 
-from datetime import datetime
 from db.models.models import Exchanges, now_moscow
 
 
@@ -251,16 +251,32 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     await state.set_state(None)
     await state.update_data({"last_id_message": state_message.message_id})
 
-    # Ждём 5 минут и проверяем статус
-    await asyncio.sleep(5 * 60)
+    # Ждём 15 минут и проверяем статус
+    await asyncio.sleep(15*60)
     exchange = await Exchanges.get(id=id_exchange)
     state_exchange = exchange.state
     if state_exchange == 'WAIT_PAYMENT':
         await callback.message.answer(
             text=get_no_payment_instructions(),
-            reply_markup=support_keyb,
-            parse_mode="MarkdownV2"
+            reply_markup=support_keyb
         )
+
+
+# Обработка кнопки "Назад" после 15 минут
+@router.callback_query(F.data == "back_end_deal")
+async def back_end_deal(callback: types.CallbackQuery, state: FSMContext):
+
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except:
+        pass
+
+    state_message = await bot.send_message(
+        chat_id=callback.message.chat.id,
+        text=complete_deal_instruction_msg,
+        reply_markup=get_full_exchange_completion_keyboard()
+    )
+    await state.update_data({"last_id_message": state_message.message_id})
 
 
 # Обработчик кнопки "Надо исправить"

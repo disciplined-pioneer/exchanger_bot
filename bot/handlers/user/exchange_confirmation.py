@@ -1,7 +1,9 @@
 from aiogram import Router, F, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
+from settings import settings
 from utils.user.user_details import *
 from utils.user.exchange_confirmation import *
 
@@ -46,6 +48,12 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
         text=exchange_completed_message_partner(callback.from_user.id, id_exchange)
     )
 
+    # Уведомляем группу
+    await bot.send_message(
+        chat_id=settings.bot.GROUP_ID,
+        text=exchange_completed_message_partner(callback.from_user.id, id_exchange)
+    )
+
     await state.clear()
 
 
@@ -69,7 +77,7 @@ async def not_receive_money(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Отправляем сообщение партнёру
-@router.message(MessagingStates.user_message)
+@router.message(StateFilter(MessagingStates.user_message), F.text)
 async def user_message(message: types.Message, state: FSMContext):
 
     # Получаем данные
@@ -81,6 +89,14 @@ async def user_message(message: types.Message, state: FSMContext):
     await state.set_state(None)
 
     try:
+
+        # Отправляем сообщение партнёру
+        await bot.send_message(
+            chat_id=partner_id,
+            text=format_message_to_partner(tg_id, message.text),
+            reply_markup=reply_to_user
+        )
+
         # Убираем клавиатуру с предыдущего сообщения, не меняя текст
         await bot.edit_message_reply_markup(
             chat_id=message.from_user.id,
@@ -91,17 +107,12 @@ async def user_message(message: types.Message, state: FSMContext):
         # Отправляем новое сообщение вместо редактирования
         await bot.send_message(
             chat_id=message.from_user.id,
-            text=confirmation_message()
+            text=confirmation_message(),
+            reply_markup=new_message_partner_keyb
         )
-
-        # Отправляем сообщение партнёру
-        await bot.send_message(
-            chat_id=partner_id,
-            text=format_message_to_partner(tg_id, message.text),
-            reply_markup=reply_to_user
-        )
-    except Exception as e:
-        print(e)
+        
+    except:
+        pass
 
 
 # Обработка кнопки "Назад" в подтверждение оплаты

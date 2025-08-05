@@ -10,7 +10,9 @@ user_confirm_keyb = InlineKeyboardMarkup(
 
 support_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="Поддержка", url=settings.bot.SUPPORT_LINK)]
+        [InlineKeyboardButton(text="Поддержка", url=settings.bot.SUPPORT_LINK)],
+        [InlineKeyboardButton(text="Написать партнёру", callback_data="not_receive_money")],
+        [InlineKeyboardButton(text="Назад", callback_data="back_end_deal")]
     ]
 )
 

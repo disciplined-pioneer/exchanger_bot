@@ -11,6 +11,7 @@ def generate_requisites_message(platform: str=''):
 
 photo_document_or_text_request_message = "❗️ Пожалуйста, отправьте фото, документ или текст"
 
+complete_deal_instruction_msg = "Если деньги вам всё-таки пришли, то вы можете завершить сделку самостоятельно"
 
 def generate_payment_message(sum: float, data: str='') -> str:
 
@@ -23,7 +24,7 @@ def format_confirm_details(details: str='') -> str:
 
 def get_no_payment_instructions() -> str:
     return (
-        "Если не пришли деньги, напишите в поддержку"
+        "Прошло уже 15 минут, обычно деньги приходят раньше. Возможно, что-то пошло не так. Но вы можете написать партнеру. Если не удалось решить с партнером – пишите в поддержку. Если все решено и деньги уже получены – нажимайте кнопку «назад» и завершите сделку"
     )
 
 
@@ -47,3 +48,6 @@ async def format_seller_message(tg_id, message_text):
 
 def get_sent_confirmation():
     return 'Сообщение было отправлено пользователю'
+
+def generate_client_message_text(user_id):
+    return f'Напишите сообщение клиенту: {user_id}'

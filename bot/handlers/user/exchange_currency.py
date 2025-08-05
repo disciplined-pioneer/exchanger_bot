@@ -148,11 +148,12 @@ async def process_input(message: types.Message, state: FSMContext):
                     message_id=last_bot_message_id,
                     reply_markup=None
                 )
-                await bot.send_message(
+                msg = await bot.send_message(
                     chat_id=message.chat.id,
                     text=incorrect_data[0],
                     reply_markup=back_menu
                 )
+                await state.update_data(last_id_message=msg.message_id)
                 await state.set_state(ExchangeStates.sum)
                 return
             
@@ -163,11 +164,12 @@ async def process_input(message: types.Message, state: FSMContext):
                     message_id=last_bot_message_id,
                     reply_markup=None
                 )
-                await bot.send_message(
+                msg = await bot.send_message(
                     chat_id=message.chat.id,
                     text=incorrect_data[2] + limits,
                     reply_markup=back_menu
                 )
+                await state.update_data(last_id_message=msg.message_id)
                 await state.set_state(ExchangeStates.sum)
                 return
             
@@ -179,13 +181,12 @@ async def process_input(message: types.Message, state: FSMContext):
                 message_id=last_bot_message_id,
                 reply_markup=None
             )
-            await bot.send_message(
+            msg = await bot.send_message(
                 chat_id=message.chat.id,
                 text=text,
                 reply_markup=confirm_cancel_exchange
             )
-
-            await state.update_data(sum_amount=amount, cny_sum=cny_sum)
+            await state.update_data(sum_amount=amount, cny_sum=cny_sum, last_id_message=msg.message_id)
             await state.set_state(ExchangeStates.plug)
             return
             
@@ -196,11 +197,12 @@ async def process_input(message: types.Message, state: FSMContext):
                 message_id=last_bot_message_id,
                 reply_markup=None
             )
-            await bot.send_message(
+            msg = await bot.send_message(
                 chat_id=message.chat.id,
                 text=incorrect_data[1],
                 reply_markup=back_menu
             )
+            await state.update_data(last_id_message=msg.message_id)
             return
 
     except:

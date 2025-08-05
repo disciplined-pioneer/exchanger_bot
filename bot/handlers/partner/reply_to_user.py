@@ -1,4 +1,5 @@
 from aiogram import Router, F, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
@@ -23,7 +24,7 @@ async def reply_user(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_reply_markup(reply_markup=None)
 
     state_message = await callback.message.answer(
-        text=f'Напишите сообщение клиенту: {user_id}',
+        text=generate_client_message_text(user_id),
         reply_markup=back_payment_confirmation
     )
 
@@ -32,7 +33,7 @@ async def reply_user(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Отправляем сообщение пользователю
-@router.message(MessagingStates.partner_message)
+@router.message(StateFilter(MessagingStates.partner_message), F.text)
 async def partner_message(message: types.Message, state: FSMContext):
 
     # Получаем данные
@@ -44,6 +45,13 @@ async def partner_message(message: types.Message, state: FSMContext):
     await state.set_state(None)
 
     try:
+
+        # Отправляем сообщение пользователю
+        await bot.send_message(
+            chat_id=user_id,
+            text=await format_seller_message(tg_id, message.text),
+            reply_markup=reply_to_partner
+        )
         
         # Убираем кнопки из старого сообщения, не меняя текст
         await bot.edit_message_reply_markup(
@@ -55,15 +63,10 @@ async def partner_message(message: types.Message, state: FSMContext):
         # Отправляем новое сообщение с подтверждением
         await bot.send_message(
             chat_id=message.from_user.id,
-            text=get_sent_confirmation()
+            text=get_sent_confirmation(),
+            reply_markup=new_message_user_keyb
         )
 
-        # Отправляем сообщение пользователю
-        await bot.send_message(
-            chat_id=user_id,
-            text=await format_seller_message(tg_id, message.text),
-            reply_markup=reply_to_partner
-        )
     except:
         return
 
