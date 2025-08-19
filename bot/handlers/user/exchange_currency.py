@@ -1,4 +1,5 @@
 from aiogram import Router, F, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
@@ -118,7 +119,7 @@ async def start_confirm_exchange(callback: types.CallbackQuery, state: FSMContex
 
 
 # Сохраняем сумму
-@router.message(ExchangeStates.sum)
+@router.message(StateFilter(ExchangeStates.sum), F.text)
 async def process_input(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
@@ -243,7 +244,8 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
         platform=platform,
         state="NEW",
         created_at=now_moscow(),
-        payment_check="None"
+        payment_check="None",
+        data=data
     )
 
     await state.update_data(id_exchange=exchange.id)
@@ -257,17 +259,8 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
             platform=platform,
             cny_sum=cny_sum
         ),
-        reply_markup=await send_details(tg_id)
+        reply_markup=await send_details(tg_id=tg_id, exchange_id=exchange.id)
     )
-    
-    # Считываем состояние пользователя и переход в нужное состояние
-    partner_state = FSMContext(
-        storage=state.storage,
-        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=partner_id, user_id=partner_id)
-    )
-    await partner_state.set_state(ExchangeStates.partner_details)
-    await partner_state.update_data(user_id=tg_id, id_exchange=exchange.id)
-    await partner_state.update_data(**data)
 
     # Логгирование в группу
     await bot.send_message(

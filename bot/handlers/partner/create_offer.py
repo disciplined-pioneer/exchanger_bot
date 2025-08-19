@@ -1,4 +1,5 @@
 from aiogram import Router, F, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
@@ -50,7 +51,7 @@ async def change_value(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Обработка ввода лимитов
-@router.message(CollectingCurrencyInfo.range_limits)
+@router.message(StateFilter(CollectingCurrencyInfo.range_limits), F.text)
 async def range_limits(message: types.Message, state: FSMContext):
 
     await message.delete()
@@ -100,7 +101,7 @@ async def range_limits(message: types.Message, state: FSMContext):
 
 
 # Обработка курса обмена
-@router.message(CollectingCurrencyInfo.exchange_rate)
+@router.message(StateFilter(CollectingCurrencyInfo.exchange_rate), F.text)
 async def exchange_rate(message: types.Message, state: FSMContext):
 
     # Данные

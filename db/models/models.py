@@ -275,6 +275,8 @@ class Exchanges(Base, ModelAdmin):
     client_id: Mapped[int] = mapped_column(BigInteger)
     partner_id: Mapped[int] = mapped_column(BigInteger)
 
+    data: Mapped[dict | None] = mapped_column(JSON, nullable=False)  # JSONB для любых данных между пользователем и партнёром
+
     from_currency: Mapped[str]
     to_currency: Mapped[str]
 

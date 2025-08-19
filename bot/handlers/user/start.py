@@ -25,7 +25,11 @@ async def cmd_start(message: Message, state: FSMContext):
     
     # Ищем уже активные сделки
     all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED'])
-    if all_exchanges:
+
+    # Проверяем, есть ли активная сделка для текущего пользователя
+    user_active_exchange = any(exchange.client_id == message.from_user.id for exchange in all_exchanges)
+
+    if user_active_exchange:
         await message.delete()
         await message.answer(there_deal_message)
         return

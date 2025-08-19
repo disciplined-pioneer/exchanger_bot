@@ -1,4 +1,5 @@
 from aiogram import Router, F, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from core.bot import bot
@@ -19,6 +20,12 @@ router = Router()
 async def send_details(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
+    data = await state.get_data()
+    ex_ids = data.get('ex_ids', {})
+
+    user_id = callback.data.split('_')[1]
+    ex_id = callback.data.split('_')[2]
+
     try:
         # Убираем кнопки из старого сообщения, не меняя текст
         await callback.message.edit_reply_markup(reply_markup=None)
@@ -28,16 +35,17 @@ async def send_details(callback: types.CallbackQuery, state: FSMContext):
     # Отправляем новое сообщение с текстом для ввода реквизитов
     state_message = await callback.message.answer(input_requisites_message)
 
+    ex_ids[user_id] = ex_id
+
     await state.set_state(ExchangeStates.details)
-    await state.update_data({"last_id_message": state_message.message_id})
+    await state.update_data(last_id_message=state_message.message_id, ex_ids=ex_ids)
 
 
 # Сохраняем введённые реквизиты
-@router.message(ExchangeStates.details)
+@router.message(StateFilter(ExchangeStates.details), F.text)
 async def save_details(message: types.Message, state: FSMContext):
 
     await message.delete()
-    data = await state.get_data()
 
     # Проверка на текст
     if not message.text:
@@ -159,4 +167,4 @@ async def edit_details(callback: types.CallbackQuery, state: FSMContext):
 
     # Обновляем состояние
     await state.set_state(ExchangeStates.details)
-    await state.update_data({"last_id_message": new_msg.message_id})
+    await state.update_data(last_id_message=new_msg.message_id)

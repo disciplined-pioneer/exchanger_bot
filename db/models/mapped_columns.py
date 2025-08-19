@@ -21,7 +21,6 @@ def now_moscow() -> datetime:
     """Возвращает текущее время по Москве без tzinfo (наивное datetime)."""
     return datetime.now(MOSCOW_TZ).replace(tzinfo=None)
 
-
 # Для строковых столбцов с ограничениями
 str_3 = mapped_column(String(3))
 str_32 = mapped_column(String(32))

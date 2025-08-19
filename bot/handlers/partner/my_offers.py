@@ -1,4 +1,5 @@
 from aiogram import Router, F, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from db.models.models import Rates
@@ -111,7 +112,7 @@ async def edit_rate(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Сохраняем введённый курс
-@router.message(RateEdit.rate)
+@router.message(StateFilter(RateEdit.rate), F.text)
 async def save_rate(message: types.Message, state: FSMContext):
     
     await message.delete()
