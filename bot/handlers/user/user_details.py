@@ -234,7 +234,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             chat_id=partner_id,
             document=details_user,
             caption=format_user_details(tg_id=tg_id),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(id_exchange)
         )
 
     else:
