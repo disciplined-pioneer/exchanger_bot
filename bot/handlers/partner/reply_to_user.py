@@ -10,26 +10,29 @@ from bot.keyboards.partner.reply_to_user import *
 from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
+from db.models.models import Exchanges
+
 
 router = Router()
 
 
 # Обработчик кнопки "Ответить" пользователю
-@router.callback_query(F.data == "reply_to_user")
+@router.callback_query(F.data.startswith("reply_to_user"))
 async def reply_user(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
-    data = await state.get_data()
-    user_id = data.get('user_id', 0)
+    id_exchange = int(callback.data.split(':')[1])
+    exchange_rate = await Exchanges.get(id=id_exchange)
+    user_id = exchange_rate.client_id
     await callback.message.edit_reply_markup(reply_markup=None)
 
     state_message = await callback.message.answer(
         text=generate_client_message_text(user_id),
-        reply_markup=back_payment_confirmation
+        reply_markup=back_payment_confirmation(exchange_rate.id)
     )
 
     await state.set_state(MessagingStates.partner_message)
-    await state.update_data(last_id_message=state_message.message_id)
+    await state.update_data(last_id_message=state_message.message_id, ex_id=exchange_rate.id)
 
 
 # Отправляем сообщение пользователю
@@ -39,10 +42,12 @@ async def partner_message(message: types.Message, state: FSMContext):
     # Получаем данные
     data = await state.get_data()
     tg_id = message.from_user.id
-    user_id = data.get('user_id', 0)
-    last_id_message = data.get('last_id_message', 0)
+    ex_id = data.get('ex_id')
+    last_id_message = data.get('last_id_message')
 
-    await state.set_state(None)
+    exchange_rate = await Exchanges.get(id=int(ex_id))
+    user_id = exchange_rate.client_id
+    await state.update_data(ex_id=None)
 
     try:
 
@@ -64,30 +69,39 @@ async def partner_message(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=message.from_user.id,
             text=get_sent_confirmation(),
-            reply_markup=new_message_user_keyb
+            reply_markup=reply_to_user(ex_id)
         )
 
-    except:
+    except Exception as e:
+        print(e)
         return
+    print(data)
+    await state.set_state(None)
 
 
 # Обработчик кнопки "Назад" в подтверждене оплаты
-@router.callback_query(F.data == "back_payment_confirmation")
+@router.callback_query(F.data.startswith("back_payment_confirmation"))
 async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
     # Информация
     await callback.answer()
-    await state.set_state(None)
-    data = await state.get_data()
+
+    id_exchange = int(callback.data.split(':')[1])
+    exchange = await Exchanges.get(id=int(id_exchange))
+    data = exchange.data
+
     partner_id = data.get('partner_id', '')
     details_user = data.get('details_user', '')
     message_type = data.get("message_type", '')
+
+    await state.update_data(ex_id=None)
 
     # Убираем кнопки из старого сообщения
     try:
         await callback.message.edit_reply_markup(reply_markup=None)
     except:
         pass
+
 
     # В зависимости от типа отправляем сообщение ПАРТНЁРУ
     if message_type in 'photo':
@@ -97,7 +111,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
             chat_id=partner_id,
             photo=details_user,
             caption=format_user_details(),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(id_exchange)
         )
 
     elif message_type in 'document':
@@ -107,7 +121,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
             chat_id=partner_id,
             document=details_user,
             caption=format_user_details(),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(id_exchange)
         )
 
     else:
@@ -116,5 +130,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
         await bot.send_message(
             chat_id=partner_id,
             text=format_user_details(details_user),
-            reply_markup=create_payment_keyboard()
+            reply_markup=create_payment_keyboard(id_exchange)
         )
+
+    await state.set_state(None)

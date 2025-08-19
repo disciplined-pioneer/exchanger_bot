@@ -43,6 +43,8 @@ async def cmd_start(message: Message, state: FSMContext):
         )
 
     elif role_user == 'partner': # Парнёр
+        data = await state.get_data()
+        print(data)
         await message.answer(
             text=starting_parner_message,
             reply_markup=await get_partner_menu(tg_id)

@@ -23,8 +23,8 @@ async def send_details(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     ex_ids = data.get('ex_ids', {})
 
-    user_id = callback.data.split('_')[1]
-    ex_id = callback.data.split('_')[2]
+    user_id = int(callback.data.split(':')[1])
+    ex_id = int(callback.data.split(':')[2])
 
     try:
         # Убираем кнопки из старого сообщения, не меняя текст
@@ -35,10 +35,10 @@ async def send_details(callback: types.CallbackQuery, state: FSMContext):
     # Отправляем новое сообщение с текстом для ввода реквизитов
     state_message = await callback.message.answer(input_requisites_message)
 
-    ex_ids[user_id] = ex_id
+    ex_ids[ex_id] = user_id
 
     await state.set_state(ExchangeStates.details)
-    await state.update_data(last_id_message=state_message.message_id, ex_ids=ex_ids)
+    await state.update_data(last_id_message=state_message.message_id, ex_ids=ex_ids, ex_id=ex_id)
 
 
 # Сохраняем введённые реквизиты
@@ -46,6 +46,8 @@ async def send_details(callback: types.CallbackQuery, state: FSMContext):
 async def save_details(message: types.Message, state: FSMContext):
 
     await message.delete()
+    data = await state.get_data()
+    ex_id = data.get('ex_id')
 
     # Проверка на текст
     if not message.text:
@@ -60,7 +62,10 @@ async def save_details(message: types.Message, state: FSMContext):
         return
 
     details_text = message.text.strip()
-    await state.update_data(details=details_text)
+    exchange = await Exchanges.get(id=int(ex_id))
+    data = exchange.data
+    data['details'] = details_text
+    await exchange.update(data=data)
 
     try:
 
@@ -86,21 +91,18 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
     
     await callback.answer()
     tg_id = callback.from_user.id
-    partner_data = await state.get_data()
-    user_id = partner_data.get('user_id', '')
+    data_state = await state.get_data()
+    ex_id = data_state.get('ex_id')
 
-    # Считываем состояние пользователя
-    user_state = FSMContext(
-        storage=state.storage,
-        key=state.key.__class__(bot_id=state.key.bot_id, chat_id=user_id, user_id=user_id)
-    )
+    exchange = await Exchanges.get(id=int(ex_id))
+    data = exchange.data
+    user_id = exchange.client_id
 
-    # Достаём данные пользователя
-    user_data = await user_state.get_data()
-    details = partner_data.get('details', '')
-    sum_amount = user_data.get('sum_amount', '')
-    currency = user_data.get('currency', '')
-    id_exchange = user_data.get('id_exchange', '')
+    # Достаём данные
+    details = data.get('details', '')
+    sum_amount = data.get('sum_amount', '')
+    currency = data.get('currency', '')
+    id_exchange = data.get('id_exchange', '')
 
     # Удаляем клавиатуру у сообщения
     try:
@@ -122,9 +124,8 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         ),
         reply_markup=payment_keyboard
     )
-    
-    info_exchange = await Exchanges.get(id=id_exchange)
-    await info_exchange.update(last_id_msg=new_msg.message_id)
+
+    await exchange.update(last_id_msg=new_msg.message_id)
 
     # Отправляем новое сообщение партнёру
     await bot.send_message(
@@ -132,7 +133,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
         text=requisites_sent_message
     )
 
-    await state.update_data({'id_exchange': id_exchange})
+    await state.update_data(ex_id=None)
 
     # Логгирование в группу
     await bot.send_message(

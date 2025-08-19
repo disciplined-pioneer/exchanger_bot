@@ -1,9 +1,9 @@
 photo_or_receipt_message = "Пожалуйста, отправьте фото или файл с чеком в этот чат"
 
-payment_confirmation_message = "Клиент подтвердил оплату и отправил чек:"
+def payment_confirmation_message(tg_id):
+    return f"Клиент {tg_id} подтвердил оплату и отправил чек:"
 
 photo_or_document_request_message = "❗️ Пожалуйста, отправьте фото или документ"
-
 
 def generate_requisites_message(platform: str=''):
     return f"Введите свои реквизиты:\n{platform}. Или загрузите QR-код для оплаты"
@@ -28,8 +28,8 @@ def get_no_payment_instructions() -> str:
     )
 
 
-def format_user_details(details: str='') -> str:
-    return f"Реквизиты пользователя:\n{details}"
+def format_user_details(details: str='', tg_id: str='') -> str:
+    return f"Реквизиты пользователя ({tg_id}):\n{details}"
 
 
 def format_receipt_log(tg_id: int, id_exchange: int) -> str:

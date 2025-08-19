@@ -1,10 +1,11 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-back_payment_confirmation = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_payment_confirmation")]
-    ]
-)
+def back_payment_confirmation(ex_id):
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🔙 Назад", callback_data=f"back_payment_confirmation:{ex_id}")]
+        ]
+    )
 
 reply_to_partner = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -12,8 +13,10 @@ reply_to_partner = InlineKeyboardMarkup(
     ]
 )
 
-new_message_user_keyb = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="Написать новое сообщение", callback_data="reply_to_user")]
-    ]
-)
+def reply_to_user(ex_id):
+    keyb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Написать новое сообщение", callback_data=f"reply_to_user:{ex_id}")]
+        ]
+    )
+    return keyb

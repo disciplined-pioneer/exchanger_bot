@@ -16,14 +16,13 @@ router = Router()
     
 
 # Обработчик кнопки "Я оплатил" у партнёра
-@router.callback_query(F.data == "paid_partner")
+@router.callback_query(F.data.startswith("paid_partner"))
 async def user_paid(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
-    data = await state.get_data()
+
     tg_id = callback.from_user.id
-    user_id = data.get('user_id', 0)
-    id_exchange = data.get('id_exchange', 0)
+    id_exchange = int(callback.data.split(':')[1])
 
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
@@ -39,6 +38,7 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
         pass
 
     # Отправляем сообщение пользователю только с первой кнопкой
+    user_id = exchange_rate.client_id
     sent_message_user = await bot.send_message(
         chat_id=user_id,
         text=await get_partner_payment_confirmed_message(callback.from_user.id),
@@ -63,16 +63,20 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
             text=deal_auto_completed_message
         )
 
-    await state.clear()
+        data = await state.get_data()
+        ex_ids = data.get('ex_ids', {})
+        ex_ids.pop(exchange_rate.id, None)
+        await state.update_data(ex_ids=exchange_rate.id)
 
     
 # Обработчик кнопки "Деньги не пришли" у партнёра
-@router.callback_query(F.data == "not_paid_partner")
+@router.callback_query(F.data.startswith("not_paid_partner"))
 async def user_not_paid(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.answer()
-    data = await state.get_data()
-    user_id = data.get('user_id', '')
+    id_exchange = int(callback.data.split(':')[1])
+    exchange_rate = await Exchanges.get(id=id_exchange)
+    user_id = exchange_rate.client_id
 
     # Убираем кнопки из старого сообщения, не меняя текст
     try:

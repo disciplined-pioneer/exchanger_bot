@@ -1,6 +1,7 @@
 from aiogram import Router, F, types
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.base import StorageKey
 
 from core.bot import bot
 from settings import settings
@@ -54,6 +55,16 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
         text=exchange_completed_message_partner(callback.from_user.id, id_exchange)
     )
 
+    # Удаляем id сделки из списка
+    partner_state = FSMContext(
+        storage=state.storage,
+        key=StorageKey(bot_id=state.key.bot_id, chat_id=partner_id, user_id=partner_id)
+    )
+    partner_data = await partner_state.get_data()
+    ex_ids = partner_data.get('ex_ids', {})
+    ex_ids.pop(exchange_rate.id, None)
+    await partner_state.update_data(ex_ids=ex_ids)
+
     await state.clear()
 
 
@@ -82,8 +93,9 @@ async def user_message(message: types.Message, state: FSMContext):
 
     # Получаем данные
     data = await state.get_data()
-    tg_id  = message.from_user.id
+    tg_id = message.from_user.id
     partner_id = data.get('partner_id', 0)
+    id_exchange = data.get('id_exchange', 0)
     last_id_message = data.get('last_id_message', 0)
 
     await state.set_state(None)
@@ -94,7 +106,7 @@ async def user_message(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=partner_id,
             text=format_message_to_partner(tg_id, message.text),
-            reply_markup=reply_to_user
+            reply_markup=reply_to_user(id_exchange)
         )
 
         # Убираем клавиатуру с предыдущего сообщения, не меняя текст

@@ -16,11 +16,11 @@ support_keyb = InlineKeyboardMarkup(
     ]
 )
 
-def create_payment_keyboard() -> InlineKeyboardMarkup:
+def create_payment_keyboard(id_exchange) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Я оплатил", callback_data="paid_partner")],
-            [InlineKeyboardButton(text="❌ Деньги не пришли", callback_data="not_paid_partner")],
-            [InlineKeyboardButton(text="💬 Сложности с оплатой, написать клиенту в чат", callback_data='reply_to_user')]
+            [InlineKeyboardButton(text="✅ Я оплатил", callback_data=f"paid_partner:{id_exchange}")],
+            [InlineKeyboardButton(text="❌ Деньги не пришли", callback_data=f"not_paid_partner:{id_exchange}")],
+            [InlineKeyboardButton(text="💬 Сложности с оплатой, написать клиенту в чат", callback_data=f'reply_to_user:{id_exchange}')]
         ]
     )

@@ -108,7 +108,7 @@ confirm_cancel_exchange = InlineKeyboardMarkup(
 
 async def send_details(tg_id, exchange_id):
     return InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="📨 Отправить реквизиты", callback_data=f"send_details_{tg_id}_{exchange_id}")]
-    ]
-)
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📨 Отправить реквизиты", callback_data=f"send_details:{tg_id}:{exchange_id}")]
+        ]
+    )

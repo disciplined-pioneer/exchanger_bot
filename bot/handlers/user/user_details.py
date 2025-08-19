@@ -51,7 +51,6 @@ async def handle_receipt(message: types.Message, state: FSMContext):
     tg_id = message.from_user.id
     partner_id = data.get("partner_id", '')
     id_exchange = data.get('id_exchange', 0)
-    last_bot_message_id = data.get("last_id_message", 0)
 
     try:
 
@@ -59,12 +58,12 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             sent_file = message.photo[-1]
             file_id = sent_file.file_id
             await state.update_data({"file_check": file_id})
-            await bot.send_photo(partner_id, file_id, caption=payment_confirmation_message)
+            await bot.send_photo(partner_id, file_id, caption=payment_confirmation_message(tg_id))
 
         elif message.document:
             file_id = message.document.file_id
             await state.update_data({"file_check": file_id})
-            await bot.send_document(partner_id, file_id, caption=payment_confirmation_message)
+            await bot.send_document(partner_id, file_id, caption=payment_confirmation_message(tg_id))
 
         else:
             state_message = await bot.send_message(
@@ -185,18 +184,20 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 
     await callback.answer()
     data = await state.get_data()
+    tg_id = callback.from_user.id
     id_exchange = data.get('id_exchange', '')
     partner_id = data.get('partner_id', '')
     details_user = data.get('details_user', '')
     cny_sum = data.get('cny_sum', '')
     message_type = data.get("message_type", '')
 
-    from aiogram.fsm.storage.base import StorageKey
-    partner_state = FSMContext(
-        storage=state.storage,
-        key=StorageKey(bot_id=state.key.bot_id, chat_id=partner_id, user_id=partner_id)
-    )
-    await partner_state.update_data(details_user=details_user, message_type=message_type)
+    # Сохраняем для использования партнёром
+    exchange = await Exchanges.get(id=id_exchange)
+    data = exchange.data
+    data['details_user'] = details_user
+    data['message_type'] = message_type
+
+    await exchange.update(data=data)
 
     if message_type == 'photo':
 
@@ -213,8 +214,8 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         await bot.send_photo(
             chat_id=partner_id,
             photo=details_user,
-            caption=format_user_details(),
-            reply_markup=create_payment_keyboard()
+            caption=format_user_details(tg_id=tg_id),
+            reply_markup=create_payment_keyboard(id_exchange)
         )
 
     elif message_type == 'document':
@@ -232,7 +233,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         await bot.send_document(
             chat_id=partner_id,
             document=details_user,
-            caption=format_user_details(),
+            caption=format_user_details(tg_id=tg_id),
             reply_markup=create_payment_keyboard()
         )
 
@@ -244,7 +245,7 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 
         await bot.send_message(
             chat_id=partner_id,
-            text=format_user_details(details_user),
+            text=format_user_details(details=details_user, tg_id=tg_id),
             reply_markup=create_payment_keyboard()
         )
 
