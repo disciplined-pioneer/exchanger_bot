@@ -34,19 +34,19 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
     # Отправляем сообщения партнёрам
     await callback.answer()
     info_partners = await Partners.all()
-    for user in info_partners:
+    for partner in info_partners:
         try:
             # Отправляем сообщение партнёру
-            commissions = await Exchanges.get_partner_commission(user.tg_id)
+            commissions = await Exchanges.get_partner_commission(partner.id)
             if commissions != 0:
                 await bot.send_message(
-                    chat_id=user.tg_id,
+                    chat_id=partner.tg_id,
                     text=await commission_payment_message(commissions),
                     reply_markup=paid_commission_keyb(commissions)
                 )
                 
                 # Активируем ему состояние
-                partner_state = FSMContext(bot=bot, storage=state.storage, chat=user.tg_id, user=user.tg_id)
+                partner_state = FSMContext(bot=bot, storage=state.storage, chat=partner.tg_id, user=partner.tg_id)
                 await partner_state.update_data(commissions=commissions)
                 await partner_state.set_state(RequestCommissions.request)
 
@@ -73,8 +73,10 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
     commissions = float(callback.data.split(':')[1])
     
+    tg_id = callback.from_user.id
+    partner = await Partners.get(tg_id=tg_id)
     await Commissions.create(
-        partner_id=callback.from_user.id,
+        partner_id=partner.id,
         commissions=commissions
     )
 
@@ -87,7 +89,7 @@ async def request_commissions(callback: types.CallbackQuery, state: FSMContext):
         try:
             await bot.send_message(
                 chat_id=tg_id,
-                text=await partner_paid_commission_message(callback.from_user.id, commissions)
+                text=await partner_paid_commission_message(tg_id, partner.name, commissions)
             )
         except Exception as e:
             print(f"Не удалось отправить админу {tg_id}: {e}")

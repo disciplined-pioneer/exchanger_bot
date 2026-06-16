@@ -16,6 +16,5 @@ messages_sent_message = '✅ Сообщения были отправлены п
 
 payment_confirmed_message = '✅ Вы подтвердили оплату'
 
-async def partner_paid_commission_message(tg_id, commissions):
-    partner = await Partners.get(tg_id=tg_id)    
-    return f'Партнёр:\nID: {tg_id}, Имя: {partner.name}\nОплатил комиссию в размере {commissions} CNY'
+async def partner_paid_commission_message(tg_id, name, commissions):   
+    return f'Партнёр:\nID: {tg_id}, Имя: {name}\nОплатил комиссию в размере {commissions} CNY'
