@@ -14,7 +14,7 @@ from bot.templates.user.exchange_confirmation import *
 from bot.templates.partner.result_exchange import *
 from bot.keyboards.partner.result_exchange import *
 
-from db.models.models import Exchanges, now_moscow
+from db.models.models import Exchanges, Partners, now_moscow
 
 
 router = Router()
@@ -27,10 +27,11 @@ async def confirm_receipt_money(callback: types.CallbackQuery, state: FSMContext
     await callback.answer()
     data = await state.get_data()
     id_exchange = data.get('id_exchange', 0)
-    partner_id = data.get('partner_id', 0)
 
     # Изменяем статус
     exchange_rate = await Exchanges.get(id=id_exchange)
+    partner_info = await Partners.get(id=exchange_rate.partner_id)
+    partner_id = partner_info.tg_id
     await exchange_rate.update(
         state="COMPLETED",
         update_at=now_moscow()
@@ -94,11 +95,13 @@ async def user_message(message: types.Message, state: FSMContext):
     # Получаем данные
     data = await state.get_data()
     tg_id = message.from_user.id
-    partner_id = data.get('partner_id', 0)
     id_exchange = data.get('id_exchange', 0)
     last_id_message = data.get('last_id_message', 0)
 
     await state.set_state(None)
+    exchange_rate = await Exchanges.get(id=id_exchange)
+    partner_info = await Partners.get(id=exchange_rate.partner_id)
+    partner_id = partner_info.tg_id
 
     try:
 

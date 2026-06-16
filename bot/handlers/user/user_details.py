@@ -9,7 +9,7 @@ from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 from bot.keyboards.partner.result_exchange import get_full_exchange_completion_keyboard
 
-from db.models.models import Exchanges, now_moscow
+from db.models.models import Exchanges, Partners, now_moscow
 
 
 router = Router()
@@ -49,23 +49,24 @@ async def handle_receipt(message: types.Message, state: FSMContext):
     await message.delete()
     data = await state.get_data()
     tg_id = message.from_user.id
-    partner_id = data.get("partner_id", '')
     id_exchange = data.get('id_exchange', 0)
 
     try:
+
+        exchange_rate = await Exchanges.get(id=id_exchange)
+        partner_info = await Partners.get(id=exchange_rate.partner_id)
+        partner_id = partner_info.tg_id
 
         if message.photo:
             sent_file = message.photo[-1]
             file_id = sent_file.file_id
             await state.update_data({"file_check": file_id})
-            exchange_rate = await Exchanges.get(id=id_exchange)
-            await bot.send_photo(exchange_rate.partner.tg_id, file_id, caption=payment_confirmation_message(tg_id))
+            await bot.send_photo(partner_id, file_id, caption=payment_confirmation_message(tg_id))
 
         elif message.document:
             file_id = message.document.file_id
             await state.update_data({"file_check": file_id})
-            exchange_rate = await Exchanges.get(id=id_exchange)
-            await bot.send_document(exchange_rate.partner.tg_id, file_id, caption=payment_confirmation_message(tg_id))
+            await bot.send_document(partner_id, file_id, caption=payment_confirmation_message(tg_id))
 
         else:
             state_message = await bot.send_message(
@@ -76,7 +77,6 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             return
         
         # Изменяем поле с чеком
-        exchange_rate = await Exchanges.get(id=id_exchange)
         await exchange_rate.update(
             payment_check=file_id,
             update_at=now_moscow()
@@ -176,7 +176,8 @@ async def user_details(message: types.Message, state: FSMContext):
         
         await state.set_state(None)  # Снимаем состояние
 
-    except:
+    except Exception as e:
+        print(e)
         pass
 
 
@@ -188,7 +189,6 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
     data = await state.get_data()
     tg_id = callback.from_user.id
     id_exchange = data.get('id_exchange', '')
-    partner_id = data.get('partner_id', '')
     details_user = data.get('details_user', '')
     cny_sum = data.get('cny_sum', '')
     message_type = data.get("message_type", '')
@@ -234,8 +234,10 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
 
         # Сообщение партнёру
         exchange = await Exchanges.get(id=id_exchange)
+        partner_info = await Partners.get(id=exchange.partner_id)
+        partner_id = partner_info.tg_id
         await bot.send_document(
-            chat_id=exchange.partner.tg_id,
+            chat_id=partner_id,
             document=details_user,
             caption=format_user_details(tg_id=tg_id),
             reply_markup=create_payment_keyboard(id_exchange)

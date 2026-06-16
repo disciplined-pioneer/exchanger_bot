@@ -10,7 +10,7 @@ from bot.keyboards.partner.reply_to_user import *
 from bot.templates.user.user_details import *
 from bot.keyboards.user.user_details import *
 
-from db.models.models import Exchanges
+from db.models.models import Exchanges, Users, Partners
 
 
 router = Router()
@@ -23,7 +23,8 @@ async def reply_user(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
     id_exchange = int(callback.data.split(':')[1])
     exchange_rate = await Exchanges.get(id=id_exchange)
-    user_id = exchange_rate.client.tg_id
+    user_info = await Users.get(id=exchange_rate.client_id)
+    user_id = user_info.tg_id
     await callback.message.edit_reply_markup(reply_markup=None)
 
     state_message = await callback.message.answer(
@@ -46,7 +47,8 @@ async def partner_message(message: types.Message, state: FSMContext):
     last_id_message = data.get('last_id_message')
 
     exchange_rate = await Exchanges.get(id=int(ex_id))
-    user_id = exchange_rate.client.tg_id
+    user_info = await Users.get(id=exchange_rate.client_id)
+    user_id = user_info.tg_id
     await state.update_data(ex_id=None)
 
     try:
@@ -88,9 +90,11 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
     id_exchange = int(callback.data.split(':')[1])
     exchange = await Exchanges.get(id=int(id_exchange))
-    data = exchange.data
+    user_info = await Users.get(id=exchange.client_id)
+    partner_info = await Partners.get(id=exchange.partner_id)
+    partner_id = partner_info.tg_id
 
-    partner_id = data.get('partner_id', '')
+    data = exchange.data
     details_user = data.get('details_user', '')
     message_type = data.get("message_type", '')
 
@@ -101,16 +105,15 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.edit_reply_markup(reply_markup=None)
     except:
         pass
-
-
+    
     # В зависимости от типа отправляем сообщение ПАРТНЁРУ
     if message_type in 'photo':
 
         # Отправляем сообщение партнёру
         await bot.send_photo(
-            chat_id=exchange.partner.tg_id,
+            chat_id=partner_id,
             photo=details_user,
-            caption=format_user_details(),
+            caption=format_user_details(tg_id=user_info.tg_id),
             reply_markup=create_payment_keyboard(id_exchange)
         )
 
@@ -118,9 +121,9 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
         # Отправляем сообщение партнёру
         await bot.send_document(
-            chat_id=exchange.partner.tg_id,
+            chat_id=partner_id,
             document=details_user,
-            caption=format_user_details(),
+            caption=format_user_details(tg_id=user_info.tg_id),
             reply_markup=create_payment_keyboard(id_exchange)
         )
 
@@ -128,7 +131,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
         # Партнёр
         await bot.send_message(
-            chat_id=exchange.partner.tg_id,
+            chat_id=partner_id,
             text=format_user_details(details_user),
             reply_markup=create_payment_keyboard(id_exchange)
         )
