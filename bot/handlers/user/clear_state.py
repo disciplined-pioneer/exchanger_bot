@@ -18,8 +18,7 @@ async def handle_unexpected_message(message: types.Message, state: FSMContext):
     if message.text == '/start':
         await cmd_start(message, state)
         return
-    
-    current_state = await state.get_state()
+
     print('🛑 Удаляем сообщение - не в состоянии 🛑')
     await message.delete()    
     

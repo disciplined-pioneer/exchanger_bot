@@ -23,7 +23,7 @@ async def reply_user(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
     id_exchange = int(callback.data.split(':')[1])
     exchange_rate = await Exchanges.get(id=id_exchange)
-    user_id = exchange_rate.client_id
+    user_id = exchange_rate.client.tg_id
     await callback.message.edit_reply_markup(reply_markup=None)
 
     state_message = await callback.message.answer(
@@ -46,7 +46,7 @@ async def partner_message(message: types.Message, state: FSMContext):
     last_id_message = data.get('last_id_message')
 
     exchange_rate = await Exchanges.get(id=int(ex_id))
-    user_id = exchange_rate.client_id
+    user_id = exchange_rate.client.tg_id
     await state.update_data(ex_id=None)
 
     try:
@@ -108,7 +108,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
         # Отправляем сообщение партнёру
         await bot.send_photo(
-            chat_id=partner_id,
+            chat_id=exchange.partner.tg_id,
             photo=details_user,
             caption=format_user_details(),
             reply_markup=create_payment_keyboard(id_exchange)
@@ -118,7 +118,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
         # Отправляем сообщение партнёру
         await bot.send_document(
-            chat_id=partner_id,
+            chat_id=exchange.partner.tg_id,
             document=details_user,
             caption=format_user_details(),
             reply_markup=create_payment_keyboard(id_exchange)
@@ -128,7 +128,7 @@ async def back_confirmation(callback: types.CallbackQuery, state: FSMContext):
 
         # Партнёр
         await bot.send_message(
-            chat_id=partner_id,
+            chat_id=exchange.partner.tg_id,
             text=format_user_details(details_user),
             reply_markup=create_payment_keyboard(id_exchange)
         )

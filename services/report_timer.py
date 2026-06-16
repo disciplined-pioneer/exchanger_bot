@@ -47,7 +47,7 @@ async def cancel_expired_exchanges():
                 try:
                     if exchange.last_id_msg is not None:
                         await bot.edit_message_reply_markup(
-                            chat_id=exchange.client_id,
+                            chat_id=exchange.client.tg_id,
                             message_id=exchange.last_id_msg,
                             reply_markup=None
                         )
@@ -57,13 +57,11 @@ async def cancel_expired_exchanges():
                 logging.info(f"❌ Обмен ID {exchange.id} отменён (таймаут {time_diff}).")
 
                 try:
-                    from db.models.models import Partners
+                    partner = exchange.partner
 
-                    partner = await Partners.get(tg_id=exchange.partner_id)
-                    
                     # Уведомляем клиента
                     await bot.send_message(
-                        chat_id=exchange.client_id,
+                        chat_id=exchange.client.tg_id,
                         text = (
                             f"❌ Заявка с партнёром {partner.name} была отменена по таймауту – ранее присланные реквизиты более не активны.\n\n"
                             f"НЕ СОВЕРШАЙТЕ НА НИХ ОПЛАТУ – ВЫ ПОТЕРЯЕТЕ ДЕНЬГИ.\n\n"
@@ -71,16 +69,16 @@ async def cancel_expired_exchanges():
                         )
                     )
                 except Exception as e:
-                    logging.warning(f"Не удалось отправить сообщение клиенту {exchange.client_id}: {e}")
+                    logging.warning(f"Не удалось отправить сообщение клиенту {exchange.client.tg_id}: {e}")
 
                 try:
                     # Уведомляем партнёра
                     await bot.send_message(
-                        chat_id=exchange.partner_id,
-                        text=f'⏰ Заявка с пользователем {exchange.partner_id} №{exchange.id} была отменена по таймауту'
+                        chat_id=exchange.partner.tg_id,
+                        text=f'⏰ Заявка с пользователем {exchange.client.tg_id} №{exchange.id} была отменена по таймауту'
                     )
                 except Exception as e:
-                    logging.warning(f"Не удалось отправить сообщение партнёру {exchange.partner_id}: {e}")
+                    logging.warning(f"Не удалось отправить сообщение партнёру {exchange.partner.tg_id}: {e}")
 
                 try:
                     # Уведомляем группу

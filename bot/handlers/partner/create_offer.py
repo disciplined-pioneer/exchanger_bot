@@ -135,7 +135,8 @@ async def exchange_rate(message: types.Message, state: FSMContext):
             return
 
     # Добавляем в БД и удаляем, если запись уже есть
-    await save_rate(currency, exchange_rate, platform, limits, tg_id)
+    partner_info = await Partners.get(tg_id=tg_id)
+    await save_rate(currency, exchange_rate, platform, limits, partner_info.id)
 
     try:
         # Убираем кнопки из старого сообщения

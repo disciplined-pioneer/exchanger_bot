@@ -8,7 +8,7 @@ from bot.keyboards.partner.send_details import *
 from bot.templates.partner.send_details import *
 
 from settings import settings
-from db.models.models import Exchanges
+from db.models.models import Exchanges, Users
 from utils.user.request_details import ExchangeStates
 
 
@@ -96,7 +96,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
     exchange = await Exchanges.get(id=int(ex_id))
     data = exchange.data
-    user_id = exchange.client_id
+    user_info = await Users.get(id=exchange.client_id)
 
     # Достаём данные
     details = data.get('details', '')
@@ -116,7 +116,7 @@ async def confirm_details(callback: types.CallbackQuery, state: FSMContext):
 
     # Отправляем сообщение пользователю
     new_msg = await bot.send_message(
-        chat_id=user_id,
+        chat_id=user_info.tg_id,
         text=await create_payment_message(
             details=details,
             sum=sum_amount,

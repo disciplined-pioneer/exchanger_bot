@@ -3,15 +3,16 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 # Добавляем все заявки как кнопки для каждого из партнёров
-async def get_partner_exchanges_keyboard(partner_id: int, page: int = 1, per_page: int = 5) -> InlineKeyboardMarkup:
+async def get_partner_exchanges_keyboard(tg_id: int, page: int = 1, per_page: int = 5) -> InlineKeyboardMarkup:
 
-    from db.models.models import Exchanges
+    from db.models.models import Exchanges, Partners
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
     
     # Поиск заявок не с 'COMPLETED' + id партнёра
     all_exchanges = await Exchanges.exclude(state=['COMPLETED', 'CANCELLED'])
-    all_exchanges_partner = [exchange for exchange in all_exchanges if exchange.partner_id == partner_id]
+    partner_info = await Partners.get(tg_id=tg_id)
+    all_exchanges_partner = [exchange for exchange in all_exchanges if exchange.partner_id == partner_info.id]
     
     # Рассчитываем нужный срез для пагинации
     start_index = (page - 1) * per_page

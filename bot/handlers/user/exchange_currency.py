@@ -8,7 +8,7 @@ from bot.keyboards.user.exchange_currency import *
 from bot.templates.user.exchange_currency import *
 
 from settings import settings
-from db.models.models import Exchanges
+from db.models.models import Users, Partners, Exchanges
 from db.models.mapped_columns import now_moscow
 
 
@@ -206,8 +206,8 @@ async def process_input(message: types.Message, state: FSMContext):
             await state.update_data(last_id_message=msg.message_id)
             return
 
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 
 # Обработка кнопки "Совершить обмен"
@@ -230,13 +230,16 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
     except:
         pass
 
-    text = await waiting_for_payment_mess(partner_id)
+    partner_user = await Partners.get(id=partner_id)
+    text = await waiting_for_payment_mess(partner_user.id)
     await callback.message.answer(text)
 
-    # Сохраняем начало обмена в БД
+    client_user = await Users.get(tg_id=tg_id)
+    
+    # Сохраняем начало обмена в БД с реальными ID
     exchange = await Exchanges.create(
-        client_id=tg_id,
-        partner_id=partner_id,
+        client_id=client_user.id,
+        partner_id=partner_user.id,
         from_currency=currency,
         to_currency="CNY",
         amout_from=sum_amount,
@@ -252,7 +255,7 @@ async def confirm_exchange(callback: types.CallbackQuery, state: FSMContext):
 
     # Отправляем сообщение нужному партнёру
     await bot.send_message(
-        chat_id=partner_id,
+        chat_id=partner_user.tg_id,
         text=await format_exchange_request(
             amount=sum_amount,
             currency=currency,

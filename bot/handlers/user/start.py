@@ -22,17 +22,6 @@ async def cmd_start(message: Message, state: FSMContext):
     if result_ban_user:
         await message.answer(text='❌ Ваш аккаунт был забанен')
         return
-    
-    # Ищем уже активные сделки
-    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED'])
-
-    # Проверяем, есть ли активная сделка для текущего пользователя
-    user_active_exchange = any(exchange.client_id == message.from_user.id for exchange in all_exchanges)
-
-    if user_active_exchange:
-        await message.delete()
-        await message.answer(there_deal_message)
-        return
 
     #await message.answer(text=starting_user_message, reply_markup=start_user_keyb)
 
@@ -41,19 +30,28 @@ async def cmd_start(message: Message, state: FSMContext):
             text=starting_admin_message,
             reply_markup=start_admin_keyb
         )
+        return
 
     elif role_user == 'partner': # Парнёр
-        data = await state.get_data()
-        print(data)
         await message.answer(
             text=starting_parner_message,
             reply_markup=await get_partner_menu(tg_id)
         )
+        return
+    
+    await message.delete()
 
-    else: # Пользователь
+    # Ищем уже активные сделки
+    all_exchanges = await Exchanges.exclude(state=['CANCELLED', 'COMPLETED'])
+    user_info = await Users.get(tg_id=tg_id)
+    user_active_exchange = any(exchange.client_id == user_info.id for exchange in all_exchanges)
+
+    if user_active_exchange:
+        await message.answer(there_deal_message)
+        return
+
+    if role_user == 'user': # Пользователь
         await message.answer(
             text=starting_user_message,
             reply_markup=start_user_keyb
         )
-
-    await message.delete()

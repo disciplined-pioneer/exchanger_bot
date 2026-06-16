@@ -34,7 +34,7 @@ async def main():
         text='✅ Бот запущен'
     )
 
-    asyncio.create_task(reporter_loop()) # Фоновая задача
+    #asyncio.create_task(reporter_loop()) # Фоновая задача
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,

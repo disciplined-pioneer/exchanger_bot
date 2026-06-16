@@ -34,7 +34,7 @@ async def partner_information(currency: str, id: int):
     from db.models.models import Partners, Exchanges, Rates
 
     rate_info = await Rates.get(id=id)
-    partner_info = await Partners.get(tg_id=rate_info.partner_id)
+    partner_info = await Partners.get(id=rate_info.partner_id)
     count_exchanges = await Exchanges.get_deal_count_by_partner(partner_id=rate_info.partner_id)
 
     text = (
@@ -67,7 +67,7 @@ async def format_exchange_message(sum: float, currency: str, platform: str, id: 
     from db.models.models import Rates, Partners
 
     rate_info = await Rates.get(id=id)
-    partner = await Partners.get(tg_id=partner_id)
+    partner = await Partners.get(id=partner_id)
 
     cny_sum = round(sum/rate_info.rate)
     result = (
@@ -108,7 +108,7 @@ async def waiting_for_payment_mess(partner_id: int) -> str:
 
     from db.models.models import Partners
 
-    partner = await Partners.get(tg_id=partner_id)
+    partner = await Partners.get(id=partner_id)
     text = (
         f"Партнёр {partner.name} получил вашу заявку на обмен и уже готовит реквизиты – пожалуйста, ожидайте. "
         "Обычно реквизиты отправляются в чат в течение 15 минут, если этого не произошло – сделка отменится автоматически.\n\n"

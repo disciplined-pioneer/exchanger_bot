@@ -5,9 +5,9 @@ from typing import TypeVar, Generic, Sequence
 from typing import Optional, List
 from sqlalchemy import not_
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy import select, case, desc, JSON, func, Boolean
+from sqlalchemy import select, case, desc, JSON, func, Boolean, ForeignKey
 
-from sqlalchemy.orm import Mapped, selectinload, load_only
+from sqlalchemy.orm import Mapped, selectinload, load_only, relationship
 from sqlalchemy.sql import select, update as sqlalchemy_update
 
 from db.models.mapped_columns import *
@@ -170,12 +170,14 @@ class ModelAdmin(Generic[T]):
 
 # Хранение списка всех пользователей
 class Users(Base, ModelAdmin):
-    
+
     __tablename__ = 'users'
 
     id: Mapped[intpk]
     tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     role: Mapped[str]
+
+    exchanges: Mapped[list["Exchanges"]] = relationship(back_populates="client")
 
     @classmethod
     async def get_allowed_tg_ids(cls) -> list[int]:
@@ -191,7 +193,7 @@ class Users(Base, ModelAdmin):
 
 # Хранение списка всех партнёров
 class Partners(Base, ModelAdmin):
-    
+
     __tablename__ = 'partners'
 
     id: Mapped[intpk]
@@ -203,6 +205,10 @@ class Partners(Base, ModelAdmin):
         default=True,
         comment='True — партнёр работает, False — партнёр не работает'
     )
+
+    exchanges: Mapped[list["Exchanges"]] = relationship(back_populates="partner")
+    rates: Mapped[list["Rates"]] = relationship(back_populates="partner")
+    commissions: Mapped[list["Commissions"]] = relationship(back_populates="partner")
 
     @classmethod
     async def get_ids_by_from_and_platform(cls, from_currency: str, platform: str) -> List[int]:
@@ -220,14 +226,15 @@ class Partners(Base, ModelAdmin):
 
                 for pair in partner.active_pairs:
                     if pair.get("from") == from_currency and pair.get("platform") == platform:
-                        matching_ids.append(partner.tg_id)
+                        matching_ids.append(partner.id)
                         break
 
             return matching_ids
 
+
 # Хранение всех ставок
 class Rates(Base, ModelAdmin):
-    
+
     __tablename__ = 'rates'
 
     id: Mapped[intpk]
@@ -237,8 +244,10 @@ class Rates(Base, ModelAdmin):
     rate: Mapped[float] = mapped_column(Float)
     platform: Mapped[str]
     limits: Mapped[str]
-    partner_id: Mapped[int] = mapped_column(BigInteger)
+    partner_id: Mapped[int] = mapped_column(ForeignKey('partners.id'))
     date: Mapped[datetime]
+
+    partner: Mapped["Partners"] = relationship(back_populates="rates")
 
     @classmethod
     async def get_latest_rate(
@@ -268,14 +277,14 @@ class Rates(Base, ModelAdmin):
 
 # Хранение всех обменов
 class Exchanges(Base, ModelAdmin):
-    
+
     __tablename__ = 'exchanges'
 
     id: Mapped[intpk]
-    client_id: Mapped[int] = mapped_column(BigInteger)
-    partner_id: Mapped[int] = mapped_column(BigInteger)
+    client_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    partner_id: Mapped[int] = mapped_column(ForeignKey('partners.id'))
 
-    data: Mapped[dict | None] = mapped_column(JSON, nullable=False)  # JSONB для любых данных между пользователем и партнёром
+    data: Mapped[dict | None] = mapped_column(JSON, nullable=False)
 
     from_currency: Mapped[str]
     to_currency: Mapped[str]
@@ -291,7 +300,10 @@ class Exchanges(Base, ModelAdmin):
 
     payment_check: Mapped[str]
     last_id_msg: Mapped[int | None] = mapped_column(BigInteger, default=None)
-    
+
+    client: Mapped["Users"] = relationship(back_populates="exchanges")
+    partner: Mapped["Partners"] = relationship(back_populates="exchanges")
+
     state_completed = "COMPLETED"
 
     @classmethod
@@ -497,13 +509,15 @@ class Exchanges(Base, ModelAdmin):
 
 # Хранение комиссий
 class Commissions(Base, ModelAdmin):
-    
+
     __tablename__ = 'commissions'
 
     id: Mapped[intpk]
-    partner_id: Mapped[int] = mapped_column(BigInteger)
+    partner_id: Mapped[int] = mapped_column(ForeignKey('partners.id'))
     commissions: Mapped[float] = mapped_column(Float)
     date: Mapped[datetime] = mapped_column(default=now_moscow)
+
+    partner: Mapped["Partners"] = relationship(back_populates="commissions")
     
 
     @classmethod

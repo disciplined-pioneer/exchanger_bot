@@ -2,7 +2,7 @@ from aiogram import Router, F, types
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
-from db.models.models import Rates
+from db.models.models import Rates, Partners
 
 from core.bot import bot
 from bot.keyboards.partner.my_offers import *
@@ -28,11 +28,12 @@ async def my_offers(callback: types.CallbackQuery, state: FSMContext):
         pass
 
     tg_id = callback.from_user.id
+    partner_info = await Partners.get(tg_id=tg_id)
 
     # Отправляем новое сообщение с текстом и клавиатурой
     await callback.message.answer(
         text=choose_ad_message,
-        reply_markup=await build_rates_keyboard_for_partner(tg_id)
+        reply_markup=await build_rates_keyboard_for_partner(partner_info.id)
     )
 
 

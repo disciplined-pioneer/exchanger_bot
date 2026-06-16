@@ -58,12 +58,14 @@ async def handle_receipt(message: types.Message, state: FSMContext):
             sent_file = message.photo[-1]
             file_id = sent_file.file_id
             await state.update_data({"file_check": file_id})
-            await bot.send_photo(partner_id, file_id, caption=payment_confirmation_message(tg_id))
+            exchange_rate = await Exchanges.get(id=id_exchange)
+            await bot.send_photo(exchange_rate.partner.tg_id, file_id, caption=payment_confirmation_message(tg_id))
 
         elif message.document:
             file_id = message.document.file_id
             await state.update_data({"file_check": file_id})
-            await bot.send_document(partner_id, file_id, caption=payment_confirmation_message(tg_id))
+            exchange_rate = await Exchanges.get(id=id_exchange)
+            await bot.send_document(exchange_rate.partner.tg_id, file_id, caption=payment_confirmation_message(tg_id))
 
         else:
             state_message = await bot.send_message(
@@ -211,8 +213,9 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         )
 
         # Сообщение партнёру
+        exchange = await Exchanges.get(id=id_exchange)
         await bot.send_photo(
-            chat_id=partner_id,
+            chat_id=exchange.partner.tg_id,
             photo=details_user,
             caption=format_user_details(tg_id=tg_id),
             reply_markup=create_payment_keyboard(id_exchange)
@@ -230,8 +233,9 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
         )
 
         # Сообщение партнёру
+        exchange = await Exchanges.get(id=id_exchange)
         await bot.send_document(
-            chat_id=partner_id,
+            chat_id=exchange.partner.tg_id,
             document=details_user,
             caption=format_user_details(tg_id=tg_id),
             reply_markup=create_payment_keyboard(id_exchange)
@@ -243,8 +247,9 @@ async def user_confirm_details(callback: types.CallbackQuery, state: FSMContext)
             generate_payment_message(cny_sum, f"\nРеквизиты:\n{details_user}")
         )
 
+        exchange = await Exchanges.get(id=id_exchange)
         await bot.send_message(
-            chat_id=partner_id,
+            chat_id=exchange.partner.tg_id,
             text=format_user_details(details=details_user, tg_id=tg_id),
             reply_markup=create_payment_keyboard()
         )

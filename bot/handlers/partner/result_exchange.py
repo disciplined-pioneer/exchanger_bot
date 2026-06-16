@@ -38,7 +38,7 @@ async def user_paid(callback: types.CallbackQuery, state: FSMContext):
         pass
 
     # Отправляем сообщение пользователю только с первой кнопкой
-    user_id = exchange_rate.client_id
+    user_id = exchange_rate.client.tg_id
     sent_message_user = await bot.send_message(
         chat_id=user_id,
         text=await get_partner_payment_confirmed_message(callback.from_user.id),
@@ -76,7 +76,7 @@ async def user_not_paid(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
     id_exchange = int(callback.data.split(':')[1])
     exchange_rate = await Exchanges.get(id=id_exchange)
-    user_id = exchange_rate.client_id
+    user_id = exchange_rate.client.tg_id
 
     # Убираем кнопки из старого сообщения, не меняя текст
     try:

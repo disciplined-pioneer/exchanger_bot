@@ -16,7 +16,7 @@ router = Router()
 @router.callback_query(F.data == "view_requests")
 async def view_requests(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
-    partner_id = callback.from_user.id
+    tg_id = callback.from_user.id
 
     # Удаляем клавиатуру у предыдущего сообщения
     try:
@@ -27,7 +27,7 @@ async def view_requests(callback: types.CallbackQuery, state: FSMContext):
     # Отправляем новое сообщение
     await callback.message.answer(
         text=choose_request_message,
-        reply_markup=await get_partner_exchanges_keyboard(partner_id)
+        reply_markup=await get_partner_exchanges_keyboard(tg_id)
     )
 
 

@@ -29,11 +29,12 @@ update_rate_keyb = InlineKeyboardMarkup(
 async def get_partner_menu(tg_id: int):
     
     # Заявки
+    partner_info = await Partners.get(tg_id=tg_id)
     all_exchanges = await Exchanges.exclude(state=['COMPLETED', 'CANCELLED'])
-    count_exchanges = len([exchange for exchange in all_exchanges if exchange.partner_id == tg_id])
+    count_exchanges = len([exchange for exchange in all_exchanges if exchange.partner_id == partner_info.id])
 
     # Объявления
-    info_partner_rates = await Rates.filter(partner_id=tg_id)
+    info_partner_rates = await Rates.filter(partner_id=partner_info.id)
     count = len(info_partner_rates)
 
     # Статус партнёра

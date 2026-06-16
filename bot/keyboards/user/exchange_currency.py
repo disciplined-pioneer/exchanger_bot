@@ -34,7 +34,7 @@ async def output_all_possible_exchanges():
     return keyboard
 
 
-# Кнопки со всеми объявлениями согласно парамметрам
+# Кнопки со всеми объявлениями согласно параметрам
 async def buttons_with_all_ads(currency: str, platform: str):
 
     from db.models.models import Partners, Rates
@@ -42,30 +42,29 @@ async def buttons_with_all_ads(currency: str, platform: str):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[]) 
     list_ids = await Partners.get_ids_by_from_and_platform(currency, platform)
 
-    for tg_id in list_ids:
+    for id in list_ids:
         rate = await Rates.get_latest_rate(
             from_currency=currency,
             to_currency='CNY',
             platform=platform,
-            partner_id=tg_id
+            partner_id=id
         )
 
         if rate is None:
             continue  # Пропускаем, если нет курса
 
         # Прогон по курсам
-        info_partners = await Partners.filter(tg_id=tg_id)
+        info_partners = await Partners.get(id=id)
         if not info_partners:
             continue  # Пропускаем, если партнёры не найдены
 
-        for partner in info_partners:
-            rates = await Rates.filter(partner_id=tg_id, platform=platform, from_currency=currency) 
-            for rate in rates:
-                button = InlineKeyboardButton(
-                    text=f'{rate.rate} {rate.from_currency} ({rate.limits}) - {partner.name}',
-                    callback_data=f'rate_id:{rate.id}'  # id обмена
-                )
-                keyboard.inline_keyboard.append([button])
+        rates = await Rates.filter(partner_id=id, platform=platform, from_currency=currency) 
+        for rate in rates:
+            button = InlineKeyboardButton(
+                text=f'{rate.rate} {rate.from_currency} ({rate.limits}) - {info_partners.name}',
+                callback_data=f'rate_id:{rate.id}'  # id обмена
+            )
+            keyboard.inline_keyboard.append([button])
 
 
     keyboard.inline_keyboard.append([

@@ -25,7 +25,6 @@ async def build_rates_keyboard_for_partner(partner_id: int) -> InlineKeyboardMar
         rate = rate_partner.rate
         limits = rate_partner.limits
         from_currency = rate_partner.from_currency
-        to_currency = rate_partner.to_currency
         platform = rate_partner.platform
 
         # Добавляем кнопки
