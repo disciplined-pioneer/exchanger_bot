@@ -9,6 +9,7 @@ start_admin_keyb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
         [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")],
         [InlineKeyboardButton(text="➕ Добавить партнёра", callback_data="add_partner")],
+        [InlineKeyboardButton(text="❌ Удалить обмен", callback_data="delete_exchange")],
         [InlineKeyboardButton(text="🚫 Бан", callback_data="ban_user")]
     ]
 )

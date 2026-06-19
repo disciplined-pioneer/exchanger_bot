@@ -4,6 +4,7 @@ from bot.handlers.admin.broadcast import router as broadcast
 from bot.handlers.admin.statistics import router as statistics
 from bot.handlers.admin.add_partner import router as add_partner
 from bot.handlers.admin.commissions import router as commissions
+from bot.handlers.admin.delete_exchange import router as delete_exchange
 
 from bot.handlers.user.clear_state import router as clear_state
 from bot.handlers.user.exchange_currency import router as exchange_currency
@@ -26,6 +27,7 @@ routers = [
     broadcast,
     statistics,
     add_partner,
+    delete_exchange,
     commissions,
     work_status,
     

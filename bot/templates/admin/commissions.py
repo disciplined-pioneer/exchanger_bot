@@ -1,8 +1,7 @@
-from settings import settings
+
 from db.models.models import Partners, Exchanges
 
 async def commission_info_message():
-    #count_partners = len(await Partners.all())
     count_partners = await Exchanges.get_partners_with_debt_count()
     commissions = await Exchanges.get_total_unpaid_commission()
     return f'Комиссия к получению: {commissions} CNY\nПартнёров: {count_partners}'

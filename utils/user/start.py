@@ -1,7 +1,7 @@
 from db.models.models import Users
 
 # Фукнция для проверки наличия пользователя в БД и его статуса на Бан
-async def check_ban_status(user_id: int):
+async def get_or_create_user_status(user_id: int):
     
     user_info = await Users.get(tg_id=user_id)
 
@@ -16,6 +16,6 @@ async def check_ban_status(user_id: int):
     else:
         await Users.create(
             tg_id=user_id,
-            role='client'
+            role='user'
         )
-        return False, 'client'
+        return False, 'user'

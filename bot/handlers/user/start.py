@@ -18,7 +18,7 @@ async def cmd_start(message: Message, state: FSMContext):
     
     # Проверка на бан пользователя
     tg_id = message.from_user.id
-    result_ban_user, role_user = await check_ban_status(tg_id)
+    result_ban_user, role_user = await get_or_create_user_status(tg_id)
     if result_ban_user:
         await message.answer(text='❌ Ваш аккаунт был забанен')
         return

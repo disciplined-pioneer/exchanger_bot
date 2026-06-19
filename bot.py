@@ -27,14 +27,12 @@ async def main():
     await init_postgres()
     await register_initial_users() # Добавляем админов и партнёров
 
-    print("АДМИНЫ:", settings.bot.ADMINS)
-
     await bot.send_message(
         chat_id=settings.bot.GROUP_ID,
         text='✅ Бот запущен'
     )
 
-    #asyncio.create_task(reporter_loop()) # Фоновая задача
+    asyncio.create_task(reporter_loop()) # Фоновая задача
     
     await bot.set_my_commands(
         commands=settings.bot.COMMANDS,

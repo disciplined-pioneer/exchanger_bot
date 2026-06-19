@@ -54,7 +54,7 @@ async def save_rate(currency: str, exchange_rate: str, platform: str, limits: st
     :param partner_id: id партнёра
     """
 
-    from db.models.models import Rates
+    from db.models.models import Rates, now_moscow
 
     # Добавление новой записи
     await Rates.create(
@@ -64,5 +64,5 @@ async def save_rate(currency: str, exchange_rate: str, platform: str, limits: st
         platform=platform,
         limits=limits,
         partner_id=partner_id,
-        date=datetime.now()
+        date=now_moscow()
     )
